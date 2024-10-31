@@ -29,13 +29,15 @@ export interface AuthenticationData {
 export const authenticationHandler = authHandler<AuthenticationParams, AuthenticationData>(async (params) => {
   // check if token is valid
   // get the token from the header
-  // TODO MIC explode token from Bearer
-  const token = params.authorization;
+  // this should be in the format "Bearer <token>"
+  const bearerToken = params.authorization;
+  // extract the token by removing the "Bearer " prefix
+  const token = bearerToken.startsWith('Bearer ') ? bearerToken.slice(7) : '';
   // extract payload from token
   const { payload } = await jwtVerify<AuthenticationData>(token, new TextEncoder().encode(jwtSercretKey()));
-  // prepare authentication response  
+  // prepare authentication response
   const response: AuthenticationData = {
-    userID: "" + payload.userID
+    userID: '' + payload.userID,
   };
   return response;
 }); // authenticationHandler
