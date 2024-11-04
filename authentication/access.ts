@@ -71,11 +71,11 @@ export const login = api({ expose: true, method: 'POST', path: '/login' }, async
 export const loginRenew = api(
   { expose: true, auth: true, method: 'POST', path: '/login/renew' },
   async (request: LoginRenewRequest): Promise<LoginResponse> => {
-    // get jwt from header
+    // get data from request
     // extract payload from token
     const { payload } = await jwtVerify<AuthenticationData>(request.token, new TextEncoder().encode(jwtSercretKey()));
     const userId = payload.userID;
-    if (true) {
+    if (userId === request.userId) {
       // user allowed to access
       // generate new token
       const expiresIn: number = +jwtDurationInSeconds();
