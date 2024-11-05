@@ -17,7 +17,7 @@ const jwtDurationInSeconds = secret('JWTDurationInMinute');
  */
 export const login = api({ expose: true, method: 'POST', path: '/login' }, async (request: LoginRequest): Promise<LoginResponse> => {
   // TODO MIC check user credentials
-  const userAllowed = request.username == 'admin' && request.password == 'secret';
+  const userAllowed = request.email == 'admin' && request.password == 'secret';
   const userId = '3939032';
   if (userAllowed) {
     // user allowed to access

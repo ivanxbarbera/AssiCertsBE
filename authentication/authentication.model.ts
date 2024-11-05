@@ -4,7 +4,7 @@ import { Header } from 'encore.dev/api';
  * Data received in the login request
  */
 export interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
 } // LoginRequest
 

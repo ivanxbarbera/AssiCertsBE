@@ -7,11 +7,11 @@ import { login } from './access';
 describe('login', () => {
   // test for correct login
   test('trying right user credentials', async () => {
-    const resp = await login({ username: 'admin', password: 'secret' });
+    const resp = await login({ email: 'admin', password: 'secret' });
     expect(resp.token).toBeDefined();
   });
   // test for wrong login
   test('trying wrong user credentials', async () => {
-    await expect(login({ username: 'john.doe', password: 'foo' })).rejects.toThrow('Unknown user');
+    await expect(login({ email: 'john.doe', password: 'foo' })).rejects.toThrow('Unknown user');
   });
 });
