@@ -7,7 +7,7 @@ import { AuthenticationData } from './authentication';
  * JWT Secret.
  */
 const jwtSercretKey = secret('JWTSecretKey');
-const jwtDurationInSeconds = secret('JWTDurationInSeconds');
+const jwtDurationInSeconds = secret('JWTDurationInMinute');
 
 /**
  * Data received in the login request
