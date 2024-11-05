@@ -1,38 +1,13 @@
 import { api, APIError } from 'encore.dev/api';
 import { secret } from 'encore.dev/config';
 import { jwtVerify, SignJWT } from 'jose';
-import { AuthenticationData } from './authentication';
+import { AuthenticationData, LoginRenewRequest, LoginRequest, LoginResponse } from './authentication.model';
 
 /**
  * JWT Secret.
  */
 const jwtSercretKey = secret('JWTSecretKey');
 const jwtDurationInSeconds = secret('JWTDurationInMinute');
-
-/**
- * Data received in the login request
- */
-interface LoginRequest {
-  username: string;
-  password: string;
-} // LoginRequest
-
-/**
- * Data returned in the login response
- */
-interface LoginResponse {
-  token: string;
-  expiresIn: number;
-  userId: string;
-} // LoginResponse
-
-/**
- * Data received in the login request
- */
-interface LoginRenewRequest {
-  userId: string;
-  token: string;
-} // LoginRenewRequest
 
 /**
  * Login API.

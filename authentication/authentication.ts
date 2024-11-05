@@ -2,25 +2,12 @@ import { Gateway, Header } from 'encore.dev/api';
 import { authHandler } from 'encore.dev/auth';
 import { secret } from 'encore.dev/config';
 import { jwtVerify } from 'jose';
+import { AuthenticationData, AuthenticationParams } from './authentication.model';
 
 /**
  * JWT Secret.
  */
 const jwtSercretKey = secret('JWTSecretKey');
-
-/**
- * Data received for authentication verify
- */
-interface AuthenticationParams {
-  authorization: Header<'Authorization'>;
-} // AuthenticationParams
-
-/**
- * Data returned after authentication verify
- */
-export interface AuthenticationData {
-  userID: string;
-} // AutheticationData
 
 /**
  * Authentication handler.
