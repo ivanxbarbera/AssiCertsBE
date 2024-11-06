@@ -19,7 +19,7 @@ export interface LoginResponse {
   // token life duration in minutes
   expiresIn: number;
   // identifier of the logged user
-  userId: string;
+  userId: number;
 } // LoginResponse
 
 /**
@@ -27,7 +27,7 @@ export interface LoginResponse {
  */
 export interface LoginRenewRequest {
   // identifier of the logged user
-  userId: string;
+  userId: number;
   // token to be renewed
   token: string;
 } // LoginRenewRequest
@@ -47,3 +47,16 @@ export interface AuthenticationData {
   // identifier of the logged user
   userID: string;
 } // AutheticationData
+//
+
+/**
+ * User loaded for authentication check.
+ */
+export interface AuthenticationUser {
+  // user indentifie
+  id: number;
+  // user email
+  email: string;
+  // user encrypted password
+  passwordHash: string;
+} // AuthenticationUser

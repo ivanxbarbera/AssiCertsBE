@@ -1,7 +1,11 @@
+// libraries
 import { api, APIError } from 'encore.dev/api';
-import { secret } from 'encore.dev/config';
 import { jwtVerify, SignJWT } from 'jose';
-import { AuthenticationData, LoginRenewRequest, LoginRequest, LoginResponse } from './authentication.model';
+import { orm } from '../db/db';
+import bcrypt from 'bcryptjs';
+// application modules
+import { AuthenticationData, AuthenticationUser, LoginRenewRequest, LoginRequest, LoginResponse } from './authentication.model';
+import { secret } from 'encore.dev/config';
 
 /**
  * JWT Secret.
@@ -16,11 +20,13 @@ const jwtDurationInSeconds = secret('JWTDurationInMinute');
  * If wrong return a permission denied error.
  */
 export const login = api({ expose: true, method: 'POST', path: '/login' }, async (request: LoginRequest): Promise<LoginResponse> => {
-  // TODO MIC check user credentials
-  const userAllowed = request.email == 'admin' && request.password == 'secret';
-  const userId = '3939032';
+  // load user profile data
+  const authenticationQry = () => orm<AuthenticationUser>('user');
+  const authentication = await authenticationQry().first('id', 'email', { passwordHash: 'password_hash' }).where('email', request.email);
+  const userAllowed = authentication && bcrypt.compareSync(request.password, authentication.passwordHash);
   if (userAllowed) {
     // user allowed to access
+    const userId = authentication.id;
     // generate token
     const expiresIn: number = +jwtDurationInSeconds();
     const token: string = await new SignJWT({ userID: userId })
@@ -49,7 +55,7 @@ export const loginRenew = api(
     // get data from request
     // extract payload from token
     const { payload } = await jwtVerify<AuthenticationData>(request.token, new TextEncoder().encode(jwtSercretKey()));
-    const userId = payload.userID;
+    const userId: number = parseInt(payload.userID);
     if (userId === request.userId) {
       // user allowed to access
       // generate new token

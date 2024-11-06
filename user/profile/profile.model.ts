@@ -4,7 +4,7 @@
  */
 export interface UserProfileRequest {
   // identifier of the logged user
-  userId: string;
+  userId: number;
 } // UserProfileRequest
 
 /**

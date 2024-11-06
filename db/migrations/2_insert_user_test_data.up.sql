@@ -1,0 +1,11 @@
+INSERT INTO public.user (email, password_hash, name, surname) VALUES ('admin@assihub.it', '$2b$10$fYutgpXvCNyxwnBIkF9Nt.YNbmc/FkJwQ1AuF6Bnolx0sIEd4OWWq', 'Administrator', 'Site');
+INSERT INTO public.user (email, password_hash, name, surname) VALUES ('alice@assihub.it', '$2b$10$fYutgpXvCNyxwnBIkF9Nt.YNbmc/FkJwQ1AuF6Bnolx0sIEd4OWWq', 'Alice', 'Johnson');
+INSERT INTO public.user (email, password_hash, name, surname) VALUES ('bob@assihub.it', '$2b$10$fYutgpXvCNyxwnBIkF9Nt.YNbmc/FkJwQ1AuF6Bnolx0sIEd4OWWq', 'Bob', 'Smith');
+INSERT INTO public.user (email, password_hash, name, surname) VALUES ('carol@assihub.it', '$2b$10$fYutgpXvCNyxwnBIkF9Nt.YNbmc/FkJwQ1AuF6Bnolx0sIEd4OWWq', 'Carol', 'Williams');
+INSERT INTO public.user (email, password_hash, name, surname) VALUES ('dave@assihub.it', '$2b$10$fYutgpXvCNyxwnBIkF9Nt.YNbmc/FkJwQ1AuF6Bnolx0sIEd4OWWq', 'Dave', 'Brown');
+INSERT INTO public.user (email, password_hash, name, surname) VALUES ('eve@assihub.it', '$2b$10$fYutgpXvCNyxwnBIkF9Nt.YNbmc/FkJwQ1AuF6Bnolx0sIEd4OWWq', 'Eve', 'Jones');
+INSERT INTO public.user (email, password_hash, name, surname) VALUES ('frank@assihub.it', '$2b$10$fYutgpXvCNyxwnBIkF9Nt.YNbmc/FkJwQ1AuF6Bnolx0sIEd4OWWq', 'Frank', 'Garcia');
+INSERT INTO public.user (email, password_hash, name, surname) VALUES ('grace@assihub.it', '$2b$10$fYutgpXvCNyxwnBIkF9Nt.YNbmc/FkJwQ1AuF6Bnolx0sIEd4OWWq', 'Grace', 'Miller');
+INSERT INTO public.user (email, password_hash, name, surname) VALUES ('heidi@assihub.it', '$2b$10$fYutgpXvCNyxwnBIkF9Nt.YNbmc/FkJwQ1AuF6Bnolx0sIEd4OWWq', 'Heidi', 'Davis');
+INSERT INTO public.user (email, password_hash, name, surname) VALUES ('ivan@assihub.it', '$2b$10$fYutgpXvCNyxwnBIkF9Nt.YNbmc/FkJwQ1AuF6Bnolx0sIEd4OWWq', 'Ivan', 'Martinez');
+INSERT INTO public.user (email, password_hash, name, surname) VALUES ('judy@assihub.it', '$2b$10$fYutgpXvCNyxwnBIkF9Nt.YNbmc/FkJwQ1AuF6Bnolx0sIEd4OWWq', 'Judy', 'Lopez');
