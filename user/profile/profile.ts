@@ -2,14 +2,14 @@
 import { api, APIError } from 'encore.dev/api';
 import { getAuthData } from '~encore/auth';
 // application modules
-import { UserProfileRequest, UserProfileResponse } from './user.model';
-import { AuthenticationData } from './../authentication/authentication.model';
+import { UserProfileRequest, UserProfileResponse } from './profile.model';
+import { AuthenticationData } from '../../authentication/authentication.model';
 
 /**
  * User profile details.
- * Request for user profiles.
+ * Returns user profile data, a subset of user details, for getting user basic informations.
  */
-export const userProfileGet = api(
+export const userProfile = api(
   { expose: true, auth: true, method: 'GET', path: '/user/profile/:userId' },
   async (request: UserProfileRequest): Promise<UserProfileResponse> => {
     // get authentication data
@@ -29,4 +29,4 @@ export const userProfileGet = api(
       throw APIError.permissionDenied('User not allowed to access requested data');
     }
   }
-); // userProfileGet
+); // userProfile

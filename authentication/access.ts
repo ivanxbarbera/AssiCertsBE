@@ -10,8 +10,8 @@ const jwtSercretKey = secret('JWTSecretKey');
 const jwtDurationInSeconds = secret('JWTDurationInMinute');
 
 /**
- * Login API.
- * Request for login posted by the client.
+ * User login.
+ * Request for user authentication.
  * Check the credentials and if right return the authentication token.
  * If wrong return a permission denied error.
  */
@@ -38,9 +38,9 @@ export const login = api({ expose: true, method: 'POST', path: '/login' }, async
 }); // login
 
 /**
- * Login API.
- * Request for login posted by the client.
- * Check the credentials and if right return the authentication token.
+ * Login renew.
+ * Request for token renew before expiration.
+ * Check current token validity and if valid generate and return a new token.
  * If wrong return a permission denied error.
  */
 export const loginRenew = api(
@@ -67,4 +67,4 @@ export const loginRenew = api(
       throw APIError.permissionDenied('Invalid token');
     }
   }
-); // login
+); // loginRenew
