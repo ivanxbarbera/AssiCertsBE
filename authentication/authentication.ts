@@ -1,7 +1,8 @@
-import { Gateway, Header } from 'encore.dev/api';
+import { APIError, Gateway } from 'encore.dev/api';
 import { authHandler } from 'encore.dev/auth';
 import { secret } from 'encore.dev/config';
 import { jwtVerify } from 'jose';
+import cookie from 'cookie';
 import { AuthenticationData, AuthenticationParams } from './authentication.model';
 
 /**
@@ -12,21 +13,38 @@ const jwtSercretKey = secret('JWTSecretKey');
 /**
  * Authentication handler.
  * Intercept authenticated API call and check for its validity.
+ * Can manage either Bearer nor Cookie authentication.
  */
 export const authenticationHandler = authHandler<AuthenticationParams, AuthenticationData>(async (params) => {
-  // check if token is valid
-  // get the token from the header
-  // this should be in the format "Bearer <token>"
-  const bearerToken = params.authorization;
-  // extract the token by removing the "Bearer " prefix
-  const token = bearerToken.startsWith('Bearer ') ? bearerToken.slice(7) : '';
-  // extract payload from token
-  const { payload } = await jwtVerify<AuthenticationData>(token, new TextEncoder().encode(jwtSercretKey()));
-  // prepare authentication response
-  const response: AuthenticationData = {
-    userID: '' + payload.userID,
-  };
-  return response;
+  if (params.authorizationBearer) {
+    // check if token is valid
+    // get the token from the header
+    // this should be in the format "Bearer <token>"
+    const bearerToken = params.authorizationBearer;
+    // extract the token by removing the "Bearer " prefix
+    const token = bearerToken.startsWith('Bearer ') ? bearerToken.slice(7) : '';
+    // extract payload from token
+    const { payload } = await jwtVerify<AuthenticationData>(token, new TextEncoder().encode(jwtSercretKey()));
+    // prepare authentication response
+    const response: AuthenticationData = {
+      userID: '' + payload.userID,
+    };
+    return response;
+  } else if (params.authorizationCookie) {
+    // get the token from cookie
+    const cookies = cookie.parse(params.authorizationCookie);
+    const token = cookies.auth ? cookies.auth! : '';
+    // extract payload from token
+    const { payload } = await jwtVerify<AuthenticationData>(token, new TextEncoder().encode(jwtSercretKey()));
+    // prepare authentication response
+    const response: AuthenticationData = {
+      userID: '' + payload.userID,
+    };
+    return response;
+  } else {
+    // token cannot be renewed
+    throw APIError.unauthenticated('Malformed request');
+  }
 }); // authenticationHandler
 
 /**

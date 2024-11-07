@@ -11,16 +11,26 @@ export interface LoginRequest {
 } // LoginRequest
 
 /**
- * Data returned in the login response
+ * Data returned in the login response using cookie authentication.
  */
-export interface LoginResponse {
+export interface LoginCookieResponse {
+  // token life duration in minutes
+  expiresIn: number;
+  // identifier of the logged user
+  userId: number;
+} // LoginCookieResponse
+
+/**
+ * Data returned in the login response using Bearer authentication.
+ */
+export interface LoginBearerResponse {
   // generate token
   token: string;
   // token life duration in minutes
   expiresIn: number;
   // identifier of the logged user
   userId: number;
-} // LoginResponse
+} // LoginBearerResponse
 
 /**
  * Data received in the login request
@@ -33,11 +43,12 @@ export interface LoginRenewRequest {
 } // LoginRenewRequest
 
 /**
- * Data received for authentication verify
+ * Data received for authentication verify using Bearer
  */
 export interface AuthenticationParams {
   // Bearer ahtorization header field
-  authorization: Header<'Authorization'>;
+  authorizationBearer?: Header<'Authorization'>;
+  authorizationCookie?: Header<'Cookie'>;
 } // AuthenticationParams
 
 /**

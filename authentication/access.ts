@@ -4,22 +4,27 @@ import { jwtVerify, SignJWT } from 'jose';
 import { orm } from '../db/db';
 import bcrypt from 'bcryptjs';
 // application modules
-import { AuthenticationData, AuthenticationUser, LoginRenewRequest, LoginRequest, LoginResponse } from './authentication.model';
+import {
+  AuthenticationData,
+  AuthenticationUser,
+  LoginRenewRequest,
+  LoginRequest,
+  LoginBearerResponse,
+  LoginCookieResponse,
+} from './authentication.model';
 import { secret } from 'encore.dev/config';
+import { IncomingMessage, ServerResponse } from 'http';
 
-/**
- * JWT Secret.
- */
 const jwtSercretKey = secret('JWTSecretKey');
 const jwtDurationInSeconds = secret('JWTDurationInMinute');
 
 /**
- * User login.
- * Request for user authentication.
+ * User login with Bearer JWT.
+ * Request for user authentication, using JWT in Bearer Header.
  * Check the credentials and if right return the authentication token.
  * If wrong return a permission denied error.
  */
-export const login = api({ expose: true, method: 'POST', path: '/login' }, async (request: LoginRequest): Promise<LoginResponse> => {
+export const loginBearer = api({ expose: true, method: 'POST', path: '/login' }, async (request: LoginRequest): Promise<LoginBearerResponse> => {
   // load user profile data
   const authenticationQry = () => orm<AuthenticationUser>('user');
   const authentication = await authenticationQry().first('id', 'email', { passwordHash: 'password_hash' }).where('email', request.email);
@@ -35,13 +40,60 @@ export const login = api({ expose: true, method: 'POST', path: '/login' }, async
       .setExpirationTime(expiresIn + 'minute')
       .sign(new TextEncoder().encode(jwtSercretKey()));
     // prepare response
-    const response: LoginResponse = { token, expiresIn, userId };
+    const response: LoginBearerResponse = { token, expiresIn, userId };
     return response;
   } else {
     // user not allowed to access
     throw APIError.permissionDenied('Unknown user');
   }
-}); // login
+}); // loginBearer
+
+/**
+ * User login with Cookie JWT.
+ * Request for user authentication, using JWT in an HttpOnly cookie.
+ * Check the credentials and if right return the authentication token.
+ * If wrong return a permission denied error.
+ */
+export const loginCookie = api.raw(
+  { expose: true, method: 'GET', path: '/login' },
+  async (request: IncomingMessage, response: ServerResponse<IncomingMessage>) => {
+    // get request parameters from url
+    const url = new URL(request.url || '', `http://${request.headers.host}`);
+    const email = url.searchParams.get('email');
+    const password = url.searchParams.get('password');
+    if (email && password) {
+      // user authentication data founded
+      // load user profile data
+      const authenticationQry = () => orm<AuthenticationUser>('user');
+      const authentication = await authenticationQry().first('id', 'email', { passwordHash: 'password_hash' }).where('email', email);
+      const userAllowed = authentication && bcrypt.compareSync(password!, authentication.passwordHash);
+      if (userAllowed) {
+        // user allowed to access
+        const userId: number = authentication.id;
+        // generate token
+        const expiresIn: number = +jwtDurationInSeconds();
+        const token: string = await new SignJWT({ userID: userId })
+          .setProtectedHeader({ alg: 'HS256' })
+          .setIssuedAt()
+          .setExpirationTime(expiresIn + 'minute')
+          .sign(new TextEncoder().encode(jwtSercretKey()));
+        // prepare response
+        const responseData: LoginCookieResponse = {
+          userId,
+          expiresIn,
+        };
+        response.setHeader('Set-Cookie', `auth=${token}; HttpOnly; SameSite=None; Secure=True;`);
+        response.end(JSON.stringify(responseData));
+      } else {
+        // user not allowed to access
+        throw APIError.permissionDenied('Unknown user');
+      }
+    } else {
+      // user authenticatio data not fouded
+      throw APIError.permissionDenied('Email and password required');
+    }
+  }
+); // loginCookie
 
 /**
  * Login renew.
@@ -51,7 +103,7 @@ export const login = api({ expose: true, method: 'POST', path: '/login' }, async
  */
 export const loginRenew = api(
   { expose: true, auth: true, method: 'POST', path: '/login/renew' },
-  async (request: LoginRenewRequest): Promise<LoginResponse> => {
+  async (request: LoginRenewRequest): Promise<LoginBearerResponse> => {
     // get data from request
     // extract payload from token
     const { payload } = await jwtVerify<AuthenticationData>(request.token, new TextEncoder().encode(jwtSercretKey()));
@@ -66,7 +118,7 @@ export const loginRenew = api(
         .setExpirationTime(expiresIn + 'minute')
         .sign(new TextEncoder().encode(jwtSercretKey()));
       // prepare response
-      const response: LoginResponse = { token, expiresIn, userId };
+      const response: LoginBearerResponse = { token, expiresIn, userId };
       return response;
     } else {
       // token cannot be renewed
