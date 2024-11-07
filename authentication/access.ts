@@ -7,7 +7,7 @@ import bcrypt from 'bcryptjs';
 import {
   AuthenticationData,
   AuthenticationUser,
-  LoginRenewRequest,
+  LoginRenewBearerRequest,
   LoginRequest,
   LoginBearerResponse,
   LoginCookieResponse,
@@ -82,7 +82,7 @@ export const loginCookie = api.raw(
           userId,
           expiresIn,
         };
-        response.setHeader('Set-Cookie', `auth=${token}; HttpOnly; SameSite=None; Secure=True;`);
+        response.setHeader('Set-Cookie', `auth=${token};  HttpOnly; SameSite=None; Secure; Path=/;`);
         response.end(JSON.stringify(responseData));
       } else {
         // user not allowed to access
@@ -96,14 +96,14 @@ export const loginCookie = api.raw(
 ); // loginCookie
 
 /**
- * Login renew.
- * Request for token renew before expiration.
+ * Login renew for Bearer authentication.
+ * Request for Bearer token renew before expiration.
  * Check current token validity and if valid generate and return a new token.
  * If wrong return a permission denied error.
  */
-export const loginRenew = api(
+export const loginRenewBearer = api(
   { expose: true, auth: true, method: 'POST', path: '/login/renew' },
-  async (request: LoginRenewRequest): Promise<LoginBearerResponse> => {
+  async (request: LoginRenewBearerRequest): Promise<LoginBearerResponse> => {
     // get data from request
     // extract payload from token
     const { payload } = await jwtVerify<AuthenticationData>(request.token, new TextEncoder().encode(jwtSercretKey()));
@@ -125,4 +125,48 @@ export const loginRenew = api(
       throw APIError.permissionDenied('Invalid token');
     }
   }
-); // loginRenew
+); // loginRenewBearer
+
+/**
+ * Login renew for Cookie authenticatiopn.
+ * Request for Cookie token renew before expiration.
+ * Check current token validity and if valid generate and return a new token.
+ * If wrong return a permission denied error.
+ */
+export const loginRenewCookie = api.raw(
+  { expose: true, method: 'GET', path: '/login/renew' },
+  async (request: IncomingMessage, response: ServerResponse<IncomingMessage>) => {
+    // get request parameters from url
+    const url = new URL(request.url || '', `http://${request.headers.host}`);
+    const userIdRequest = url.searchParams.get('userId');
+    if (userIdRequest) {
+      // user authentication data founded
+      // load user profile data
+      const userAllowed = true;
+      if (userAllowed) {
+        // user allowed to access
+        const userId: number = parseInt(userIdRequest);
+        // generate token
+        const expiresIn: number = +jwtDurationInSeconds();
+        const token: string = await new SignJWT({ userID: userId })
+          .setProtectedHeader({ alg: 'HS256' })
+          .setIssuedAt()
+          .setExpirationTime(expiresIn + 'minute')
+          .sign(new TextEncoder().encode(jwtSercretKey()));
+        // prepare response
+        const responseData: LoginCookieResponse = {
+          userId,
+          expiresIn,
+        };
+        response.setHeader('Set-Cookie', `auth=${token}; HttpOnly; SameSite=None; Secure; Path=/;`);
+        response.end(JSON.stringify(responseData));
+      } else {
+        // user not allowed to access
+        throw APIError.permissionDenied('Unknown user');
+      }
+    } else {
+      // user authenticatio data not fouded
+      throw APIError.permissionDenied('User identificator required');
+    }
+  }
+); // loginRenewCookie

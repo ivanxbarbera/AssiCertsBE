@@ -35,12 +35,12 @@ export interface LoginBearerResponse {
 /**
  * Data received in the login request
  */
-export interface LoginRenewRequest {
+export interface LoginRenewBearerRequest {
   // identifier of the logged user
   userId: number;
   // token to be renewed
   token: string;
-} // LoginRenewRequest
+} // LoginRenewBearerRequest
 
 /**
  * Data received for authentication verify using Bearer
