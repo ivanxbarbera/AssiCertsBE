@@ -12,7 +12,7 @@ export interface UserProfileRequest {
  * Data returned to caller with user profile details.
  * Contains a restricted set of user data.
  */
-export interface UserProfileResponse {
+export interface UserProfile {
   // loggend user email
   email: string;
   // logged user name
