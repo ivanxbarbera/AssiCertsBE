@@ -1,7 +1,7 @@
 // libraries
 import { api, APIError } from 'encore.dev/api';
 import { jwtVerify, SignJWT } from 'jose';
-import { orm } from '../db/db';
+import { orm } from '../common/db/db';
 import bcrypt from 'bcryptjs';
 // application modules
 import {

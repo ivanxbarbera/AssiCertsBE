@@ -4,7 +4,7 @@ import { getAuthData } from '~encore/auth';
 // application modules
 import { UserProfileRequest, UserProfile } from './profile.model';
 import { AuthenticationData } from '../../authentication/authentication.model';
-import { orm } from './../../db/db';
+import { orm } from '../../common/db/db';
 
 /**
  * User profile details.

@@ -12,7 +12,7 @@ import {
   UserRegisterRequest,
   UserPasswordResetConfirm,
 } from './user.model';
-import { orm } from '../db/db';
+import { orm } from '../common/db/db';
 import { UserProfile } from './profile/profile.model';
 
 const jwtSercretKey = secret('JWTSecretKey');
