@@ -8,8 +8,7 @@ export interface UserProfileRequest {
 } // UserProfileRequest
 
 /**
- * User profile data response.
- * Data returned to caller with user profile details.
+ * User profile data.
  * Contains a restricted set of user data.
  */
 export interface UserProfile {
@@ -19,4 +18,4 @@ export interface UserProfile {
   name: string;
   // logged user surname
   surname: string;
-} // UserProfileResponse
+} // UserProfile

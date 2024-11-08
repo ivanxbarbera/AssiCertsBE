@@ -1,4 +1,4 @@
 import { Service } from 'encore.dev/service';
 
-// authentication service
+// db service
 export default new Service('db');
