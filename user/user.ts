@@ -13,7 +13,7 @@ import {
   UserPasswordResetConfirm,
 } from './user.model';
 import { orm } from '../common/db/db';
-import { UserProfile } from './profile/profile.model';
+import { Validators } from '../common/utility/validators.utility';
 
 const jwtSercretKey = secret('JWTSecretKey');
 
@@ -26,6 +26,10 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   if (request.password !== request.passwordConfirm) {
     // password are different
     throw APIError.invalidArgument('Password and confirm password must be the same');
+  }
+  if (!Validators.isValidEmail(request.email)) {
+    // email is not well formed
+    throw APIError.invalidArgument('Email address is not well formed');
   }
   // check for mail existance
   const emailCount = (await orm('user').count('id').where('email', request.email))[0]['id'] as number;
