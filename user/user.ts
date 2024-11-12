@@ -98,7 +98,6 @@ export const userPasswordResetConfirm = api(
   { expose: true, method: 'PATCH', path: '/user/password-reset' },
   async (request: UserPasswordResetConfirmRequest): Promise<UserPasswordResetConfirm> => {
     // check data
-    // TODO MIC check for validation, test encore feature
     if (request.password !== request.passwordConfirm) {
       // password are different
       throw APIError.invalidArgument('Password and confirm password must be the same');

@@ -23,24 +23,34 @@ export const authenticationHandler = authHandler<AuthenticationParams, Authentic
     const bearerToken = params.authorizationBearer;
     // extract the token by removing the "Bearer " prefix
     const token = bearerToken.startsWith('Bearer ') ? bearerToken.slice(7) : '';
-    // extract payload from token
-    const { payload } = await jwtVerify<AuthenticationData>(token, new TextEncoder().encode(jwtSercretKey()));
-    // prepare authentication response
-    const response: AuthenticationData = {
-      userID: '' + payload.userID,
-    };
-    return response;
+    try {
+      // extract payload from token
+      const { payload } = await jwtVerify<AuthenticationData>(token, new TextEncoder().encode(jwtSercretKey()));
+      // prepare authentication response
+      const response: AuthenticationData = {
+        userID: '' + payload.userID,
+      };
+      return response;
+    } catch (exception) {
+      // token verification error
+      throw APIError.unauthenticated('Not authenticated');
+    }
   } else if (params.authorizationCookie) {
     // get the token from cookie
     const cookies = cookie.parse(params.authorizationCookie);
     const token = cookies.auth ? cookies.auth! : '';
-    // extract payload from token
-    const { payload } = await jwtVerify<AuthenticationData>(token, new TextEncoder().encode(jwtSercretKey()));
-    // prepare authentication response
-    const response: AuthenticationData = {
-      userID: '' + payload.userID,
-    };
-    return response;
+    try {
+      // extract payload from token
+      const { payload } = await jwtVerify<AuthenticationData>(token, new TextEncoder().encode(jwtSercretKey()));
+      // prepare authentication response
+      const response: AuthenticationData = {
+        userID: '' + payload.userID,
+      };
+      return response;
+    } catch (exception) {
+      // token verification error
+      throw APIError.unauthenticated('Not authenticated');
+    }
   } else {
     // token cannot be renewed
     throw APIError.unauthenticated('Malformed request');
