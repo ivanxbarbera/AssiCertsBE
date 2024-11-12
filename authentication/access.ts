@@ -52,7 +52,7 @@ export const loginBearer = api({ expose: true, method: 'POST', path: '/login' },
  * If wrong return a permission denied error.
  */
 export const loginCookie = api.raw(
-  { expose: true, auth: false, method: 'GET', path: '/login' },
+  { expose: true, method: 'GET', path: '/login' },
   async (request: IncomingMessage, response: ServerResponse<IncomingMessage>) => {
     // get request parameters from url
     const url = new URL(request.url || '', `http://${request.headers.host}`);
@@ -133,7 +133,7 @@ export const loginRenewBearer = api(
  * If wrong return a permission denied error.
  */
 export const loginRenewCookie = api.raw(
-  { expose: true, method: 'GET', path: '/login/renew' },
+  { expose: true, auth: true, method: 'GET', path: '/login/renew' },
   async (request: IncomingMessage, response: ServerResponse<IncomingMessage>) => {
     // get request parameters from url
     const url = new URL(request.url || '', `http://${request.headers.host}`);
