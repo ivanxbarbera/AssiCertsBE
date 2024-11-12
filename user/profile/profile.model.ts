@@ -4,7 +4,7 @@
  */
 export interface UserProfileRequest {
   // identifier of the logged user
-  userId: number;
+  id: number;
 } // UserProfileRequest
 
 /**
@@ -18,4 +18,6 @@ export interface UserProfile {
   name: string;
   // logged user surname
   surname: string;
+  // logged user site locking status. true is locked, false is unlocked
+  siteLocked: boolean;
 } // UserProfile

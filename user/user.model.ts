@@ -12,6 +12,8 @@ export interface User {
   name: string;
   // logged user surname
   surname: string;
+  // logged user site locking status. true is locked, false is unlocked
+  siteLocked: boolean;
 } // User
 
 /**
@@ -73,3 +75,11 @@ export interface UserPasswordReset {
   // used token. true if already used, false otherwise
   used: boolean;
 } // UserPasswordReset
+
+/**
+ * User site lock and unlock request.
+ */
+export interface UserSiteLockUnlockRequest {
+  // user identifier
+  id: number;
+} // UserSiteLockUnlockRequest

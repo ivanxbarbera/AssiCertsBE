@@ -11,26 +11,23 @@ import { orm } from '../../common/db/db';
  * Returns user profile data, a subset of user details, for getting user basic informations.
  */
 export const userProfileGet = api(
-  { expose: true, auth: true, method: 'GET', path: '/user/profile/:userId' },
+  { expose: true, auth: true, method: 'GET', path: '/user/profile/:id' },
   async (request: UserProfileRequest): Promise<UserProfile> => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
     // check user permission
-    if (userId === request.userId) {
-      // user can access his profile
-      // return user profile data
-      const userProfileQry = () => orm<UserProfile>('user');
-      const userProfile = await userProfileQry().first().where('id', request.userId);
-      if (userProfile) {
-        return userProfile;
-      } else {
-        // user not founded
-        throw APIError.notFound('Requested user profile not fouded');
-      }
-    } else {
+    if (userId !== request.id) {
       // user not allowed to access
       throw APIError.permissionDenied('User not allowed to access requested data');
     }
+    // return user profile data
+    const userProfileQry = () => orm<UserProfile>('user');
+    const userProfile = await userProfileQry().first().where('id', request.id);
+    if (!userProfile) {
+      // user not founded
+      throw APIError.notFound('Requested user profile not fouded');
+    }
+    return userProfile;
   }
 ); // userProfileGet

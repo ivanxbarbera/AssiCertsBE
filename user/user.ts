@@ -2,6 +2,7 @@
 import { api, APIError } from 'encore.dev/api';
 import { SignJWT } from 'jose';
 import bcrypt from 'bcryptjs';
+import { getAuthData } from '~encore/auth';
 // application modules
 import { secret } from 'encore.dev/config';
 import {
@@ -11,15 +12,19 @@ import {
   User,
   UserRegisterRequest,
   UserPasswordResetConfirm,
+  UserSiteLockUnlockRequest,
 } from './user.model';
 import { orm } from '../common/db/db';
 import { Validators } from '../common/utility/validators.utility';
+import { AuthenticationData } from '../authentication/authentication.model';
+import { userProfileGet } from './profile/profile';
+import { UserProfile } from './profile/profile.model';
 
 const jwtSercretKey = secret('JWTSecretKey');
 
 /**
  * User registration.
- * receive and check user data, verify email existance and add new user to system.
+ * Receive and check user data, verify email existance and add new user to system.
  */
 export const userRegister = api({ expose: true, method: 'POST', path: '/user/register' }, async (request: UserRegisterRequest) => {
   // check data
@@ -43,6 +48,7 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
     passwordHash: bcrypt.hashSync(request.password),
     name: request.name,
     surname: request.surname,
+    siteLocked: false,
   };
   // save new user
   await orm('user').insert(newUser);
@@ -130,3 +136,51 @@ export const userPasswordResetConfirm = api(
     return response;
   }
 ); // userPasswordResetConfirm
+
+/**
+ * User site lock.
+ * Receive lock site request for user, check permissions and mark as locked.
+ */
+export const userSiteLock = api(
+  { expose: true, auth: true, method: 'PATCH', path: '/user/lock-site' },
+  async (request: UserSiteLockUnlockRequest): Promise<UserProfile> => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user permission
+    if (userId !== request.id) {
+      // user not allowed to access
+      throw APIError.permissionDenied('User not allowed to access requested data');
+    }
+    // update user lock status
+    await orm('user').where('id', request.id).update('siteLocked', true);
+    // return user profile
+    return await userProfileGet({
+      id: request.id,
+    });
+  }
+); // userSiteLock
+
+/**
+ * User site unlock.
+ * Receive unlock site request for user, check permissions and mark as unlocked.
+ */
+export const userSiteUnlock = api(
+  { expose: true, auth: true, method: 'PATCH', path: '/user/unlock-site' },
+  async (request: UserSiteLockUnlockRequest): Promise<UserProfile> => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user permission
+    if (userId !== request.id) {
+      // user not allowed to access
+      throw APIError.permissionDenied('User not allowed to access requested data');
+    }
+    // update user lock status
+    await orm('user').where('id', request.id).update('siteLocked', false);
+    // return user profile
+    return await userProfileGet({
+      id: request.id,
+    });
+  }
+); // userSiteUnlock
