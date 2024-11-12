@@ -77,9 +77,18 @@ export interface UserPasswordReset {
 } // UserPasswordReset
 
 /**
- * User site lock and unlock request.
+ * User site lock request.
  */
-export interface UserSiteLockUnlockRequest {
+export interface UserSiteLockRequest {
   // user identifier
   id: number;
-} // UserSiteLockUnlockRequest
+} // UserSiteLockRequest
+
+/**
+ * User site unlock request.
+ */
+export interface UserSiteUnlockRequest {
+  // user identifier
+  id: number;
+  password: string;
+} // UserSiteUnlockRequest

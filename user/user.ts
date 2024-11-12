@@ -12,13 +12,15 @@ import {
   User,
   UserRegisterRequest,
   UserPasswordResetConfirm,
-  UserSiteLockUnlockRequest,
+  UserSiteLockRequest,
+  UserSiteUnlockRequest,
 } from './user.model';
 import { orm } from '../common/db/db';
 import { Validators } from '../common/utility/validators.utility';
 import { AuthenticationData } from '../authentication/authentication.model';
 import { userProfileGet } from './profile/profile';
 import { UserProfile } from './profile/profile.model';
+import { AuthenticationUser } from '../authentication/access.model';
 
 const jwtSercretKey = secret('JWTSecretKey');
 
@@ -143,7 +145,7 @@ export const userPasswordResetConfirm = api(
  */
 export const userSiteLock = api(
   { expose: true, auth: true, method: 'PATCH', path: '/user/lock-site' },
-  async (request: UserSiteLockUnlockRequest): Promise<UserProfile> => {
+  async (request: UserSiteLockRequest): Promise<UserProfile> => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
@@ -167,7 +169,7 @@ export const userSiteLock = api(
  */
 export const userSiteUnlock = api(
   { expose: true, auth: true, method: 'PATCH', path: '/user/unlock-site' },
-  async (request: UserSiteLockUnlockRequest): Promise<UserProfile> => {
+  async (request: UserSiteUnlockRequest): Promise<UserProfile> => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
@@ -176,11 +178,28 @@ export const userSiteUnlock = api(
       // user not allowed to access
       throw APIError.permissionDenied('User not allowed to access requested data');
     }
+    // load user profile data
+    const authenticationQry = () => orm<AuthenticationUser>('user');
+    const authentication = await authenticationQry().first('id', 'email', 'passwordHash').where('id', request.id);
+    const userAllowed = authentication && bcrypt.compareSync(request.password, authentication.passwordHash);
+    if (!userAllowed) {
+      // user not allowed to unlock site
+      throw APIError.permissionDenied('Unknown user');
+    }
     // update user lock status
-    await orm('user').where('id', request.id).update('siteLocked', false);
+    await userStatusUnlock(userId);
     // return user profile
     return await userProfileGet({
       id: request.id,
     });
   }
 ); // userSiteUnlock
+
+/**
+ * Change user status to unlocked.
+ * @param id identifier of the user to be unlocked
+ */
+export const userStatusUnlock = async (id: number) => {
+  // update user lock status
+  await orm('user').where('id', id).update('siteLocked', false);
+}; // userStatusUnlock

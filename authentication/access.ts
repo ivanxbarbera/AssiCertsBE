@@ -3,17 +3,12 @@ import { api, APIError } from 'encore.dev/api';
 import { jwtVerify, SignJWT } from 'jose';
 import { orm } from '../common/db/db';
 import bcrypt from 'bcryptjs';
-// application modules
-import {
-  AuthenticationData,
-  AuthenticationUser,
-  LoginRenewBearerRequest,
-  LoginRequest,
-  LoginBearerResponse,
-  LoginCookieResponse,
-} from './authentication.model';
-import { secret } from 'encore.dev/config';
 import { IncomingMessage, ServerResponse } from 'http';
+// application modules
+import { AuthenticationData } from './authentication.model';
+import { AuthenticationUser, LoginRenewBearerRequest, LoginRequest, LoginBearerResponse, LoginCookieResponse } from './access.model';
+import { secret } from 'encore.dev/config';
+import { userStatusUnlock } from '../user/user';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const jwtDurationInSeconds = secret('JWTDurationInMinute');
@@ -32,6 +27,8 @@ export const loginBearer = api({ expose: true, method: 'POST', path: '/login' },
   if (userAllowed) {
     // user allowed to access
     const userId = authentication.id;
+    // unlock user status
+    await userStatusUnlock(userId);
     // generate token
     const expiresIn: number = +jwtDurationInSeconds();
     const token: string = await new SignJWT({ userID: userId })
@@ -55,7 +52,7 @@ export const loginBearer = api({ expose: true, method: 'POST', path: '/login' },
  * If wrong return a permission denied error.
  */
 export const loginCookie = api.raw(
-  { expose: true, method: 'GET', path: '/login' },
+  { expose: true, auth: false, method: 'GET', path: '/login' },
   async (request: IncomingMessage, response: ServerResponse<IncomingMessage>) => {
     // get request parameters from url
     const url = new URL(request.url || '', `http://${request.headers.host}`);
@@ -70,6 +67,8 @@ export const loginCookie = api.raw(
       if (userAllowed) {
         // user allowed to access
         const userId: number = authentication.id;
+        // unlock user status
+        await userStatusUnlock(userId);
         // generate token
         const expiresIn: number = +jwtDurationInSeconds();
         const token: string = await new SignJWT({ userID: userId })
