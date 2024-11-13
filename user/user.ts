@@ -251,7 +251,7 @@ export const userDetails = api(
  * Insert new user.
  */
 export const userInsert = api(
-  { expose: true, auth: false, method: 'POST', path: '/user' },
+  { expose: true, auth: true, method: 'POST', path: '/user' },
   async (request: UserEditRequest): Promise<UserResponse> => {
     // TODO check for existent user by email
     // TODO check data
@@ -276,7 +276,7 @@ export const userInsert = api(
  * Update existing user.
  */
 export const userUpdate = api(
-  { expose: true, auth: false, method: 'PATCH', path: '/user/:id' },
+  { expose: true, auth: true, method: 'PATCH', path: '/user/:id' },
   async (request: UserEditRequest): Promise<UserResponse> => {
     // TODO check that user exists by id
     // TODO check data
