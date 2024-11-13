@@ -12,6 +12,8 @@ export interface User {
   name: string;
   // user surname
   surname: string;
+  // user fiscal code
+  fiscalCode?: string;
   // user site locking status. true is locked, false is unlocked
   siteLocked: boolean;
 } // User
@@ -37,6 +39,8 @@ export interface UserResponse {
   name: string;
   // user surname
   surname: string;
+  // user fiscal code
+  fiscalCode?: string;
   // user site locking status. true is locked, false is unlocked
   siteLocked: boolean;
 } // UserResponse
@@ -53,6 +57,8 @@ export interface UserEditRequest {
   name: string;
   // user surname
   surname: string;
+  // user fiscal code
+  fiscalCode?: string;
 } // UserEditRequest
 
 /**
