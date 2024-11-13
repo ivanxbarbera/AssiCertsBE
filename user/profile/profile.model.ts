@@ -1,6 +1,6 @@
 /**
  * User profile data request.
- * Request from caller for user profile details.
+ * Request for user profile details.
  */
 export interface UserProfileRequest {
   // identifier of the logged user
@@ -11,7 +11,7 @@ export interface UserProfileRequest {
  * User profile data.
  * Contains a restricted set of user data.
  */
-export interface UserProfile {
+export interface UserProfileResponse {
   // loggend user email
   email: string;
   // logged user name
@@ -20,4 +20,4 @@ export interface UserProfile {
   surname: string;
   // logged user site locking status. true is locked, false is unlocked
   siteLocked: boolean;
-} // UserProfile
+} // UserProfileResponse

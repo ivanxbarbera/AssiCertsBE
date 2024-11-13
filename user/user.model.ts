@@ -4,17 +4,79 @@
 export interface User {
   // user unique identificator
   id?: number;
-  // loggend user email
+  // user email
   email: string;
   // user encoded password
   passwordHash: string;
-  // logged user name
+  // user name
   name: string;
-  // logged user surname
+  // user surname
   surname: string;
-  // logged user site locking status. true is locked, false is unlocked
+  // user site locking status. true is locked, false is unlocked
   siteLocked: boolean;
 } // User
+
+/**
+ * User data request.
+ * Request for user profile details.
+ */
+export interface UserRequest {
+  // identifier of the logged user
+  id: number;
+} // UserRequest
+
+/**
+ * User data.
+ */
+export interface UserResponse {
+  // user unique identificator
+  id?: number;
+  // user email
+  email: string;
+  // user name
+  name: string;
+  // user surname
+  surname: string;
+  // user site locking status. true is locked, false is unlocked
+  siteLocked: boolean;
+} // UserResponse
+
+/**
+ * User create and update data.
+ */
+export interface UserEditRequest {
+  // user unique identificator
+  id?: number;
+  // user email
+  email: string;
+  // user name
+  name: string;
+  // user surname
+  surname: string;
+} // UserEditRequest
+
+/**
+ * Single user data returned in user search.
+ * This is a single element of the UserListResponse.
+ */
+export interface UserList {
+  // user unique identificator
+  id: number;
+  // user email
+  email: string;
+  // user name
+  name: string;
+  // user surname
+  surname: string;
+} // UserList
+
+/**
+ *User search list response.
+ */
+export interface UserListResponse {
+  // user list
+  users: UserList[];
+} // UserListResponse
 
 /**
  * User data.
@@ -26,9 +88,9 @@ export interface UserRegisterRequest {
   password: string;
   // new user password confirm
   passwordConfirm: string;
-  // logged user name
+  // user name
   name: string;
-  // logged user surname
+  // user surname
   surname: string;
 } // UserRegisterRequest
 
@@ -38,7 +100,7 @@ export interface UserRegisterRequest {
 export interface UserPasswordResetRequest {
   // user email address
   email: string;
-} // UserPasswordReserRequest
+} // UserPasswordResetRequest
 
 /**
  * User password reset request.
@@ -50,15 +112,15 @@ export interface UserPasswordResetConfirmRequest {
   password: string;
   // new user password confirm
   passwordConfirm: string;
-} // UserPasswordReserRequest
+} // UserPasswordResetConfirmRequest
 
 /**
  * User password reset confirmation response.
  */
-export interface UserPasswordResetConfirm {
+export interface UserPasswordResetConfirmResponse {
   // user email address
   email: string;
-} // UserPasswordResetConfirm
+} // UserPasswordResetConfirmResponse
 
 /**
  * User password reset.
@@ -90,5 +152,6 @@ export interface UserSiteLockRequest {
 export interface UserSiteUnlockRequest {
   // user identifier
   id: number;
+  // user password
   password: string;
 } // UserSiteUnlockRequest

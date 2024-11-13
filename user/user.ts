@@ -11,15 +11,20 @@ import {
   UserPasswordResetConfirmRequest,
   User,
   UserRegisterRequest,
-  UserPasswordResetConfirm,
+  UserPasswordResetConfirmResponse,
   UserSiteLockRequest,
   UserSiteUnlockRequest,
+  UserList,
+  UserListResponse,
+  UserRequest,
+  UserResponse,
+  UserEditRequest,
 } from './user.model';
 import { orm } from '../common/db/db';
 import { Validators } from '../common/utility/validators.utility';
 import { AuthenticationData } from '../authentication/authentication.model';
 import { userProfileGet } from './profile/profile';
-import { UserProfile } from './profile/profile.model';
+import { UserProfileResponse } from './profile/profile.model';
 import { AuthenticationUser } from '../authentication/access.model';
 
 const jwtSercretKey = secret('JWTSecretKey');
@@ -55,7 +60,7 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   // save new user
   await orm('user').insert(newUser);
   // send email to user
-  // TODO MIC send email to user
+  // TODO send email to user
 }); // userRegister
 
 /**
@@ -84,7 +89,7 @@ export const userPasswordReset = api(
       // save password reset request
       await orm('user_password_reset').insert(userPasswordReset);
       // send email to user
-      // TODO MIC send email to user
+      // TODO send email to user
     }
   }
 ); // userPasswordReset
@@ -96,7 +101,7 @@ export const userPasswordReset = api(
  */
 export const userPasswordResetConfirm = api(
   { expose: true, method: 'PATCH', path: '/user/password-reset' },
-  async (request: UserPasswordResetConfirmRequest): Promise<UserPasswordResetConfirm> => {
+  async (request: UserPasswordResetConfirmRequest): Promise<UserPasswordResetConfirmResponse> => {
     // check data
     if (request.password !== request.passwordConfirm) {
       // password are different
@@ -129,9 +134,9 @@ export const userPasswordResetConfirm = api(
     // update password reset request
     await orm('user_password_reset').where('id', userPasswordReset.id).update('used', true);
     // send email to user
-    // TODO MIC send email to user
+    // TODO send email to user
     // return response to caller
-    const response: UserPasswordResetConfirm = {
+    const response: UserPasswordResetConfirmResponse = {
       email: user.email,
     };
     return response;
@@ -144,7 +149,7 @@ export const userPasswordResetConfirm = api(
  */
 export const userSiteLock = api(
   { expose: true, auth: true, method: 'PATCH', path: '/user/lock-site' },
-  async (request: UserSiteLockRequest): Promise<UserProfile> => {
+  async (request: UserSiteLockRequest): Promise<UserProfileResponse> => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
@@ -168,7 +173,7 @@ export const userSiteLock = api(
  */
 export const userSiteUnlock = api(
   { expose: true, auth: true, method: 'PATCH', path: '/user/unlock-site' },
-  async (request: UserSiteUnlockRequest): Promise<UserProfile> => {
+  async (request: UserSiteUnlockRequest): Promise<UserProfileResponse> => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
@@ -202,3 +207,114 @@ export const userStatusUnlock = async (id: number) => {
   // update user lock status
   await orm('user').where('id', id).update('siteLocked', false);
 }; // userStatusUnlock
+
+/**
+ * Search for users.
+ * Apply filters and return a list of users.
+ */
+export const userList = api({ expose: true, auth: true, method: 'GET', path: '/user' }, async (): Promise<UserListResponse> => {
+  // TODO add search filters
+  // load users
+  const usersQry = () => orm<UserList>('user');
+  const users = await usersQry().select('id', 'email', 'name', 'surname');
+  // return users
+  return {
+    users,
+  };
+}); // userList
+
+/**
+ * Load user details.
+ */
+export const userDetails = api(
+  { expose: true, auth: true, method: 'GET', path: '/user/:id' },
+  async (request: UserRequest): Promise<UserResponse> => {
+    // load user
+    const userQry = () => orm<UserResponse>('user');
+    const user = await userQry().first().where('id', request.id);
+    if (!user) {
+      // user not found
+      throw APIError.notFound('Requested user not found');
+    }
+    // remove internal fields
+    ['passwordHash'].forEach((field: string) => {
+      if (field in user) {
+        delete (user as any)[field];
+      }
+    });
+    // return user
+    return user;
+  }
+); // userDetails
+
+/**
+ * Insert new user.
+ */
+export const userInsert = api(
+  { expose: true, auth: false, method: 'POST', path: '/user' },
+  async (request: UserEditRequest): Promise<UserResponse> => {
+    // TODO check for existent user by email
+    // TODO check data
+    // add internal fields
+    const password = generateRandomPassword();
+    const newUser: User = {
+      ...request,
+      passwordHash: bcrypt.hashSync(password),
+      siteLocked: false,
+    };
+    // insert user
+    const userQry = () => orm('user');
+    const resutlQry = await userQry().insert(newUser, ['id']);
+    // request for password regeneration
+    userPasswordReset({ email: request.email });
+    // return created user
+    return userDetails({ id: resutlQry[0].id });
+  }
+); // userInsert
+
+/**
+ * Update existing user.
+ */
+export const userUpdate = api(
+  { expose: true, auth: false, method: 'PATCH', path: '/user/:id' },
+  async (request: UserEditRequest): Promise<UserResponse> => {
+    // TODO check that user exists by id
+    // TODO check data
+    // update user
+    const userQry = () => orm('user');
+    const resutlQry = await userQry().where('id', request.id).update(request, ['id']);
+    // return updated user
+    return userDetails({ id: resutlQry[0].id });
+  }
+); // userUpdate
+
+/**
+ * Genarate a random password.
+ * @returns generated password
+ */
+const generateRandomPassword = () => {
+  // password type data
+  const length = 12;
+  const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+  const numbers = '0123456789';
+  const specialChars = '!@#$%^&*()_-+=<>?';
+  const allChars = uppercase + lowercase + numbers + specialChars;
+  // generate password
+  let password = '';
+  // at least one character from each category is included
+  password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+  password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+  password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+  password += specialChars.charAt(Math.floor(Math.random() * specialChars.length));
+  // complete the password
+  for (let i = password.length; i < length; i++) {
+    password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+  }
+  // shuffle password to ensure random order
+  password = password
+    .split('')
+    .sort(() => 0.5 - Math.random())
+    .join('');
+  return password;
+}; // generateRandomPassword

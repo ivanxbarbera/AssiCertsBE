@@ -2,7 +2,7 @@
 import { api, APIError } from 'encore.dev/api';
 import { getAuthData } from '~encore/auth';
 // application modules
-import { UserProfileRequest, UserProfile } from './profile.model';
+import { UserProfileRequest, UserProfileResponse } from './profile.model';
 import { AuthenticationData } from '../../authentication/authentication.model';
 import { orm } from '../../common/db/db';
 
@@ -12,7 +12,7 @@ import { orm } from '../../common/db/db';
  */
 export const userProfileGet = api(
   { expose: true, auth: true, method: 'GET', path: '/user/profile/:id' },
-  async (request: UserProfileRequest): Promise<UserProfile> => {
+  async (request: UserProfileRequest): Promise<UserProfileResponse> => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
@@ -22,11 +22,11 @@ export const userProfileGet = api(
       throw APIError.permissionDenied('User not allowed to access requested data');
     }
     // return user profile data
-    const userProfileQry = () => orm<UserProfile>('user');
+    const userProfileQry = () => orm<UserProfileResponse>('user');
     const userProfile = await userProfileQry().first().where('id', request.id);
     if (!userProfile) {
       // user not founded
-      throw APIError.notFound('Requested user profile not fouded');
+      throw APIError.notFound('Requested user profile not fonud');
     }
     return userProfile;
   }
