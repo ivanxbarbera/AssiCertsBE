@@ -71,7 +71,7 @@ export interface UserList {
 } // UserList
 
 /**
- *User search list response.
+ * User search list response.
  */
 export interface UserListResponse {
   // user list
