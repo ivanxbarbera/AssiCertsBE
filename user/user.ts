@@ -44,7 +44,7 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
     throw APIError.invalidArgument('Email address is not well formed');
   }
   // check for mail existance
-  const emailCount = (await orm('user').count('id').where('email', request.email))[0]['id'] as number;
+  const emailCount = (await orm('User').count('id').where('email', request.email))[0]['id'] as number;
   if (emailCount > 0) {
     // email already exists
     throw APIError.alreadyExists('User with specified email already exists');
@@ -58,7 +58,7 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
     siteLocked: false,
   };
   // save new user
-  await orm('user').insert(newUser);
+  await orm('User').insert(newUser);
   // send email to user
   // TODO send email to user
 }); // userRegister
@@ -71,7 +71,7 @@ export const userPasswordReset = api(
   { expose: true, method: 'GET', path: '/user/password-reset/:email' },
   async (request: UserPasswordResetRequest) => {
     // load user data
-    const user = await orm.first().where('email', request.email).from<User>('user');
+    const user = await orm.first().where('email', request.email).from<User>('User');
     if (user) {
       // prepare password reset
       // generate new token
@@ -87,7 +87,7 @@ export const userPasswordReset = api(
         used: false,
       };
       // save password reset request
-      await orm('user_password_reset').insert(userPasswordReset);
+      await orm('UserPasswordReset').insert(userPasswordReset);
       // send email to user
       // TODO send email to user
     }
@@ -108,7 +108,7 @@ export const userPasswordResetConfirm = api(
       throw APIError.invalidArgument('Password and confirm password must be the same');
     }
     // load password reset data
-    const userPasswordReset = await orm<UserPasswordReset>('user_password_reset').first().where('token', request.token);
+    const userPasswordReset = await orm<UserPasswordReset>('UserPasswordReset').first().where('token', request.token);
     if (!userPasswordReset) {
       // request not fouded
       throw APIError.notFound('Password reset request not fouded');
@@ -122,7 +122,7 @@ export const userPasswordResetConfirm = api(
       throw APIError.permissionDenied('Password reset request already used');
     }
     // load user
-    const user = await orm<User>('user').first().where('id', userPasswordReset.userId);
+    const user = await orm<User>('User').first().where('id', userPasswordReset.userId);
     if (!user) {
       // user not fouded
       throw APIError.notFound('User not founded');
@@ -130,9 +130,9 @@ export const userPasswordResetConfirm = api(
     // encrypt password
     const passwordHash = bcrypt.hashSync(request.password);
     // update user password
-    await orm('user').where('id', user!.id).update('passwordHash', passwordHash);
+    await orm('User').where('id', user!.id).update('passwordHash', passwordHash);
     // update password reset request
-    await orm('user_password_reset').where('id', userPasswordReset.id).update('used', true);
+    await orm('UserPasswordReset').where('id', userPasswordReset.id).update('used', true);
     // send email to user
     // TODO send email to user
     // return response to caller
@@ -159,7 +159,7 @@ export const userSiteLock = api(
       throw APIError.permissionDenied('User not allowed to access requested data');
     }
     // update user lock status
-    await orm('user').where('id', request.id).update('siteLocked', true);
+    await orm('User').where('id', request.id).update('siteLocked', true);
     // return user profile
     return await userProfileGet({
       id: request.id,
@@ -183,7 +183,7 @@ export const userSiteUnlock = api(
       throw APIError.permissionDenied('User not allowed to access requested data');
     }
     // load user profile data
-    const authenticationQry = () => orm<AuthenticationUser>('user');
+    const authenticationQry = () => orm<AuthenticationUser>('User');
     const authentication = await authenticationQry().first('id', 'email', 'passwordHash').where('id', request.id);
     const userAllowed = authentication && bcrypt.compareSync(request.password, authentication.passwordHash);
     if (!userAllowed) {
@@ -205,7 +205,7 @@ export const userSiteUnlock = api(
  */
 export const userStatusUnlock = async (id: number) => {
   // update user lock status
-  await orm('user').where('id', id).update('siteLocked', false);
+  await orm('User').where('id', id).update('siteLocked', false);
 }; // userStatusUnlock
 
 /**
@@ -215,7 +215,7 @@ export const userStatusUnlock = async (id: number) => {
 export const userList = api({ expose: true, auth: true, method: 'GET', path: '/user' }, async (): Promise<UserListResponse> => {
   // TODO add search filters
   // load users
-  const usersQry = () => orm<UserList>('user');
+  const usersQry = () => orm<UserList>('User');
   const users = await usersQry().select('id', 'email', 'name', 'surname');
   // return users
   return {
@@ -230,7 +230,7 @@ export const userDetails = api(
   { expose: true, auth: true, method: 'GET', path: '/user/:id' },
   async (request: UserRequest): Promise<UserResponse> => {
     // load user
-    const userQry = () => orm<UserResponse>('user');
+    const userQry = () => orm<UserResponse>('User');
     const user = await userQry().first().where('id', request.id);
     if (!user) {
       // user not found
@@ -263,7 +263,7 @@ export const userInsert = api(
       siteLocked: false,
     };
     // insert user
-    const userQry = () => orm('user');
+    const userQry = () => orm('User');
     const resutlQry = await userQry().insert(newUser, ['id']);
     // request for password regeneration
     userPasswordReset({ email: request.email });
@@ -281,7 +281,7 @@ export const userUpdate = api(
     // TODO check that user exists by id
     // TODO check data
     // update user
-    const userQry = () => orm('user');
+    const userQry = () => orm('User');
     const resutlQry = await userQry().where('id', request.id).update(request, ['id']);
     // return updated user
     return userDetails({ id: resutlQry[0].id });

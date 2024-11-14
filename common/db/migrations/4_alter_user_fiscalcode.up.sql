@@ -1,4 +1,4 @@
-ALTER TABLE public."user" 
+ALTER TABLE public."User" 
 ADD COLUMN
     "fiscalCode" TEXT
 ;

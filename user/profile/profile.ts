@@ -22,7 +22,7 @@ export const userProfileGet = api(
       throw APIError.permissionDenied('User not allowed to access requested data');
     }
     // return user profile data
-    const userProfileQry = () => orm<UserProfileResponse>('user');
+    const userProfileQry = () => orm<UserProfileResponse>('User');
     const userProfile = await userProfileQry().first().where('id', request.id);
     if (!userProfile) {
       // user not founded

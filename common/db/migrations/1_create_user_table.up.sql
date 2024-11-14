@@ -1,4 +1,4 @@
-CREATE TABLE public."user" (
+CREATE TABLE public."User" (
     "id" BIGSERIAL PRIMARY KEY,
     "email" TEXT UNIQUE NOT NULL,
     "passwordHash" TEXT NOT NULL,

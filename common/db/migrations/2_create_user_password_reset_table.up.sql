@@ -1,4 +1,4 @@
-CREATE TABLE public."user_password_reset" (
+CREATE TABLE public."UserPasswordReset" (
     "id" BIGSERIAL PRIMARY KEY,
     "userId" BIGSERIAL,
     "token" TEXT NOT NULL,
@@ -6,9 +6,9 @@ CREATE TABLE public."user_password_reset" (
     "used" BOOLEAN NOT NULL
 );
 
-ALTER TABLE public.user_password_reset
-ADD CONSTRAINT fk_upr_userId
-FOREIGN KEY ("userId") REFERENCES public.user(id)
+ALTER TABLE public."UserPasswordReset"
+ADD CONSTRAINT "FkUprUserId"
+FOREIGN KEY ("userId") REFERENCES public."User"("id")
 ON UPDATE CASCADE
 ON DELETE RESTRICT
 ;
