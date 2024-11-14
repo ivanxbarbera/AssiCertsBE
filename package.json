@@ -6,7 +6,8 @@
   "license": "MPL-2.0",
   "type": "module",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "typesafe-i18n": "typesafe-i18n"
   },
   "devDependencies": {
     "@types/node": "^20.5.7",
@@ -20,7 +21,8 @@
     "encore.dev": "^1.41.12",
     "jose": "^5.9.6",
     "knex": "^3.1.0",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "typesafe-i18n": "^5.26.2"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.13.0"
