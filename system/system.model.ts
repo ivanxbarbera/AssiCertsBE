@@ -1,7 +1,7 @@
 /**
  * System data model data.
  */
-export interface System {
+export interface SystemVersion {
   id: number;
   version: string;
   versionDate: Date;

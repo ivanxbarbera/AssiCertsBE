@@ -1,6 +1,6 @@
 // libraries
 import { api, APIError } from 'encore.dev/api';
-import { System, SystemVersionResponse } from './system.model';
+import { SystemVersion, SystemVersionResponse } from './system.model';
 import { orm } from '../common/db/db';
 
 const APPLICATION_VERSION: string = '0.0.1';
@@ -12,7 +12,7 @@ const APPLICATION_VERSION_DATE: Date = new Date(2024, 11 - 1, 14);
  */
 export const systemVersion = api({ expose: true, method: 'GET', path: '/system/version' }, async (): Promise<SystemVersionResponse> => {
   // load data model version
-  const usersQry = () => orm<System>('System');
+  const usersQry = () => orm<SystemVersion>('SystemVersion');
   const system = await usersQry().first().orderBy('id', 'desc');
   if (!system) {
     throw APIError.internal('Error getting datamodel version');
