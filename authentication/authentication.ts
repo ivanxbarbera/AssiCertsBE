@@ -4,6 +4,7 @@ import { secret } from 'encore.dev/config';
 import { jwtVerify } from 'jose';
 import cookie from 'cookie';
 import { AuthenticationData, AuthenticationParams } from './authentication.model';
+import locz from '../common/i18n';
 
 /**
  * JWT Secret.
@@ -33,7 +34,7 @@ export const authenticationHandler = authHandler<AuthenticationParams, Authentic
       return response;
     } catch (exception) {
       // token verification error
-      throw APIError.unauthenticated('Not authenticated');
+      throw APIError.unauthenticated(locz().AUTHENTICATION_AUTHENTICATION_NOT_AUTHENTICATED.toString());
     }
   } else if (params.authorizationCookie) {
     // get the token from cookie
@@ -49,11 +50,11 @@ export const authenticationHandler = authHandler<AuthenticationParams, Authentic
       return response;
     } catch (exception) {
       // token verification error
-      throw APIError.unauthenticated('Not authenticated');
+      throw APIError.unauthenticated(locz().AUTHENTICATION_AUTHENTICATION_NOT_AUTHENTICATED.toString());
     }
   } else {
     // token cannot be renewed
-    throw APIError.unauthenticated('Malformed request');
+    throw APIError.unauthenticated(locz().AUTHENTICATION_AUTHENTICATION_MALFORMED_REQUEST.toString());
   }
 }); // authenticationHandler
 

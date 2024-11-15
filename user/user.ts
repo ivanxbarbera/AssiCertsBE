@@ -26,6 +26,7 @@ import { AuthenticationData } from '../authentication/authentication.model';
 import { userProfileGet } from './profile/profile';
 import { UserProfileResponse } from './profile/profile.model';
 import { AuthenticationUser } from '../authentication/access.model';
+import locz from '../common/i18n';
 
 const jwtSercretKey = secret('JWTSecretKey');
 
@@ -37,17 +38,17 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   // check data
   if (request.password !== request.passwordConfirm) {
     // password are different
-    throw APIError.invalidArgument('Password and confirm password must be the same');
+    throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH.toString());
   }
   if (!Validators.isValidEmail(request.email)) {
     // email is not well formed
-    throw APIError.invalidArgument('Email address is not well formed');
+    throw APIError.invalidArgument(locz().USER_USER_EMAIL_MALFORMED.toString());
   }
   // check for mail existance
   const emailCount = (await orm('User').count('id').where('email', request.email))[0]['id'] as number;
   if (emailCount > 0) {
     // email already exists
-    throw APIError.alreadyExists('User with specified email already exists');
+    throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST.toString());
   }
   // prepare user to be saved
   const newUser: User = {
@@ -105,27 +106,27 @@ export const userPasswordResetConfirm = api(
     // check data
     if (request.password !== request.passwordConfirm) {
       // password are different
-      throw APIError.invalidArgument('Password and confirm password must be the same');
+      throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH.toString());
     }
     // load password reset data
     const userPasswordReset = await orm<UserPasswordReset>('UserPasswordReset').first().where('token', request.token);
     if (!userPasswordReset) {
       // request not fouded
-      throw APIError.notFound('Password reset request not fouded');
+      throw APIError.notFound(locz().USER_USER_RESET_REQ_NOT_FOUND.toString());
     }
     if (Date.now() > userPasswordReset.expiresAt.getTime()) {
       // request expired
-      throw APIError.resourceExhausted('Password reset request expired');
+      throw APIError.resourceExhausted(locz().USER_USER_RESET_REQ_EXPIRED.toString());
     }
     if (userPasswordReset.used) {
       // request already used
-      throw APIError.permissionDenied('Password reset request already used');
+      throw APIError.permissionDenied(locz().USER_USER_RESET_REQ_USED.toString());
     }
     // load user
     const user = await orm<User>('User').first().where('id', userPasswordReset.userId);
     if (!user) {
       // user not fouded
-      throw APIError.notFound('User not founded');
+      throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND.toString());
     }
     // encrypt password
     const passwordHash = bcrypt.hashSync(request.password);
@@ -156,7 +157,7 @@ export const userSiteLock = api(
     // check user permission
     if (userId !== request.id) {
       // user not allowed to access
-      throw APIError.permissionDenied('User not allowed to access requested data');
+      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED.toString());
     }
     // update user lock status
     await orm('User').where('id', request.id).update('siteLocked', true);
@@ -180,7 +181,7 @@ export const userSiteUnlock = api(
     // check user permission
     if (userId !== request.id) {
       // user not allowed to access
-      throw APIError.permissionDenied('User not allowed to access requested data');
+      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED.toString());
     }
     // load user profile data
     const authenticationQry = () => orm<AuthenticationUser>('User');
@@ -234,7 +235,7 @@ export const userDetails = api(
     const user = await userQry().first().where('id', request.id);
     if (!user) {
       // user not found
-      throw APIError.notFound('Requested user not found');
+      throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND.toString());
     }
     // remove internal fields
     ['passwordHash'].forEach((field: string) => {

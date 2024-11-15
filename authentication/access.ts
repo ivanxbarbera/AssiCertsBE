@@ -9,6 +9,7 @@ import { AuthenticationData } from './authentication.model';
 import { AuthenticationUser, LoginRenewBearerRequest, LoginRequest, LoginBearerResponse, LoginCookieResponse } from './access.model';
 import { secret } from 'encore.dev/config';
 import { userStatusUnlock } from '../user/user';
+import locz from '../common/i18n';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const jwtDurationInSeconds = secret('JWTDurationInMinute');
@@ -41,7 +42,7 @@ export const loginBearer = api({ expose: true, method: 'POST', path: '/login' },
     return response;
   } else {
     // user not allowed to access
-    throw APIError.permissionDenied('Unknown user');
+    throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_UNKNOWN_USER.toString());
   }
 }); // loginBearer
 
@@ -85,11 +86,11 @@ export const loginCookie = api.raw(
         response.end(JSON.stringify(responseData));
       } else {
         // user not allowed to access
-        throw APIError.permissionDenied('Unknown user');
+        throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_UNKNOWN_USER.toString());
       }
     } else {
       // user authenticatio data not fouded
-      throw APIError.permissionDenied('Email and password required');
+      throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_EMAIL_PASSWORD_REQUIRED.toString());
     }
   }
 ); // loginCookie
@@ -121,7 +122,7 @@ export const loginRenewBearer = api(
       return response;
     } else {
       // token cannot be renewed
-      throw APIError.permissionDenied('Invalid token');
+      throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_INVALID_TOKEN.toString());
     }
   }
 ); // loginRenewBearer
@@ -161,7 +162,7 @@ export const loginRenewCookie = api.raw(
         response.end(JSON.stringify(responseData));
       } else {
         // user not allowed to access
-        throw APIError.permissionDenied('Unknown user');
+        throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_UNKNOWN_USER.toString());
       }
     } else {
       // user authenticatio data not fouded
