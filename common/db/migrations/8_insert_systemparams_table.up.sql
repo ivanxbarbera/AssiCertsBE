@@ -4,3 +4,5 @@ INSERT INTO public."SystemParameter" ("group", "code", "name", "type", "value", 
 INSERT INTO public."SystemParameter" ("group", "code", "name", "type", "value", "description") VALUES ('MAIL_SMTP', 'AUTH', 'SMTP Authentication', 'BOOLEAN', 'false', 'SMTP server authentication required');
 INSERT INTO public."SystemParameter" ("group", "code", "name", "type", "value", "description") VALUES ('MAIL_SMTP', 'USER', 'SMTP User', 'TEXT', '', 'SMTP server username for authentication');
 INSERT INTO public."SystemParameter" ("group", "code", "name", "type", "value", "description") VALUES ('MAIL_SMTP', 'PASSWORD', 'SMTP Password', 'TEXT', '', 'SMTP server password for authentication');
+INSERT INTO public."SystemParameter" ("group", "code", "name", "type", "value", "description") VALUES ('MAIL_SMTP', 'DEFAULT_SENDER', 'SMTP Default sender', 'TEXT', 'noreply@assihub.it', 'SMTP default sender for system mail messages');
+INSERT INTO public."SystemParameter" ("group", "code", "name", "type", "value", "description") VALUES ('MAIL_SMTP', 'SUBJECT_PREFIX', 'SMTP Subject prefix', 'TEXT', '[Assihub]', 'SMTP subject prefix for outcoming email');
