@@ -42,7 +42,7 @@ export const loginBearer = api({ expose: true, method: 'POST', path: '/login' },
     return response;
   } else {
     // user not allowed to access
-    throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_UNKNOWN_USER.toString());
+    throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_UNKNOWN_USER());
   }
 }); // loginBearer
 
@@ -86,11 +86,11 @@ export const loginCookie = api.raw(
         response.end(JSON.stringify(responseData));
       } else {
         // user not allowed to access
-        throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_UNKNOWN_USER.toString());
+        throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_UNKNOWN_USER());
       }
     } else {
       // user authenticatio data not fouded
-      throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_EMAIL_PASSWORD_REQUIRED.toString());
+      throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_EMAIL_PASSWORD_REQUIRED());
     }
   }
 ); // loginCookie
@@ -122,7 +122,7 @@ export const loginRenewBearer = api(
       return response;
     } else {
       // token cannot be renewed
-      throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_INVALID_TOKEN.toString());
+      throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_INVALID_TOKEN());
     }
   }
 ); // loginRenewBearer
@@ -162,7 +162,7 @@ export const loginRenewCookie = api.raw(
         response.end(JSON.stringify(responseData));
       } else {
         // user not allowed to access
-        throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_UNKNOWN_USER.toString());
+        throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_UNKNOWN_USER());
       }
     } else {
       // user authenticatio data not fouded

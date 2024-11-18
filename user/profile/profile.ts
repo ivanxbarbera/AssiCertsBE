@@ -20,14 +20,14 @@ export const userProfileGet = api(
     // check user permission
     if (userId !== request.id) {
       // user not allowed to access
-      throw APIError.permissionDenied(locz().USER_PROFILE_PROFILE_USER_NOT_ALLOWED.toString());
+      throw APIError.permissionDenied(locz().USER_PROFILE_PROFILE_USER_NOT_ALLOWED());
     }
     // return user profile data
     const userProfileQry = () => orm<UserProfileResponse>('User');
     const userProfile = await userProfileQry().first().where('id', request.id);
     if (!userProfile) {
       // user not founded
-      throw APIError.notFound(locz().USER_PROFILE_PROFILE_USER_NOT_FOUND.toString());
+      throw APIError.notFound(locz().USER_PROFILE_PROFILE_USER_NOT_FOUND());
     }
     return userProfile;
   }

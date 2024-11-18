@@ -3,8 +3,11 @@ import { api, APIError } from 'encore.dev/api';
 import { SignJWT } from 'jose';
 import bcrypt from 'bcryptjs';
 import { getAuthData } from '~encore/auth';
+import { createTransport, Transporter } from 'nodemailer';
 // application modules
 import { secret } from 'encore.dev/config';
+import { SMTPParameters } from './../system/system.model';
+import { systemParametersSmtp } from './../system/system';
 import {
   UserPasswordResetRequest,
   UserPasswordReset,
@@ -29,26 +32,28 @@ import { AuthenticationUser } from '../authentication/access.model';
 import locz from '../common/i18n';
 
 const jwtSercretKey = secret('JWTSecretKey');
+const frontendBaseURL = secret('FrontendBaseURL');
 
 /**
  * User registration.
  * Receive and check user data, verify email existance and add new user to system.
+ * At the end send a confirmation email.
  */
 export const userRegister = api({ expose: true, method: 'POST', path: '/user/register' }, async (request: UserRegisterRequest) => {
   // check data
   if (request.password !== request.passwordConfirm) {
     // password are different
-    throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH.toString());
+    throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH());
   }
   if (!Validators.isValidEmail(request.email)) {
     // email is not well formed
-    throw APIError.invalidArgument(locz().USER_USER_EMAIL_MALFORMED.toString());
+    throw APIError.invalidArgument(locz().USER_USER_EMAIL_MALFORMED());
   }
   // check for mail existance
   const emailCount = (await orm('User').count('id').where('email', request.email))[0]['id'] as number;
   if (emailCount > 0) {
     // email already exists
-    throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST.toString());
+    throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST());
   }
   // prepare user to be saved
   const newUser: User = {
@@ -61,7 +66,27 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   // save new user
   await orm('User').insert(newUser);
   // send email to user
-  // TODO send email to user
+  const resetUrl = frontendBaseURL() + '/authentication';
+  const smptParameters: SMTPParameters = await systemParametersSmtp();
+  const smtpTransport: any = {
+    host: smptParameters.host,
+    port: smptParameters.port,
+    secure: smptParameters.secure,
+  };
+  if (smptParameters.authentication) {
+    smtpTransport.auth = {
+      user: smptParameters.authenticationUsername,
+      pass: smptParameters.authenticationPassowrd,
+    };
+  }
+  const transporter: Transporter = createTransport(smtpTransport);
+  await transporter.sendMail({
+    from: smptParameters.defaultSender, // sender address
+    to: newUser.email, // list of receivers
+    subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_RESET_EMAIL_SUBJECT()).trim(),
+    text: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: newUser.name, link: resetUrl }),
+    html: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: newUser.name, link: resetUrl }),
+  });
 }); // userRegister
 
 /**
@@ -90,7 +115,27 @@ export const userPasswordReset = api(
       // save password reset request
       await orm('UserPasswordReset').insert(userPasswordReset);
       // send email to user
-      // TODO send email to user
+      const resetUrl = frontendBaseURL() + '/authentication/reset-password;token=' + token;
+      const smptParameters: SMTPParameters = await systemParametersSmtp();
+      const smtpTransport: any = {
+        host: smptParameters.host,
+        port: smptParameters.port,
+        secure: smptParameters.secure,
+      };
+      if (smptParameters.authentication) {
+        smtpTransport.auth = {
+          user: smptParameters.authenticationUsername,
+          pass: smptParameters.authenticationPassowrd,
+        };
+      }
+      const transporter: Transporter = createTransport(smtpTransport);
+      await transporter.sendMail({
+        from: smptParameters.defaultSender, // sender address
+        to: user.email, // list of receivers
+        subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_RESET_EMAIL_SUBJECT()).trim(),
+        text: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
+        html: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+      });
     }
   }
 ); // userPasswordReset
@@ -106,27 +151,27 @@ export const userPasswordResetConfirm = api(
     // check data
     if (request.password !== request.passwordConfirm) {
       // password are different
-      throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH.toString());
+      throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH());
     }
     // load password reset data
     const userPasswordReset = await orm<UserPasswordReset>('UserPasswordReset').first().where('token', request.token);
     if (!userPasswordReset) {
       // request not fouded
-      throw APIError.notFound(locz().USER_USER_RESET_REQ_NOT_FOUND.toString());
+      throw APIError.notFound(locz().USER_USER_RESET_REQ_NOT_FOUND());
     }
     if (Date.now() > userPasswordReset.expiresAt.getTime()) {
       // request expired
-      throw APIError.resourceExhausted(locz().USER_USER_RESET_REQ_EXPIRED.toString());
+      throw APIError.resourceExhausted(locz().USER_USER_RESET_REQ_EXPIRED());
     }
     if (userPasswordReset.used) {
       // request already used
-      throw APIError.permissionDenied(locz().USER_USER_RESET_REQ_USED.toString());
+      throw APIError.permissionDenied(locz().USER_USER_RESET_REQ_USED());
     }
     // load user
     const user = await orm<User>('User').first().where('id', userPasswordReset.userId);
     if (!user) {
       // user not fouded
-      throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND.toString());
+      throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
     }
     // encrypt password
     const passwordHash = bcrypt.hashSync(request.password);
@@ -135,7 +180,27 @@ export const userPasswordResetConfirm = api(
     // update password reset request
     await orm('UserPasswordReset').where('id', userPasswordReset.id).update('used', true);
     // send email to user
-    // TODO send email to user
+    const resetUrl = frontendBaseURL() + '/authentication';
+    const smptParameters: SMTPParameters = await systemParametersSmtp();
+    const smtpTransport: any = {
+      host: smptParameters.host,
+      port: smptParameters.port,
+      secure: smptParameters.secure,
+    };
+    if (smptParameters.authentication) {
+      smtpTransport.auth = {
+        user: smptParameters.authenticationUsername,
+        pass: smptParameters.authenticationPassowrd,
+      };
+    }
+    const transporter: Transporter = createTransport(smtpTransport);
+    await transporter.sendMail({
+      from: smptParameters.defaultSender, // sender address
+      to: user.email, // list of receivers
+      subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT()).trim(),
+      text: locz().USER_USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
+      html: locz().USER_USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+    });
     // return response to caller
     const response: UserPasswordResetConfirmResponse = {
       email: user.email,
@@ -157,7 +222,7 @@ export const userSiteLock = api(
     // check user permission
     if (userId !== request.id) {
       // user not allowed to access
-      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED.toString());
+      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED());
     }
     // update user lock status
     await orm('User').where('id', request.id).update('siteLocked', true);
@@ -181,7 +246,7 @@ export const userSiteUnlock = api(
     // check user permission
     if (userId !== request.id) {
       // user not allowed to access
-      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED.toString());
+      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED());
     }
     // load user profile data
     const authenticationQry = () => orm<AuthenticationUser>('User');
@@ -235,7 +300,7 @@ export const userDetails = api(
     const user = await userQry().first().where('id', request.id);
     if (!user) {
       // user not found
-      throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND.toString());
+      throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
     }
     // remove internal fields
     ['passwordHash'].forEach((field: string) => {

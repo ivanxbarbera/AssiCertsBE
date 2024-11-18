@@ -34,7 +34,7 @@ export const authenticationHandler = authHandler<AuthenticationParams, Authentic
       return response;
     } catch (exception) {
       // token verification error
-      throw APIError.unauthenticated(locz().AUTHENTICATION_AUTHENTICATION_NOT_AUTHENTICATED.toString());
+      throw APIError.unauthenticated(locz().AUTHENTICATION_AUTHENTICATION_NOT_AUTHENTICATED());
     }
   } else if (params.authorizationCookie) {
     // get the token from cookie
@@ -50,11 +50,11 @@ export const authenticationHandler = authHandler<AuthenticationParams, Authentic
       return response;
     } catch (exception) {
       // token verification error
-      throw APIError.unauthenticated(locz().AUTHENTICATION_AUTHENTICATION_NOT_AUTHENTICATED.toString());
+      throw APIError.unauthenticated(locz().AUTHENTICATION_AUTHENTICATION_NOT_AUTHENTICATED());
     }
   } else {
     // token cannot be renewed
-    throw APIError.unauthenticated(locz().AUTHENTICATION_AUTHENTICATION_MALFORMED_REQUEST.toString());
+    throw APIError.unauthenticated(locz().AUTHENTICATION_AUTHENTICATION_MALFORMED_REQUEST());
   }
 }); // authenticationHandler
 
