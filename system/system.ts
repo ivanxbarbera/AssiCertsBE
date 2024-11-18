@@ -9,6 +9,7 @@ import {
   SystemVersionResponse,
 } from './system.model';
 import { orm } from '../common/db/db';
+import { secret } from 'encore.dev/config';
 
 const APPLICATION_VERSION: string = '0.0.1';
 const APPLICATION_VERSION_DATE: Date = new Date(2024, 11 - 1, 14);
@@ -97,24 +98,30 @@ export const systemParameterToObject = (systemParameters: SystemParameter[]): an
   return paramtersObject;
 }; // filterSystemParameterByCode
 
+// SMTP Environments
+const mailSMTPHost: string = secret('MailSMTPHost')();
+const mailSMTPPort: number = parseInt(secret('MailSMTPPort')());
+const mailSMTPSecure: boolean = secret('MailSMTPSecure')() === 'true';
+const mailSMTPAuthentication: boolean = secret('MailSMTPAuthentication')() === 'true';
+const mailSMTPAuthenticationUsername: string = secret('MailSMTPAuthenticationUsername')();
+const mailSMTPAuthenticationPassword: string = secret('MailSMTPAuthenticationPassword')();
+const mailSMTPAuthenticationDefaultSender: string = secret('MailSMTPAuthenticationDefaultSender')();
+const mailSMTPAuthenticationSubjectPrefix: string = secret('MailSMTPAuthenticationSubjectPrefix')();
+
 /**
  * SMTP parameters.
  * Load SMTP configuration stored in system parameters.
  */
 export const systemParametersSmtp = api({ expose: false, method: 'GET', path: '/system/parameters/smtp' }, async (): Promise<SMTPParameters> => {
-  // load smtp parameters from system parameters
-  const response: SystemParameterResponse = await systemParameter({ group: 'MAIL_SMTP' });
-  // convert system parameters to single object
-  const smtpParametersObject = systemParameterToObject(response.systemParameters);
   // create smtp paramters
   return {
-    host: smtpParametersObject.MAIL_SMTP_HOST,
-    port: smtpParametersObject.MAIL_SMTP_PORT,
-    secure: smtpParametersObject.MAIL_SMTP_SECURE,
-    authentication: smtpParametersObject.MAIL_SMTP_AUTH,
-    authenticationUsername: smtpParametersObject.MAIL_SMTP_USER,
-    authenticationPassowrd: smtpParametersObject.MAIL_SMTP_PASSWORD,
-    defaultSender: smtpParametersObject.MAIL_SMTP_DEFAULT_SENDER,
-    subjectPrefix: smtpParametersObject.MAIL_SMTP_SUBJECT_PREFIX,
+    host: mailSMTPHost,
+    port: mailSMTPPort,
+    secure: mailSMTPSecure,
+    authentication: mailSMTPAuthentication,
+    authenticationUsername: mailSMTPAuthenticationUsername,
+    authenticationPassowrd: mailSMTPAuthenticationPassword,
+    defaultSender: mailSMTPAuthenticationDefaultSender,
+    subjectPrefix: mailSMTPAuthenticationSubjectPrefix,
   };
 }); // smtpParameters
