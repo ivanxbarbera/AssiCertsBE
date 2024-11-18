@@ -77,14 +77,19 @@ export const systemParameterToObject = (systemParameters: SystemParameter[]): an
     switch (systemParameter.type) {
       case 'TEXT':
         paramtersObject[systemParameter.group + '_' + systemParameter.code] = systemParameter.value;
+        break;
       case 'NUMBER':
         paramtersObject[systemParameter.group + '_' + systemParameter.code] = parseInt(systemParameter.value);
+        break;
       case 'DECIMAL':
         paramtersObject[systemParameter.group + '_' + systemParameter.code] = parseFloat(systemParameter.value);
+        break;
       case 'BOOLEAN':
         paramtersObject[systemParameter.group + '_' + systemParameter.code] = systemParameter.value.toLowerCase() === 'true';
+        break;
       case 'DATE':
         paramtersObject[systemParameter.group + '_' + systemParameter.code] = new Date(systemParameter.value);
+        break;
       default:
         paramtersObject[systemParameter.group + '_' + systemParameter.code] = systemParameter.value;
     }
@@ -109,5 +114,7 @@ export const systemParametersSmtp = api({ expose: false, method: 'GET', path: '/
     authentication: smtpParametersObject.MAIL_SMTP_AUTH,
     authenticationUsername: smtpParametersObject.MAIL_SMTP_USER,
     authenticationPassowrd: smtpParametersObject.MAIL_SMTP_PASSWORD,
+    defaultSender: smtpParametersObject.MAIL_SMTP_DEFAULT_SENDER,
+    subjectPrefix: smtpParametersObject.MAIL_SMTP_SUBJECT_PREFIX,
   };
 }); // smtpParameters
