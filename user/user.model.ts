@@ -129,6 +129,20 @@ export interface UserPasswordResetConfirmResponse {
 } // UserPasswordResetConfirmResponse
 
 /**
+ * User password change request.
+ */
+export interface UserPasswordChangeRequest {
+  // user indentifier
+  userId: number;
+  // previuos password
+  oldPassword: string;
+  // new user password
+  password: string;
+  // new user password confirm
+  passwordConfirm: string;
+} // UserPasswordResetConfirmRequest
+
+/**
  * User password reset.
  */
 export interface UserPasswordReset {

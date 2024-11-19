@@ -22,6 +22,7 @@ import {
   UserRequest,
   UserResponse,
   UserEditRequest,
+  UserPasswordChangeRequest,
 } from './user.model';
 import { orm } from '../common/db/db';
 import { Validators } from '../common/utility/validators.utility';
@@ -208,6 +209,44 @@ export const userPasswordResetConfirm = api(
     return response;
   }
 ); // userPasswordResetConfirm
+
+/**
+ * Password change.
+ * Receive old and new password, check for old and new validity and change password.
+ */
+export const userPasswordChange = api(
+  { expose: true, method: 'PATCH', path: '/user/password-change' },
+  async (request: UserPasswordChangeRequest) => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user permission
+    if (userId !== request.userId) {
+      // user not allowed to access
+      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED());
+    }
+    // check data
+    if (request.password !== request.passwordConfirm) {
+      // password are different
+      throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH());
+    }
+    // load user
+    const user = await orm<User>('User').first().where('id', request.userId);
+    if (!user) {
+      // user not fouded
+      throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
+    }
+    // check old password
+    if (!bcrypt.compareSync(request.oldPassword, user.passwordHash)) {
+      // old password wrong
+      throw APIError.permissionDenied(locz().USER_USER_OLD_PASSWORD());
+    }
+    // encrypt password
+    const passwordHash = bcrypt.hashSync(request.password);
+    // update user password
+    await orm('User').where('id', user!.id).update('passwordHash', passwordHash);
+  }
+); // userPasswordChange
 
 /**
  * User site lock.

@@ -80,6 +80,10 @@ type RootTranslation = {
 	 */
 	USER_USER_USER_NOT_ALLOWED: string
 	/**
+	 * P​a​s​s​w​o​r​d​ ​p​r​e​c​e​d​e​n​t​e​ ​n​o​n​ ​c​o​r​r​e​t​t​a
+	 */
+	USER_USER_OLD_PASSWORD: string
+	/**
 	 * R​i​c​h​i​e​s​t​a​ ​r​i​p​r​i​s​t​i​n​o​ ​p​a​s​s​w​o​r​d
 	 */
 	USER_USER_PASSWORD_RESET_EMAIL_SUBJECT: string
@@ -200,6 +204,10 @@ export type TranslationFunctions = {
 	 * Utente non autorizzato ad accedere ai dati richiesti
 	 */
 	USER_USER_USER_NOT_ALLOWED: () => LocalizedString
+	/**
+	 * Password precedente non corretta
+	 */
+	USER_USER_OLD_PASSWORD: () => LocalizedString
 	/**
 	 * Richiesta ripristino password
 	 */

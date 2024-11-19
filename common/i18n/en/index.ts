@@ -17,6 +17,7 @@ const en = {
   USER_USER_RESET_REQ_USED: 'Password reset request already used',
   USER_USER_USER_NOT_FOUND: 'User not founded',
   USER_USER_USER_NOT_ALLOWED: 'User not allowed to access requested data',
+  USER_USER_OLD_PASSWORD: 'Wrong old password',
   USER_USER_PASSWORD_RESET_EMAIL_SUBJECT: 'Password reset request',
   USER_USER_PASSWORD_RESET_EMAIL_BODY_HTML:
     'Hello {name: string},<br>somebody asks to change your password. To proceed click link below.<br><a href="{link: string}">Reset password</a>',
