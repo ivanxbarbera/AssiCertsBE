@@ -30,9 +30,14 @@ const it = {
     'Ciao {name: string},\nla tua password è stata ripristinata. Per accedere clicca sul link seguente.\n{link: string}',
   USER_USER_PASSWORD_REGISTER_EMAIL_SUBJECT: 'Registrazione confermata',
   USER_USER_PASSWORD_REGISTER_EMAIL_BODY_HTML:
-    'Ciao {name: string},<br>sei stato correttamente registrato su Assihub. Per accedere clicca sul link seguente.<br><a href="{link: string}">Accedi ad Assihub</a>',
+    'Ciao {name: string},<br>sei stato correttamente registrato su Assihub. Attendi che un amministratore abiliti il tuo account.',
   USER_USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT:
-    'Ciao {name: string},\nsei stato correttamente registrato su Assihub. Per accedere clicca sul link seguente..\n{link: string}',
+    'Ciao {name: string},\nsei stato correttamente registrato su Assihub. Attendi che un amministratore abiliti il tuo accout.\n',
+  USER_USER_ACTIVATED_EMAIL_SUBJECT: 'Attivazione confermata',
+  USER_USER_ACTIVATED_EMAIL_BODY_HTML:
+    'Ciao {name: string},<br>il tuo account è stato attivato da un amministratore. Per accedere clicca sul link seguente.<br><a href="{link: string}">Accedi ad Assihub</a>',
+  USER_USER_ACTIVATED_EMAIL_BODY_TEXT:
+    'Ciao {name: string},\nsei stato correttamente registrato su Assihub. Per accedere clicca su link seguente.\n{link: string}',
 } satisfies BaseTranslation;
 
 export default it;

@@ -63,6 +63,7 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
     name: request.name,
     surname: request.surname,
     siteLocked: false,
+    disabled: true,
   };
   // save new user
   await orm('User').insert(newUser);
@@ -84,9 +85,9 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   await transporter.sendMail({
     from: smptParameters.defaultSender, // sender address
     to: newUser.email, // list of receivers
-    subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_RESET_EMAIL_SUBJECT()).trim(),
-    text: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: newUser.name, link: resetUrl }),
-    html: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: newUser.name, link: resetUrl }),
+    subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_REGISTER_EMAIL_SUBJECT()).trim(),
+    text: locz().USER_USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT({ name: newUser.name }),
+    html: locz().USER_USER_PASSWORD_REGISTER_EMAIL_BODY_HTML({ name: newUser.name }),
   });
 }); // userRegister
 
@@ -98,7 +99,7 @@ export const userPasswordReset = api(
   { expose: true, method: 'GET', path: '/user/password-reset/:email' },
   async (request: UserPasswordResetRequest) => {
     // load user data
-    const user = await orm.first().where('email', request.email).from<User>('User');
+    const user = await orm<User>('User').first().where('email', request.email).where('disabled', false);
     if (user) {
       // prepare password reset
       // generate new token
@@ -231,7 +232,7 @@ export const userPasswordChange = api(
       throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH());
     }
     // load user
-    const user = await orm<User>('User').first().where('id', request.userId);
+    const user = await orm<User>('User').first().where('id', request.userId).where('disabled', false);
     if (!user) {
       // user not fouded
       throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
@@ -321,7 +322,7 @@ export const userList = api({ expose: true, auth: true, method: 'GET', path: '/u
   // TODO add search filters
   // load users
   const usersQry = () => orm<UserList>('User');
-  const users = await usersQry().select('id', 'email', 'name', 'surname');
+  const users = await usersQry().select('id', 'email', 'name', 'surname', 'disabled').orderBy('surname').orderBy('name');
   // return users
   return {
     users,

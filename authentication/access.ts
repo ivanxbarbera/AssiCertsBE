@@ -23,7 +23,7 @@ const jwtDurationInSeconds = secret('JWTDurationInMinute');
 export const loginBearer = api({ expose: true, method: 'POST', path: '/login' }, async (request: LoginRequest): Promise<LoginBearerResponse> => {
   // load user profile data
   const authenticationQry = () => orm<AuthenticationUser>('User');
-  const authentication = await authenticationQry().first('id', 'email', 'passwordHash').where('email', request.email);
+  const authentication = await authenticationQry().first('id', 'email', 'passwordHash').where('email', request.email).where('disabled', false);
   const userAllowed = authentication && bcrypt.compareSync(request.password, authentication.passwordHash);
   if (userAllowed) {
     // user allowed to access
@@ -63,7 +63,7 @@ export const loginCookie = api.raw(
       // user authentication data founded
       // load user profile data
       const authenticationQry = () => orm<AuthenticationUser>('User');
-      const authentication = await authenticationQry().first('id', 'email', 'passwordHash').where('email', email);
+      const authentication = await authenticationQry().first('id', 'email', 'passwordHash').where('email', email).where('disabled', false);
       const userAllowed = authentication && bcrypt.compareSync(password!, authentication.passwordHash);
       if (userAllowed) {
         // user allowed to access

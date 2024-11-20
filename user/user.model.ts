@@ -16,6 +16,8 @@ export interface User {
   fiscalCode?: string;
   // user site locking status. true is locked, false is unlocked
   siteLocked: boolean;
+  // user status, disabled or active
+  disabled: boolean;
 } // User
 
 /**
@@ -43,6 +45,8 @@ export interface UserResponse {
   fiscalCode?: string;
   // user site locking status. true is locked, false is unlocked
   siteLocked: boolean;
+  // user status, disabled or active
+  disabled: boolean;
 } // UserResponse
 
 /**
@@ -59,6 +63,8 @@ export interface UserEditRequest {
   surname: string;
   // user fiscal code
   fiscalCode?: string;
+  // user status, disabled or active
+  disabled: boolean;
 } // UserEditRequest
 
 /**
@@ -74,6 +80,8 @@ export interface UserList {
   name: string;
   // user surname
   surname: string;
+  // user status, disabled or active
+  disabled: boolean;
 } // UserList
 
 /**

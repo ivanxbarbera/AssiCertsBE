@@ -30,9 +30,14 @@ const en = {
     'Hello {name: string},\nyou password has been resetted. To login click on the link below.\n{link: string}',
   USER_USER_PASSWORD_REGISTER_EMAIL_SUBJECT: 'Registration confirmed',
   USER_USER_PASSWORD_REGISTER_EMAIL_BODY_HTML:
-    'Hello {name: string},<br>you are successfully registered to Assihub. To login click on the link below.<br><a href="{link: string}">Login to Assihub</a>',
+    'Hello {name: string},<br>you are successfully registered to Assihub. To login click on the link below.<br>',
   USER_USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT:
-    'Hello {name: string},\nyou are successfully registered to Assihub. To login click on the link below.\n{link: string}',
+    'Hello {name: string},\nyou are successfully registered to Assihub. To login click on the link below.\n',
+  USER_USER_ACTIVATED_EMAIL_SUBJECT: 'Activation confirmed',
+  USER_USER_ACTIVATED_EMAIL_BODY_HTML:
+    'Hello {name: string},<br>your accound has been activated by an administrator. To login click on the link below..<br><a href="{link: string}">Accedi ad Assihub</a>',
+  USER_USER_ACTIVATED_EMAIL_BODY_TEXT:
+    'Hello {name: string},\nyour accound has been activated by an administrator. To login click on the link below.\n{link: string}',
 } satisfies Translation;
 
 export default en;
