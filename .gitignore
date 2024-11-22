@@ -2,5 +2,6 @@
 encore.gen.go
 encore.gen.cue
 /.encore
+encore.app
 node_modules
 /encore.gen
