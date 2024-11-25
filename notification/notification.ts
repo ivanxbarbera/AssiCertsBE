@@ -28,6 +28,7 @@ export const notificationStream = api.streamOut<NotificationHandshake, Notificat
     const user: UserResponse = await userDetails({ id: handshake.userId });
     new Subscription(notify, 'send-notification', {
       handler: async (notificationMessage: NotificationMessage) => {
+        log.debug('After: ' + JSON.stringify(notificationMessage));
         try {
           // send the message to the clients
           for (const [id, stream] of connectedStreams) {
@@ -40,12 +41,14 @@ export const notificationStream = api.streamOut<NotificationHandshake, Notificat
             } catch (err) {
               // send error, probably client disconnected
               // remove client from connected list
+              log.debug('error');
               connectedStreams.delete(id);
             }
           }
         } catch (err) {
           // general error
           // remove client from connected list
+          log.debug('error2');
           connectedStreams.delete(handshake.userId);
         }
       },
@@ -70,7 +73,8 @@ export const resendNotificationMessageList = api(
     // load noitification messages
     const notificationMessageListResponse: NotificationMessageListResponse = await notificationMessageList(request);
     const notificationMessages: NotificationMessage[] = notificationMessageListResponse.notificationMessages;
-    notificationMessages.reverse().forEach(async (notificationMessage) => {
+    notificationMessages.reverse().forEach(async (notificationMessage: NotificationMessage) => {
+      log.debug('Before: ' + JSON.stringify(notificationMessage));
       await notify.publish(notificationMessage);
     });
   }
@@ -93,3 +97,14 @@ export const notificationMessageList = api(
     };
   }
 ); // notificationMessageList
+
+// setInterval(() => {
+//   log.debug('START');
+//   notify.publish({
+//     id: 1,
+//     message: 'prova',
+//     readed: false,
+//     timestamp: new Date(),
+//     userId: 3,
+//   });
+// }, 5000);

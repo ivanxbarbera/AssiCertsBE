@@ -17,6 +17,7 @@
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/nodemailer": "^6.4.16",
+    "@types/pg": "^8.11.10",
     "bcryptjs": "^2.4.3",
     "cookie": "^1.0.1",
     "encore.dev": "^1.41.12",
