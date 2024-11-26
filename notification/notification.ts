@@ -35,7 +35,6 @@ export const notificationStream = api.streamOut<NotificationHandshake, Notificat
     const user: UserResponse = await userDetails({ id: handshake.userId });
     new Subscription(notify, 'send-notification', {
       handler: async (notificationMessage: NotificationMessage) => {
-        log.debug('After: ' + JSON.stringify(notificationMessage));
         try {
           // send the message to the clients
           for (const [id, stream] of connectedStreams) {
@@ -81,7 +80,6 @@ export const resendNotificationMessageList = api(
     const notificationMessageListResponse: NotificationMessageListResponse = await notificationMessageList(request);
     const notificationMessages: NotificationMessage[] = notificationMessageListResponse.notificationMessages;
     notificationMessages.reverse().forEach(async (notificationMessage: NotificationMessage) => {
-      log.debug('Before: ' + JSON.stringify(notificationMessage));
       await notify.publish(notificationMessage);
     });
   }
