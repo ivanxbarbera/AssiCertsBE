@@ -1,5 +1,12 @@
 import { api, StreamOut } from 'encore.dev/api';
-import { NotificationHandshake, NotificationMessage, NotificationMessageListRequest, NotificationMessageListResponse } from './notification.model';
+import {
+  NotificationHandshake,
+  NotificationMessage,
+  NotificationMessageListRequest,
+  NotificationMessageListResponse,
+  NotificationMessageReadAllRequest,
+  NotificationMessageReadRequest,
+} from './notification.model';
 import { Subscription, Topic } from 'encore.dev/pubsub';
 import { userDetails } from '../user/user';
 import { UserResponse } from '../user/user.model';
@@ -20,7 +27,7 @@ const connectedStreams: Map<number, StreamOut<NotificationMessage>> = new Map();
  * If true send the notification, otherwise pass to the next client.
  */
 export const notificationStream = api.streamOut<NotificationHandshake, NotificationMessage>(
-  { expose: true, auth: false, path: '/notification' },
+  { expose: true, auth: false, path: '/notification/stream' },
   async (handshake, stream) => {
     // add new connection to connected list
     connectedStreams.set(handshake.userId, stream);
@@ -89,14 +96,46 @@ export const notificationMessageList = api(
   async (request: NotificationMessageListRequest): Promise<NotificationMessageListResponse> => {
     // TODO add search filters
     // load noitification messages
-    const usersQry = () => orm<NotificationMessage>('NotificationMessage');
-    const notificationMessages = await usersQry().select().where('userId', request.userId).orderBy('timestamp');
+    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
+    const notificationMessages = await notificationMessageQry()
+      .select()
+      .where((whereBuilder) => {
+        whereBuilder.where('userId', request.userId);
+        if (request.onlyUnread) {
+          whereBuilder.andWhere('readed', false);
+        }
+      })
+      .orderBy('timestamp');
     // return notification messages
     return {
       notificationMessages,
     };
   }
 ); // notificationMessageList
+
+/**
+ * Mark all user notifications ad readed.
+ */
+export const notificationMessageAllRead = api(
+  { expose: true, auth: true, method: 'GET', path: '/notification/allread/:userId' },
+  async (request: NotificationMessageReadAllRequest): Promise<void> => {
+    // update all notification ad readed
+    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
+    await notificationMessageQry().update('readed', true).where('userId', request.userId);
+  }
+); // notificationMessageAllRead
+
+/**
+ * Mark a notification ad readed.
+ */
+export const notificationMessageRead = api(
+  { expose: true, auth: true, method: 'GET', path: '/notification/read/:userId/:notificationMessageId' },
+  async (request: NotificationMessageReadRequest): Promise<void> => {
+    // update specified notification ad readed
+    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
+    await notificationMessageQry().update('readed', true).where('userId', request.userId).andWhere('id', request.notificationMessageId);
+  }
+); // notificationMessageRead
 
 // setInterval(() => {
 //   log.debug('START');

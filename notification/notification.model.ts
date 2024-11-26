@@ -30,6 +30,7 @@ export interface NotificationMessage {
 export interface NotificationMessageListRequest {
   // user identfier
   userId: number;
+  onlyUnread?: boolean;
 } // NotificationMessageListRequest
 
 /**
@@ -39,3 +40,21 @@ export interface NotificationMessageListResponse {
   // notification message list
   notificationMessages: NotificationMessage[];
 } // NotificationMessageListResponse
+
+/**
+ * Nofitication messages mark read all request.
+ */
+export interface NotificationMessageReadAllRequest {
+  // user identfier
+  userId: number;
+} // NotificationMessageReadAllRequest
+
+/**
+ * Nofitication messages mark read all request.
+ */
+export interface NotificationMessageReadRequest {
+  // user identfier
+  userId: number;
+  // notification identifier
+  notificationMessageId: number;
+} // NotificationMessageReadRequest
