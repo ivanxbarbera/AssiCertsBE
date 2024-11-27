@@ -10,6 +10,7 @@ const it = {
   USER_PROFILE_PROFILE_USER_NOT_ALLOWED: 'Utente non autorizzato ad accedere ai dati richiesti',
   USER_PROFILE_PROFILE_USER_NOT_FOUND: 'Profilo utente richiesto non trovato',
   USER_USER_PASSWORD_MATCH: 'Password e conferma password devono coincidere',
+  USER_USER_PASSWORD_NOT_COMPLIANT: 'Password non conforme ai requisiti richiesti',
   USER_USER_EMAIL_MALFORMED: 'Indirizzo email non valido',
   USER_USER_EMAIL_ALREADY_EXIST: 'Utente con la mail indicata esistente',
   USER_USER_RESET_REQ_NOT_FOUND: 'Richiesta di rigenerazione password non trovata',

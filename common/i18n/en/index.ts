@@ -10,6 +10,7 @@ const en = {
   USER_PROFILE_PROFILE_USER_NOT_ALLOWED: 'User not allowed to access requested data',
   USER_PROFILE_PROFILE_USER_NOT_FOUND: 'Requested user profile not found',
   USER_USER_PASSWORD_MATCH: 'Password and confirm password must be the same',
+  USER_USER_PASSWORD_NOT_COMPLIANT: 'Password not compliant to required contraints',
   USER_USER_EMAIL_MALFORMED: 'Email address is not well formed',
   USER_USER_EMAIL_ALREADY_EXIST: 'User with specified email already exists',
   USER_USER_RESET_REQ_NOT_FOUND: 'Password reset request not fouded',

@@ -84,3 +84,23 @@ export interface SMTPParameters {
   // SMTP mail subject prefix
   subjectPrefix: string;
 } // SMTPParameters
+
+/**
+ * SMPT server configuration parameters.
+ */
+export interface PasswordCheckParameters {
+  // password min length
+  minLength: number;
+  // password min lower case letters number
+  minLowerLetters: number;
+  // password min upper case letters number
+  minUpperLetters: number;
+  // password min numbers number
+  minNumbers: number;
+  // password min special characters number
+  minSpecials: number;
+  // password historyc unusable number
+  historyUnusable: number;
+  // password expiration in days
+  expirationDays: number;
+} // PasswordCheckParameters

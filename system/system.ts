@@ -1,6 +1,7 @@
 // libraries
 import { api, APIError } from 'encore.dev/api';
 import {
+  PasswordCheckParameters,
   SMTPParameters,
   SystemParameter,
   SystemParameterRequest,
@@ -124,4 +125,28 @@ export const systemParametersSmtp = api({ expose: false, method: 'GET', path: '/
     defaultSender: mailSMTPAuthenticationDefaultSender,
     subjectPrefix: mailSMTPAuthenticationSubjectPrefix,
   };
-}); // smtpParameters
+}); // systemParametersSmtp
+
+/**
+ * Password check paramters.
+ * Load password check parameter configuration stored in system parameters
+ */
+export const systemParametersPasswordCheck = api(
+  { expose: false, method: 'GET', path: '/system/parameters/password-check' },
+  async (): Promise<PasswordCheckParameters> => {
+    // load smtp parameters from system parameters
+    const response: SystemParameterResponse = await systemParameter({ group: 'PASSWORD_CHECK' });
+    // convert system parameters to single object
+    const passwordCheckParametersObject = systemParameterToObject(response.systemParameters);
+    // create smtp paramters
+    return {
+      minLength: passwordCheckParametersObject.MIN_LENGTH,
+      minLowerLetters: passwordCheckParametersObject.MIN_LOWER_LETTERS,
+      minUpperLetters: passwordCheckParametersObject.MIN_UPPER_LETTERS,
+      minNumbers: passwordCheckParametersObject.MIN_NUMBERS,
+      minSpecials: passwordCheckParametersObject.MIN_SPECIALS,
+      historyUnusable: passwordCheckParametersObject.HISTORY_UNUSABLE,
+      expirationDays: passwordCheckParametersObject.EXPIRATION_DAYS,
+    };
+  }
+); // systemParametersPasswordCheck

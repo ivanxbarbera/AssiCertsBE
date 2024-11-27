@@ -52,6 +52,10 @@ type RootTranslation = {
 	 */
 	USER_USER_PASSWORD_MATCH: string
 	/**
+	 * P​a​s​s​w​o​r​d​ ​n​o​n​ ​c​o​n​f​o​r​m​e​ ​a​i​ ​r​e​q​u​i​s​i​t​i​ ​r​i​c​h​i​e​s​t​i
+	 */
+	USER_USER_PASSWORD_NOT_COMPLIANT: string
+	/**
 	 * I​n​d​i​r​i​z​z​o​ ​e​m​a​i​l​ ​n​o​n​ ​v​a​l​i​d​o
 	 */
 	USER_USER_EMAIL_MALFORMED: string
@@ -192,6 +196,10 @@ export type TranslationFunctions = {
 	 * Password e conferma password devono coincidere
 	 */
 	USER_USER_PASSWORD_MATCH: () => LocalizedString
+	/**
+	 * Password non conforme ai requisiti richiesti
+	 */
+	USER_USER_PASSWORD_NOT_COMPLIANT: () => LocalizedString
 	/**
 	 * Indirizzo email non valido
 	 */

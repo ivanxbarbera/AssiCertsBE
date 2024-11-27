@@ -183,3 +183,22 @@ export interface UserSiteUnlockRequest {
   // user password
   password: string;
 } // UserSiteUnlockRequest
+
+/**
+ * User password compliance to contraints check request.
+ */
+export interface UserPasswordCheckRequest {
+  password: string;
+} // UserPasswordCheckRequest
+
+/**
+ * User password validity compliance response.
+ */
+export interface UserPasswordCheckResponse {
+  // password score value. max value 12
+  score: number;
+  // password strenght
+  strength: string;
+  // password compliance. true can be used, false otherwise
+  compliant: boolean;
+} // UserPasswordCheckResponse

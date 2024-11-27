@@ -1,3 +1,4 @@
+import { PasswordCheckParameters } from './../system/system.model';
 // libraries
 import { api, APIError } from 'encore.dev/api';
 import { SignJWT } from 'jose';
@@ -7,7 +8,7 @@ import { createTransport, Transporter } from 'nodemailer';
 // application modules
 import { secret } from 'encore.dev/config';
 import { SMTPParameters } from './../system/system.model';
-import { systemParametersSmtp } from './../system/system';
+import { systemParametersPasswordCheck, systemParametersSmtp } from './../system/system';
 import {
   UserPasswordResetRequest,
   UserPasswordReset,
@@ -23,6 +24,8 @@ import {
   UserResponse,
   UserEditRequest,
   UserPasswordChangeRequest,
+  UserPasswordCheckRequest,
+  UserPasswordCheckResponse,
 } from './user.model';
 import { orm } from '../common/db/db';
 import { Validators } from '../common/utility/validators.utility';
@@ -45,6 +48,12 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   if (request.password !== request.passwordConfirm) {
     // password are different
     throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH());
+  }
+  // check password compliance
+  const passwordCheck: UserPasswordCheckResponse = await userPasswordCheck({ password: request.password });
+  if (!passwordCheck.compliant) {
+    // password not compliant
+    throw APIError.invalidArgument(locz().USER_USER_PASSWORD_NOT_COMPLIANT());
   }
   if (!Validators.isValidEmail(request.email)) {
     // email is not well formed
@@ -155,6 +164,12 @@ export const userPasswordResetConfirm = api(
       // password are different
       throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH());
     }
+    // check password compliance
+    const passwordCheck: UserPasswordCheckResponse = await userPasswordCheck({ password: request.password });
+    if (!passwordCheck.compliant) {
+      // password not compliant
+      throw APIError.invalidArgument(locz().USER_USER_PASSWORD_NOT_COMPLIANT());
+    }
     // load password reset data
     const userPasswordReset = await orm<UserPasswordReset>('UserPasswordReset').first().where('token', request.token);
     if (!userPasswordReset) {
@@ -231,6 +246,12 @@ export const userPasswordChange = api(
       // password are different
       throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH());
     }
+    // check password compliance
+    const passwordCheck: UserPasswordCheckResponse = await userPasswordCheck({ password: request.password });
+    if (!passwordCheck.compliant) {
+      // password not compliant
+      throw APIError.invalidArgument(locz().USER_USER_PASSWORD_NOT_COMPLIANT());
+    }
     // load user
     const user = await orm<User>('User').first().where('id', request.userId).where('disabled', false);
     if (!user) {
@@ -248,6 +269,65 @@ export const userPasswordChange = api(
     await orm('User').where('id', user!.id).update('passwordHash', passwordHash);
   }
 ); // userPasswordChange
+
+/**
+ * User password compliance check.
+ * Check for password contraints compliance and evaluate password score and strngth.
+ */
+export const userPasswordCheck = api(
+  { expose: true, auth: false, method: 'GET', path: '/user/password-check/:password' },
+  async (request: UserPasswordCheckRequest): Promise<UserPasswordCheckResponse> => {
+    // load passowrd constraints
+    const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();
+    // check password compliance
+    const password = request.password;
+    let score = 0;
+    let compliant = true;
+    // minimum compliance requirements
+    const minLength = passwordCheckParams.minLength;
+    const hasLowerCase = (password.match(/[a-z]/g) || []).length >= passwordCheckParams.minLowerLetters;
+    const hasUpperCase = (password.match(/[A-Z]/g) || []).length >= passwordCheckParams.minUpperLetters;
+    const hasNumber = (password.match(/\d/g) || []).length >= passwordCheckParams.minNumbers;
+    const hasSpecialChar = (password.match(/[!@#$%^&*(),.?":{}|<>]/g) || []).length >= passwordCheckParams.minSpecials;
+    // check password compliance
+    if (password.length < minLength || !hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
+      compliant = false;
+    } else {
+      // calculate base score for compliance
+      score += password.length >= passwordCheckParams.minLength + 4 ? 2 : 1;
+      // character diversity
+      if (hasLowerCase) score += 2;
+      if (hasUpperCase) score += 2;
+      if (hasNumber) score += 2;
+      if (hasSpecialChar) score += 2;
+      // characters variety
+      const uniqueChars = new Set(password).size;
+      score += uniqueChars >= 8 ? 2 : 1;
+      // penalty for consecutive repeating characters
+      const repeatingChars = /(.)\1/.test(password);
+      if (repeatingChars) score -= 1;
+
+      // penalty for predictable patterns (like sequential numbers or letters)
+      const hasSequentialPattern =
+        /(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)/i.test(
+          password
+        );
+      if (hasSequentialPattern) score -= 2;
+    }
+    // set strength based in score
+    let strength = 'Non-compliant';
+    if (compliant) {
+      if (score <= 3) {
+        strength = 'Weak';
+      } else if (score <= 6) {
+        strength = 'Medium';
+      } else {
+        strength = 'Strong';
+      }
+    }
+    return { score, strength, compliant };
+  }
+); // userPasswordCheck
 
 /**
  * User site lock.
@@ -362,7 +442,7 @@ export const userInsert = api(
     // TODO check for existent user by email
     // TODO check data
     // add internal fields
-    const password = generateRandomPassword();
+    const password = await generateRandomPassword();
     const newUser: User = {
       ...request,
       passwordHash: bcrypt.hashSync(password),
@@ -398,9 +478,10 @@ export const userUpdate = api(
  * Genarate a random password.
  * @returns generated password
  */
-const generateRandomPassword = () => {
+const generateRandomPassword = async () => {
+  // load passowrd constraints
+  const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();
   // password type data
-  const length = 12;
   const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const lowercase = 'abcdefghijklmnopqrstuvwxyz';
   const numbers = '0123456789';
@@ -408,13 +489,21 @@ const generateRandomPassword = () => {
   const allChars = uppercase + lowercase + numbers + specialChars;
   // generate password
   let password = '';
-  // at least one character from each category is included
-  password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
-  password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
-  password += numbers.charAt(Math.floor(Math.random() * numbers.length));
-  password += specialChars.charAt(Math.floor(Math.random() * specialChars.length));
+  // add characters from each category
+  for (let i = 0; i < passwordCheckParams.minLowerLetters + 1; i++) {
+    password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+  }
+  for (let i = 0; i < passwordCheckParams.minUpperLetters + 1; i++) {
+    password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+  }
+  for (let i = 0; i < passwordCheckParams.minNumbers + 1; i++) {
+    password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+  }
+  for (let i = 0; i < passwordCheckParams.minSpecials; i++) {
+    password += specialChars.charAt(Math.floor(Math.random() * specialChars.length));
+  }
   // complete the password
-  for (let i = password.length; i < length; i++) {
+  for (let i = password.length; i < passwordCheckParams.minLength + 4; i++) {
     password += allChars.charAt(Math.floor(Math.random() * allChars.length));
   }
   // shuffle password to ensure random order
