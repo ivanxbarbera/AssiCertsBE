@@ -119,52 +119,49 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
  * Request for forgotten password reset.
  * Receive user email, generate a new token for password regeneration and send it via email to requesting user.
  */
-export const userPasswordReset = api(
-  { expose: true, method: 'GET', path: '/user/password-reset/:email' },
-  async (request: UserPasswordResetRequest) => {
-    // load user data
-    const user = await orm<User>('User').first().where('email', request.email).where('disabled', false);
-    if (user) {
-      // prepare password reset
-      // generate new token
-      const token: string = await new SignJWT({ email: user.email })
-        .setProtectedHeader({ alg: 'HS256' })
-        .setIssuedAt()
-        .setExpirationTime('60minute')
-        .sign(new TextEncoder().encode(jwtSercretKey()));
-      const userPasswordReset: UserPasswordReset = {
-        userId: user.id!,
-        token,
-        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
-        used: false,
+export const userPasswordReset = api({ expose: true, method: 'GET', path: '/user/password-reset' }, async (request: UserPasswordResetRequest) => {
+  // load user data
+  const user = await orm<User>('User').first().where('email', request.email).where('disabled', false);
+  if (user) {
+    // prepare password reset
+    // generate new token
+    const token: string = await new SignJWT({ email: user.email })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('60minute')
+      .sign(new TextEncoder().encode(jwtSercretKey()));
+    const userPasswordReset: UserPasswordReset = {
+      userId: user.id!,
+      token,
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      used: false,
+    };
+    // save password reset request
+    await orm('UserPasswordReset').insert(userPasswordReset);
+    // send email to user
+    const resetUrl = frontendBaseURL() + '/authentication/reset-password;token=' + token;
+    const smptParameters: SMTPParameters = await systemParametersSmtp();
+    const smtpTransport: any = {
+      host: smptParameters.host,
+      port: smptParameters.port,
+      secure: smptParameters.secure,
+    };
+    if (smptParameters.authentication) {
+      smtpTransport.auth = {
+        user: smptParameters.authenticationUsername,
+        pass: smptParameters.authenticationPassowrd,
       };
-      // save password reset request
-      await orm('UserPasswordReset').insert(userPasswordReset);
-      // send email to user
-      const resetUrl = frontendBaseURL() + '/authentication/reset-password;token=' + token;
-      const smptParameters: SMTPParameters = await systemParametersSmtp();
-      const smtpTransport: any = {
-        host: smptParameters.host,
-        port: smptParameters.port,
-        secure: smptParameters.secure,
-      };
-      if (smptParameters.authentication) {
-        smtpTransport.auth = {
-          user: smptParameters.authenticationUsername,
-          pass: smptParameters.authenticationPassowrd,
-        };
-      }
-      const transporter: Transporter = createTransport(smtpTransport);
-      await transporter.sendMail({
-        from: smptParameters.defaultSender, // sender address
-        to: user.email, // list of receivers
-        subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_RESET_EMAIL_SUBJECT()).trim(),
-        text: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
-        html: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
-      });
     }
+    const transporter: Transporter = createTransport(smtpTransport);
+    await transporter.sendMail({
+      from: smptParameters.defaultSender, // sender address
+      to: user.email, // list of receivers
+      subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_RESET_EMAIL_SUBJECT()).trim(),
+      text: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
+      html: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+    });
   }
-); // userPasswordReset
+}); // userPasswordReset
 
 /**
  * Password reset.
@@ -352,7 +349,7 @@ export const userPasswordHistoryCheck = api(
  * Check for password contraints compliance and evaluate password score and strngth.
  */
 export const userPasswordCheck = api(
-  { expose: true, auth: false, method: 'GET', path: '/user/password-check/:password' },
+  { expose: true, auth: false, method: 'GET', path: '/user/password-check' },
   async (request: UserPasswordCheckRequest): Promise<UserPasswordCheckResponse> => {
     // load password constraints
     const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();
@@ -361,49 +358,69 @@ export const userPasswordCheck = api(
     let score = 0;
     let compliant = true;
     // minimum compliance requirements
-    const hasMinLength = password.length > passwordCheckParams.minLength;
-    const hasLowerCase = (password.match(/[a-z]/g) || []).length >= passwordCheckParams.minLowerLetters;
-    const hasUpperCase = (password.match(/[A-Z]/g) || []).length >= passwordCheckParams.minUpperLetters;
-    const hasNumber = (password.match(/\d/g) || []).length >= passwordCheckParams.minNumbers;
-    const hasSpecialChar = (password.match(/[!@#$%^&*(),.?":{}|<>]/g) || []).length >= passwordCheckParams.minSpecials;
+    const length = password.length;
+    const hasMinLength = length > passwordCheckParams.minLength;
+    const lowerCaseNum = (password.match(/[a-z]/g) || []).length;
+    const hasLowerCase = lowerCaseNum >= passwordCheckParams.minLowerLetters;
+    const upperCaseNum = (password.match(/[A-Z]/g) || []).length;
+    const hasUpperCase = upperCaseNum >= passwordCheckParams.minUpperLetters;
+    const numberNum = (password.match(/\d/g) || []).length;
+    const hasNumber = numberNum >= passwordCheckParams.minNumbers;
+    const specialsNum = (password.match(/[!@#$%^&*(),.?":{}|<>]/g) || []).length;
+    const hasSpecialChar = specialsNum >= passwordCheckParams.minSpecials;
     // check password compliance
     if (!hasMinLength || !hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
       compliant = false;
-    } else {
-      // calculate base score for compliance
-      score += password.length >= passwordCheckParams.minLength + 4 ? 2 : 1;
-      // character diversity
-      if (hasLowerCase) score += 2;
-      if (hasUpperCase) score += 2;
-      if (hasNumber) score += 2;
-      if (hasSpecialChar) score += 2;
-      // characters variety
-      const uniqueChars = new Set(password).size;
-      score += uniqueChars >= 8 ? 2 : 1;
-      // penalty for consecutive repeating characters
-      const repeatingChars = /(.)\1/.test(password);
-      if (repeatingChars) score -= 1;
-
-      // penalty for predictable patterns (like sequential numbers or letters)
-      const hasSequentialPattern =
-        /(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)/i.test(
-          password
-        );
-      if (hasSequentialPattern) score -= 2;
     }
+    // calculate base score for compliance
+    if (password != '') score += 1;
+    if (hasMinLength) score += 1;
+    if (hasLowerCase) score += 1;
+    if (hasUpperCase) score += 1;
+    if (hasNumber) score += 1;
+    if (hasSpecialChar) score += 1;
+    // more than minimal requirements
+    if (length > passwordCheckParams.minLength + 2) score += 2;
+    if (lowerCaseNum > passwordCheckParams.minLowerLetters + 2) score += 2;
+    if (upperCaseNum > passwordCheckParams.minUpperLetters + 2) score += 2;
+    if (numberNum > passwordCheckParams.minNumbers + 2) score += 2;
+    if (specialsNum > passwordCheckParams.minSpecials + 2) score += 2;
+    // password length
+    if (password.length >= passwordCheckParams.minLength + 4) score += 2;
+    // characters variety
+    const uniqueChars = new Set(password).size;
+    if (uniqueChars >= 8) score += 2;
+    // penalty for consecutive repeating characters
+    const repeatingChars = /(.)\1/.test(password);
+    if (repeatingChars) score -= 1;
+    // penalty for predictable patterns (like sequential numbers or letters)
+    const hasSequentialPattern =
+      /(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)/i.test(
+        password
+      );
+    if (hasSequentialPattern) score -= 2;
     // set strength based in score
-    let strength = 'Non-compliant';
+    let strength = 'NON_COMPLIANT';
     if (compliant) {
-      if (score <= 3) {
-        strength = 'Weak';
-      } else if (score <= 6) {
-        strength = 'Medium';
+      if (score <= 10) {
+        strength = 'WEAK';
+      } else if (score <= 15) {
+        strength = 'MEDIUM';
       } else {
-        strength = 'Strong';
+        strength = 'STRONG';
       }
     }
     // prepare response
-    const response: UserPasswordCheckResponse = { score, strength, compliant, hasMinLength, hasLowerCase, hasUpperCase, hasNumber, hasSpecialChar };
+    const response: UserPasswordCheckResponse = {
+      score: Math.round((100 * score) / 20),
+      strength,
+      compliant,
+      hasMinLength,
+      hasLowerCase,
+      hasUpperCase,
+      hasNumber,
+      hasSpecialChar,
+    };
     return response;
   }
 ); // userPasswordCheck
