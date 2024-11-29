@@ -260,7 +260,7 @@ export const userPasswordResetConfirm = api(
  * Receive old and new password, check for old and new validity and change password.
  */
 export const userPasswordChange = api(
-  { expose: true, method: 'PATCH', path: '/user/password-change' },
+  { expose: true, auth: true, method: 'PATCH', path: '/user/password-change' },
   async (request: UserPasswordChangeRequest) => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
