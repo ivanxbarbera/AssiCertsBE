@@ -88,6 +88,10 @@ type RootTranslation = {
 	 */
 	USER_USER_OLD_PASSWORD: string
 	/**
+	 * P​a​s​s​w​o​r​d​ ​g​i​à​ ​u​s​a​t​a​ ​i​n​ ​p​r​e​c​e​d​e​n​z​a
+	 */
+	USER_USER_USED_PASSWORD: string
+	/**
 	 * R​i​c​h​i​e​s​t​a​ ​r​i​p​r​i​s​t​i​n​o​ ​p​a​s​s​w​o​r​d
 	 */
 	USER_USER_PASSWORD_RESET_EMAIL_SUBJECT: string
@@ -232,6 +236,10 @@ export type TranslationFunctions = {
 	 * Password precedente non corretta
 	 */
 	USER_USER_OLD_PASSWORD: () => LocalizedString
+	/**
+	 * Password già usata in precedenza
+	 */
+	USER_USER_USED_PASSWORD: () => LocalizedString
 	/**
 	 * Richiesta ripristino password
 	 */

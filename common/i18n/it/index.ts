@@ -19,6 +19,7 @@ const it = {
   USER_USER_USER_NOT_FOUND: 'Utente non trovato',
   USER_USER_USER_NOT_ALLOWED: 'Utente non autorizzato ad accedere ai dati richiesti',
   USER_USER_OLD_PASSWORD: 'Password precedente non corretta',
+  USER_USER_USED_PASSWORD: 'Password già usata in precedenza',
   USER_USER_PASSWORD_RESET_EMAIL_SUBJECT: 'Richiesta ripristino password',
   USER_USER_PASSWORD_RESET_EMAIL_BODY_HTML:
     'Ciao {name: string},<br>è stato richiesto il ripristino della tua password. Per procedere clicca sul link seguente.<br><a href="{link: string}">Ripristina password</a>',

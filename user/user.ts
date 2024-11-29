@@ -206,7 +206,7 @@ export const userPasswordResetConfirm = api(
     });
     if (!passwordHistoryCheck.compliant) {
       // password not compliant
-      throw APIError.invalidArgument(locz().USER_USER_OLD_PASSWORD());
+      throw APIError.invalidArgument(locz().USER_USER_USED_PASSWORD());
     }
     // load user
     const user = await orm<User>('User').first().where('id', userPasswordReset.userId);
@@ -291,13 +291,18 @@ export const userPasswordChange = api(
     });
     if (!passwordHistoryCheck.compliant) {
       // password not compliant
-      throw APIError.invalidArgument(locz().USER_USER_OLD_PASSWORD());
+      throw APIError.invalidArgument(locz().USER_USER_USED_PASSWORD());
     }
     // load user
     const user = await orm<User>('User').first().where('id', request.userId).where('disabled', false);
     if (!user) {
       // user not fouded
       throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
+    }
+    // check current password
+    if (!bcrypt.compareSync(request.password, user.passwordHash)) {
+      // wrong previous password
+      throw APIError.invalidArgument(locz().USER_USER_OLD_PASSWORD());
     }
     // encrypt password
     const passwordHash = bcrypt.hashSync(request.password);
@@ -323,8 +328,6 @@ export const userPasswordHistoryCheck = api(
   async (request: UserPasswordHistoryCheckRequest): Promise<UserPasswordHistoryCheckResponse> => {
     // load password constraints
     const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();
-    // encrypt password
-    const passwordHash = bcrypt.hashSync(request.password);
     // load user history password
     const userPasswordHistoriesQry = () => orm<UserPasswordHistory>('UserPasswordHistory');
     const userPasswordHistories: UserPasswordHistory[] = await userPasswordHistoriesQry()
@@ -333,7 +336,7 @@ export const userPasswordHistoryCheck = api(
       .orderBy('date', 'DESC')
       .limit(passwordCheckParams.historyUnusable);
     const findedPasswords = userPasswordHistories.filter((userPasswordHistory) => {
-      return userPasswordHistory.passwordHash === passwordHash;
+      return bcrypt.compareSync(request.password, userPasswordHistory.passwordHash);
     });
     if (findedPasswords.length > 0) {
       // password already used
