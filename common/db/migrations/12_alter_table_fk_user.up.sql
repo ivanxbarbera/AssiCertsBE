@@ -1,0 +1,7 @@
+
+ALTER TABLE public."NotificationMessage"
+ADD CONSTRAINT "FkNmUserId"
+FOREIGN KEY ("userId") REFERENCES public."User"("id")
+ON UPDATE CASCADE
+ON DELETE RESTRICT
+;

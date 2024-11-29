@@ -201,4 +201,38 @@ export interface UserPasswordCheckResponse {
   strength: string;
   // password compliance. true can be used, false otherwise
   compliant: boolean;
+  // passowrd min lenght compliance. true if complian, false otherwise
+  hasMinLength: boolean;
+  // passowrd lower case characters number compliance. true if complian, false otherwise
+  hasLowerCase: boolean;
+  // passowrd upper case characters number compliance. true if complian, false otherwise
+  hasUpperCase: boolean;
+  // passowrd number of number compliance. true if complian, false otherwise
+  hasNumber: boolean;
+  // passowrd special characters number compliance. true if complian, false otherwise
+  hasSpecialChar: boolean;
+} // UserPasswordCheckResponse
+
+export interface UserPasswordHistory {
+  id?: number;
+  userId: number;
+  date: Date;
+  passwordHash: string;
+} // UserPasswordHistory
+
+/**
+ * User password history check request.
+ * Check if password has been already used by user before.
+ */
+export interface UserPasswordHistoryCheckRequest {
+  userId: number;
+  password: string;
+} // UserPasswordCheckRequest
+
+/**
+ * User password history check response.
+ */
+export interface UserPasswordHistoryCheckResponse {
+  // password compliance. true can be used, false otherwise
+  compliant: boolean;
 } // UserPasswordCheckResponse

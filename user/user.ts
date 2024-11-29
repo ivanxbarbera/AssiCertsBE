@@ -26,6 +26,9 @@ import {
   UserPasswordChangeRequest,
   UserPasswordCheckRequest,
   UserPasswordCheckResponse,
+  UserPasswordHistoryCheckResponse,
+  UserPasswordHistoryCheckRequest,
+  UserPasswordHistory,
 } from './user.model';
 import { orm } from '../common/db/db';
 import { Validators } from '../common/utility/validators.utility';
@@ -65,17 +68,29 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
     // email already exists
     throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST());
   }
+  // encrypt password
+  const passwordHash = bcrypt.hashSync(request.password);
   // prepare user to be saved
   const newUser: User = {
     email: request.email,
-    passwordHash: bcrypt.hashSync(request.password),
+    passwordHash: passwordHash,
     name: request.name,
     surname: request.surname,
     siteLocked: false,
     disabled: true,
   };
   // save new user
-  await orm('User').insert(newUser);
+  const userRst = await orm('User').insert(newUser, ['id']);
+  const id = userRst[0].id;
+  // insert user password history
+  const newUserPasswordHistory: UserPasswordHistory = {
+    userId: id,
+    date: new Date(),
+    passwordHash,
+  };
+  const userPasswordHistoryQry = () => orm('UserPasswordHistory');
+  const userPasswordHistoryRst = await userPasswordHistoryQry().insert(newUserPasswordHistory, ['id']);
+
   // send email to user
   const resetUrl = frontendBaseURL() + '/authentication';
   const smptParameters: SMTPParameters = await systemParametersSmtp();
@@ -184,6 +199,15 @@ export const userPasswordResetConfirm = api(
       // request already used
       throw APIError.permissionDenied(locz().USER_USER_RESET_REQ_USED());
     }
+    // check password history
+    const passwordHistoryCheck: UserPasswordHistoryCheckResponse = await userPasswordHistoryCheck({
+      userId: userPasswordReset.userId,
+      password: request.password,
+    });
+    if (!passwordHistoryCheck.compliant) {
+      // password not compliant
+      throw APIError.invalidArgument(locz().USER_USER_OLD_PASSWORD());
+    }
     // load user
     const user = await orm<User>('User').first().where('id', userPasswordReset.userId);
     if (!user) {
@@ -194,6 +218,14 @@ export const userPasswordResetConfirm = api(
     const passwordHash = bcrypt.hashSync(request.password);
     // update user password
     await orm('User').where('id', user!.id).update('passwordHash', passwordHash);
+    // insert user password history
+    const newUserPasswordHistory: UserPasswordHistory = {
+      userId: user.id!,
+      date: new Date(),
+      passwordHash,
+    };
+    const userPasswordHistoryQry = () => orm('UserPasswordHistory');
+    const userPasswordHistoryRst = await userPasswordHistoryQry().insert(newUserPasswordHistory, ['id']);
     // update password reset request
     await orm('UserPasswordReset').where('id', userPasswordReset.id).update('used', true);
     // send email to user
@@ -252,23 +284,65 @@ export const userPasswordChange = api(
       // password not compliant
       throw APIError.invalidArgument(locz().USER_USER_PASSWORD_NOT_COMPLIANT());
     }
+    // check password history
+    const passwordHistoryCheck: UserPasswordHistoryCheckResponse = await userPasswordHistoryCheck({
+      userId: request.userId,
+      password: request.password,
+    });
+    if (!passwordHistoryCheck.compliant) {
+      // password not compliant
+      throw APIError.invalidArgument(locz().USER_USER_OLD_PASSWORD());
+    }
     // load user
     const user = await orm<User>('User').first().where('id', request.userId).where('disabled', false);
     if (!user) {
       // user not fouded
       throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
     }
-    // check old password
-    if (!bcrypt.compareSync(request.oldPassword, user.passwordHash)) {
-      // old password wrong
-      throw APIError.permissionDenied(locz().USER_USER_OLD_PASSWORD());
-    }
     // encrypt password
     const passwordHash = bcrypt.hashSync(request.password);
     // update user password
     await orm('User').where('id', user!.id).update('passwordHash', passwordHash);
+    // insert user password history
+    const newUserPasswordHistory: UserPasswordHistory = {
+      userId: user.id!,
+      date: new Date(),
+      passwordHash,
+    };
+    const userPasswordHistoryQry = () => orm('UserPasswordHistory');
+    const userPasswordHistoryRst = await userPasswordHistoryQry().insert(newUserPasswordHistory, ['id']);
   }
 ); // userPasswordChange
+
+/**
+ * User password compliance check.
+ * Check for password contraints compliance and evaluate password score and strngth.
+ */
+export const userPasswordHistoryCheck = api(
+  { expose: true, auth: false, method: 'GET', path: '/user/password-history-check/:userId' },
+  async (request: UserPasswordHistoryCheckRequest): Promise<UserPasswordHistoryCheckResponse> => {
+    // load password constraints
+    const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();
+    // encrypt password
+    const passwordHash = bcrypt.hashSync(request.password);
+    // load user history password
+    const userPasswordHistoriesQry = () => orm<UserPasswordHistory>('UserPasswordHistory');
+    const userPasswordHistories: UserPasswordHistory[] = await userPasswordHistoriesQry()
+      .select()
+      .where('userId', request.userId)
+      .orderBy('date', 'DESC')
+      .limit(passwordCheckParams.historyUnusable);
+    const findedPasswords = userPasswordHistories.filter((userPasswordHistory) => {
+      return userPasswordHistory.passwordHash === passwordHash;
+    });
+    if (findedPasswords.length > 0) {
+      // password already used
+      return { compliant: false };
+    }
+    // new password
+    return { compliant: true };
+  }
+); // userPasswordHistoryCheck
 
 /**
  * User password compliance check.
@@ -277,20 +351,20 @@ export const userPasswordChange = api(
 export const userPasswordCheck = api(
   { expose: true, auth: false, method: 'GET', path: '/user/password-check/:password' },
   async (request: UserPasswordCheckRequest): Promise<UserPasswordCheckResponse> => {
-    // load passowrd constraints
+    // load password constraints
     const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();
     // check password compliance
     const password = request.password;
     let score = 0;
     let compliant = true;
     // minimum compliance requirements
-    const minLength = passwordCheckParams.minLength;
+    const hasMinLength = password.length > passwordCheckParams.minLength;
     const hasLowerCase = (password.match(/[a-z]/g) || []).length >= passwordCheckParams.minLowerLetters;
     const hasUpperCase = (password.match(/[A-Z]/g) || []).length >= passwordCheckParams.minUpperLetters;
     const hasNumber = (password.match(/\d/g) || []).length >= passwordCheckParams.minNumbers;
     const hasSpecialChar = (password.match(/[!@#$%^&*(),.?":{}|<>]/g) || []).length >= passwordCheckParams.minSpecials;
     // check password compliance
-    if (password.length < minLength || !hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
+    if (!hasMinLength || !hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
       compliant = false;
     } else {
       // calculate base score for compliance
@@ -325,7 +399,9 @@ export const userPasswordCheck = api(
         strength = 'Strong';
       }
     }
-    return { score, strength, compliant };
+    // prepare response
+    const response: UserPasswordCheckResponse = { score, strength, compliant, hasMinLength, hasLowerCase, hasUpperCase, hasNumber, hasSpecialChar };
+    return response;
   }
 ); // userPasswordCheck
 
@@ -443,18 +519,28 @@ export const userInsert = api(
     // TODO check data
     // add internal fields
     const password = await generateRandomPassword();
+    const passwordHash = bcrypt.hashSync(password);
     const newUser: User = {
       ...request,
-      passwordHash: bcrypt.hashSync(password),
+      passwordHash,
       siteLocked: false,
     };
     // insert user
     const userQry = () => orm('User');
-    const resutlQry = await userQry().insert(newUser, ['id']);
+    const userRst = await userQry().insert(newUser, ['id']);
+    const id = userRst[0].id;
+    // insert user password history
+    const newUserPasswordHistory: UserPasswordHistory = {
+      userId: id,
+      date: new Date(),
+      passwordHash,
+    };
+    const userPasswordHistoryQry = () => orm('UserPasswordHistory');
+    const userPasswordHistoryRst = await userPasswordHistoryQry().insert(newUserPasswordHistory, ['id']);
     // request for password regeneration
     userPasswordReset({ email: request.email });
     // return created user
-    return userDetails({ id: resutlQry[0].id });
+    return userDetails({ id });
   }
 ); // userInsert
 

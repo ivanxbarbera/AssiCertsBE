@@ -140,13 +140,13 @@ export const systemParametersPasswordCheck = api(
     const passwordCheckParametersObject = systemParameterToObject(response.systemParameters);
     // create smtp paramters
     return {
-      minLength: passwordCheckParametersObject.MIN_LENGTH,
-      minLowerLetters: passwordCheckParametersObject.MIN_LOWER_LETTERS,
-      minUpperLetters: passwordCheckParametersObject.MIN_UPPER_LETTERS,
-      minNumbers: passwordCheckParametersObject.MIN_NUMBERS,
-      minSpecials: passwordCheckParametersObject.MIN_SPECIALS,
-      historyUnusable: passwordCheckParametersObject.HISTORY_UNUSABLE,
-      expirationDays: passwordCheckParametersObject.EXPIRATION_DAYS,
+      minLength: passwordCheckParametersObject.PASSWORD_CHECK_MIN_LENGTH,
+      minLowerLetters: passwordCheckParametersObject.PASSWORD_CHECK_MIN_LOWER_LETTERS,
+      minUpperLetters: passwordCheckParametersObject.PASSWORD_CHECK_MIN_UPPER_LETTERS,
+      minNumbers: passwordCheckParametersObject.PASSWORD_CHECK_MIN_NUMBERS,
+      minSpecials: passwordCheckParametersObject.PASSWORD_CHECK_MIN_SPECIALS,
+      historyUnusable: passwordCheckParametersObject.PASSWORD_CHECK_HISTORY_UNUSABLE,
+      expirationDays: passwordCheckParametersObject.PASSWORD_CHECK_EXPIRATION_DAYS,
     };
   }
 ); // systemParametersPasswordCheck
