@@ -321,7 +321,7 @@ export const userPasswordChange = api(
  * Check for password contraints compliance and evaluate password score and strngth.
  */
 export const userPasswordHistoryCheck = api(
-  { expose: true, auth: false, method: 'GET', path: '/user/password-history-check/:userId' },
+  { expose: true, auth: true, method: 'GET', path: '/user/password-history-check/:userId' },
   async (request: UserPasswordHistoryCheckRequest): Promise<UserPasswordHistoryCheckResponse> => {
     // load password constraints
     const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();
