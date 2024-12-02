@@ -20,7 +20,7 @@ const jwtSercretKey = secret('JWTSecretKey');
  */
 export const authenticationHandler = authHandler<AuthenticationParams, AuthenticationData>(async (params) => {
   // extract token from request
-  let token;
+  let token = '';
   if (params.authorizationBearer) {
     // check if token is valid
     // get the token from the header
@@ -41,7 +41,7 @@ export const authenticationHandler = authHandler<AuthenticationParams, Authentic
     const { payload } = await jwtVerify<AuthenticationData>(token, new TextEncoder().encode(jwtSercretKey()));
     // prepare authentication response
     const response: AuthenticationData = {
-      userID: payload.userID,
+      userID: '' + payload.userID,
     };
     // check password expiration
     const passwordEpiration: UserPasswordExpirationResponse = await getUserPasswordExpiration(parseInt(payload.userID));
