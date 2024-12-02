@@ -543,8 +543,12 @@ export const userDetails = api(
 export const userInsert = api(
   { expose: true, auth: true, method: 'POST', path: '/user' },
   async (request: UserEditRequest): Promise<UserResponse> => {
-    // TODO check for existent user by email
-    // TODO check data
+    // check for mail existance
+    const emailCount = (await orm('User').count('id').where('email', request.email))[0]['id'] as number;
+    if (emailCount > 0) {
+      // email already exists
+      throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST());
+    }
     // add internal fields
     const password = await generateRandomPassword();
     const passwordHash = bcrypt.hashSync(password);
@@ -578,11 +582,25 @@ export const userInsert = api(
 export const userUpdate = api(
   { expose: true, auth: true, method: 'PATCH', path: '/user/:id' },
   async (request: UserEditRequest): Promise<UserResponse> => {
-    // TODO check that user exists by id
-    // TODO check data
+    // load user
+    const userQry = () => orm<UserResponse>('User');
+    const user = await userQry().first().where('id', request.id);
+    if (!user) {
+      // user not found
+      throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
+    }
+    if (user.email !== request.email) {
+      // user changed his email
+      // check for mail existance
+      const emailCount = (await orm('User').count('id').where('email', request.email))[0]['id'] as number;
+      if (emailCount > 0) {
+        // email already exists
+        throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST());
+      }
+    }
     // update user
-    const userQry = () => orm('User');
-    const resutlQry = await userQry().where('id', request.id).update(request, ['id']);
+    const userUpdateQry = () => orm('User');
+    const resutlQry = await userUpdateQry().where('id', request.id).update(request, ['id']);
     // return updated user
     return userDetails({ id: resutlQry[0].id });
   }
