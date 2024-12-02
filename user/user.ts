@@ -654,7 +654,7 @@ const generateRandomPassword = async () => {
  * Check if password is usable checking user passwords history .
  */
 export const userPasswordExpirationCheck = api(
-  { expose: true, auth: false, method: 'GET', path: '/user/password-expiration-check/:userId' },
+  { expose: true, auth: true, method: 'GET', path: '/user/password-expiration-check/:userId' },
   async (request: UserPasswordExpirationRequest): Promise<UserPasswordExpirationResponse> => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
