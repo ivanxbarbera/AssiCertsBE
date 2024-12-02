@@ -10,6 +10,7 @@ import { AuthenticationUser, LoginRenewBearerRequest, LoginRequest, LoginBearerR
 import { secret } from 'encore.dev/config';
 import { userStatusUnlock } from '../user/user';
 import locz from '../common/i18n';
+import { getAuthData } from '~encore/auth';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const jwtDurationInSeconds = secret('JWTDurationInMinute');
@@ -104,26 +105,33 @@ export const loginCookie = api.raw(
 export const loginRenewBearer = api(
   { expose: true, auth: true, method: 'POST', path: '/login/renew' },
   async (request: LoginRenewBearerRequest): Promise<LoginBearerResponse> => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user permission
+    if (userId !== request.userId) {
+      // user not allowed to access
+      throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_USER_NOT_ALLOWED());
+    }
     // get data from request
     // extract payload from token
     const { payload } = await jwtVerify<AuthenticationData>(request.token, new TextEncoder().encode(jwtSercretKey()));
-    const userId: number = parseInt(payload.userID);
-    if (userId === request.userId) {
-      // user allowed to access
-      // generate new token
-      const expiresIn: number = +jwtDurationInSeconds();
-      const token: string = await new SignJWT({ userID: userId })
-        .setProtectedHeader({ alg: 'HS256' })
-        .setIssuedAt()
-        .setExpirationTime(expiresIn + 'minute')
-        .sign(new TextEncoder().encode(jwtSercretKey()));
-      // prepare response
-      const response: LoginBearerResponse = { token, expiresIn, userId };
-      return response;
-    } else {
+    const tokenUserId: number = parseInt(payload.userID);
+    if (tokenUserId !== request.userId) {
       // token cannot be renewed
       throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_INVALID_TOKEN());
     }
+    // user allowed to access
+    // generate new token
+    const expiresIn: number = +jwtDurationInSeconds();
+    const token: string = await new SignJWT({ userID: tokenUserId })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime(expiresIn + 'minute')
+      .sign(new TextEncoder().encode(jwtSercretKey()));
+    // prepare response
+    const response: LoginBearerResponse = { token, expiresIn, userId: tokenUserId };
+    return response;
   }
 ); // loginRenewBearer
 
@@ -138,35 +146,34 @@ export const loginRenewCookie = api.raw(
   async (request: IncomingMessage, response: ServerResponse<IncomingMessage>) => {
     // get request parameters from url
     const url = new URL(request.url || '', `http://${request.headers.host}`);
-    const userIdRequest = url.searchParams.get('userId');
-    if (userIdRequest) {
-      // user authentication data founded
-      // load user profile data
-      const userAllowed = true;
-      if (userAllowed) {
-        // user allowed to access
-        const userId: number = parseInt(userIdRequest);
-        // generate token
-        const expiresIn: number = +jwtDurationInSeconds();
-        const token: string = await new SignJWT({ userID: userId })
-          .setProtectedHeader({ alg: 'HS256' })
-          .setIssuedAt()
-          .setExpirationTime(expiresIn + 'minute')
-          .sign(new TextEncoder().encode(jwtSercretKey()));
-        // prepare response
-        const responseData: LoginCookieResponse = {
-          userId,
-          expiresIn,
-        };
-        response.setHeader('Set-Cookie', `auth=${token}; HttpOnly; SameSite=None; Secure; Path=/;`);
-        response.end(JSON.stringify(responseData));
-      } else {
-        // user not allowed to access
-        throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_UNKNOWN_USER());
-      }
-    } else {
+    const userIdRequestParam = url.searchParams.get('userId');
+    if (!userIdRequestParam) {
       // user authenticatio data not fouded
-      throw APIError.permissionDenied('User identificator required');
+      throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_USER_ID_REQUIRED());
     }
+    // user authentication data founded
+    const userIdRequest: number = parseInt(userIdRequestParam);
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user permission
+    if (userId !== userIdRequest) {
+      // user not allowed to access
+      throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_USER_NOT_ALLOWED());
+    }
+    // generate token
+    const expiresIn: number = +jwtDurationInSeconds();
+    const token: string = await new SignJWT({ userID: userIdRequest })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime(expiresIn + 'minute')
+      .sign(new TextEncoder().encode(jwtSercretKey()));
+    // prepare response
+    const responseData: LoginCookieResponse = {
+      userId: userIdRequest,
+      expiresIn,
+    };
+    response.setHeader('Set-Cookie', `auth=${token}; HttpOnly; SameSite=None; Secure; Path=/;`);
+    response.end(JSON.stringify(responseData));
   }
 ); // loginRenewCookie

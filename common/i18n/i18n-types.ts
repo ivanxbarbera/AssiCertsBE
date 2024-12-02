@@ -28,9 +28,13 @@ type RootTranslation = {
 	 */
 	AUTHENTICATION_ACCESS_UNKNOWN_USER: string
 	/**
+	 * U​t​e​n​t​e​ ​n​o​n​ ​a​u​t​o​r​i​z​z​a​t​o​ ​a​d​ ​a​c​c​e​d​e​r​e​ ​a​i​ ​d​a​t​i​ ​r​i​c​h​i​e​s​t​i
+	 */
+	AUTHENTICATION_ACCESS_USER_NOT_ALLOWED: string
+	/**
 	 * I​d​e​n​t​i​f​i​c​a​t​i​v​o​ ​u​t​e​n​t​e​ ​o​b​b​l​i​g​a​t​o​r​i​o
 	 */
-	AUTHENTICATION_ACCESS_USER_ID_REQUIRES: string
+	AUTHENTICATION_ACCESS_USER_ID_REQUIRED: string
 	/**
 	 * R​i​c​h​i​e​s​t​a​ ​n​o​n​ ​c​o​n​f​o​r​m​e
 	 */
@@ -39,6 +43,10 @@ type RootTranslation = {
 	 * N​o​n​ ​a​u​t​e​n​t​i​c​a​t​o
 	 */
 	AUTHENTICATION_AUTHENTICATION_NOT_AUTHENTICATED: string
+	/**
+	 * U​t​e​n​t​e​ ​n​o​n​ ​a​u​t​o​r​i​z​z​a​t​o​ ​a​d​ ​a​c​c​e​d​e​r​e​ ​a​i​ ​d​a​t​i​ ​r​i​c​h​i​e​s​t​i
+	 */
+	NOTIFICATION_USER_NOT_ALLOWED: string
 	/**
 	 * U​t​e​n​t​e​ ​n​o​n​ ​a​u​t​o​r​i​z​z​a​t​o​ ​a​d​ ​a​c​c​e​d​e​r​e​ ​a​i​ ​d​a​t​i​ ​r​i​c​h​i​e​s​t​i
 	 */
@@ -177,9 +185,13 @@ export type TranslationFunctions = {
 	 */
 	AUTHENTICATION_ACCESS_UNKNOWN_USER: () => LocalizedString
 	/**
+	 * Utente non autorizzato ad accedere ai dati richiesti
+	 */
+	AUTHENTICATION_ACCESS_USER_NOT_ALLOWED: () => LocalizedString
+	/**
 	 * Identificativo utente obbligatorio
 	 */
-	AUTHENTICATION_ACCESS_USER_ID_REQUIRES: () => LocalizedString
+	AUTHENTICATION_ACCESS_USER_ID_REQUIRED: () => LocalizedString
 	/**
 	 * Richiesta non conforme
 	 */
@@ -188,6 +200,10 @@ export type TranslationFunctions = {
 	 * Non autenticato
 	 */
 	AUTHENTICATION_AUTHENTICATION_NOT_AUTHENTICATED: () => LocalizedString
+	/**
+	 * Utente non autorizzato ad accedere ai dati richiesti
+	 */
+	NOTIFICATION_USER_NOT_ALLOWED: () => LocalizedString
 	/**
 	 * Utente non autorizzato ad accedere ai dati richiesti
 	 */

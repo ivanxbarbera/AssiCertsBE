@@ -90,7 +90,6 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   };
   const userPasswordHistoryQry = () => orm('UserPasswordHistory');
   const userPasswordHistoryRst = await userPasswordHistoryQry().insert(newUserPasswordHistory, ['id']);
-
   // send email to user
   const resetUrl = frontendBaseURL() + '/authentication';
   const smptParameters: SMTPParameters = await systemParametersSmtp();
@@ -267,7 +266,7 @@ export const userPasswordChange = api(
     const userId = parseInt(authenticationData.userID);
     // check user permission
     if (userId !== request.userId) {
-      // user not allowed to access
+      // user not allowed to change password
       throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED());
     }
     // check data
@@ -311,18 +310,27 @@ export const userPasswordChange = api(
       date: new Date(),
       passwordHash,
     };
+    // add new password to history
     const userPasswordHistoryQry = () => orm('UserPasswordHistory');
     const userPasswordHistoryRst = await userPasswordHistoryQry().insert(newUserPasswordHistory, ['id']);
   }
 ); // userPasswordChange
 
 /**
- * User password compliance check.
- * Check for password contraints compliance and evaluate password score and strngth.
+ * User password hostory check.
+ * Check if password is usable checking user passwords history .
  */
 export const userPasswordHistoryCheck = api(
   { expose: true, auth: true, method: 'GET', path: '/user/password-history-check/:userId' },
   async (request: UserPasswordHistoryCheckRequest): Promise<UserPasswordHistoryCheckResponse> => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user permission
+    if (userId !== request.userId) {
+      // user not allowed to change password
+      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED());
+    }
     // load password constraints
     const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();
     // load user history password
@@ -349,7 +357,7 @@ export const userPasswordHistoryCheck = api(
  * Check for password contraints compliance and evaluate password score and strngth.
  */
 export const userPasswordCheck = api(
-  { expose: true, auth: false, method: 'GET', path: '/user/password-check' },
+  { expose: true, method: 'GET', path: '/user/password-check' },
   async (request: UserPasswordCheckRequest): Promise<UserPasswordCheckResponse> => {
     // load password constraints
     const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();

@@ -1,4 +1,10 @@
-import { api, StreamOut } from 'encore.dev/api';
+// libraries
+import { api, APIError, StreamOut } from 'encore.dev/api';
+import { Subscription, Topic } from 'encore.dev/pubsub';
+import log from 'encore.dev/log';
+import { getAuthData } from '~encore/auth';
+import locz from '../common/i18n';
+// application module
 import {
   NotificationHandshake,
   NotificationMessage,
@@ -7,11 +13,10 @@ import {
   NotificationMessageReadAllRequest,
   NotificationMessageReadRequest,
 } from './notification.model';
-import { Subscription, Topic } from 'encore.dev/pubsub';
+import { orm } from '../common/db/db';
 import { userDetails } from '../user/user';
 import { UserResponse } from '../user/user.model';
-import log from 'encore.dev/log';
-import { orm } from '../common/db/db';
+import { AuthenticationData } from '../authentication/authentication.model';
 
 /**
  * Connected strams that listen for notifications.
@@ -47,20 +52,18 @@ export const notificationStream = api.streamOut<NotificationHandshake, Notificat
             } catch (err) {
               // send error, probably client disconnected
               // remove client from connected list
-              log.debug('error');
               connectedStreams.delete(id);
             }
           }
         } catch (err) {
           // general error
           // remove client from connected list
-          log.debug('error2');
           connectedStreams.delete(handshake.userId);
         }
       },
     });
   }
-);
+); // notificationStream
 
 /**
  * Notify a message to subscribed users.
@@ -76,6 +79,14 @@ export const notify = new Topic<NotificationMessage>('notify', {
 export const resendNotificationMessageList = api(
   { expose: true, auth: true, method: 'GET', path: '/notification/resend/:userId' },
   async (request: NotificationMessageListRequest): Promise<void> => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user permission
+    if (userId !== request.userId) {
+      // user not allowed to access
+      throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
+    }
     // load noitification messages
     const notificationMessageListResponse: NotificationMessageListResponse = await notificationMessageList(request);
     const notificationMessages: NotificationMessage[] = notificationMessageListResponse.notificationMessages;
@@ -83,7 +94,7 @@ export const resendNotificationMessageList = api(
       await notify.publish(notificationMessage);
     });
   }
-); // notificationMessageList
+); // resendNotificationMessageList
 
 /**
  * Search for notification messages.
@@ -92,6 +103,14 @@ export const resendNotificationMessageList = api(
 export const notificationMessageList = api(
   { expose: true, auth: true, method: 'GET', path: '/notification/:userId' },
   async (request: NotificationMessageListRequest): Promise<NotificationMessageListResponse> => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user permission
+    if (userId !== request.userId) {
+      // user not allowed to access
+      throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
+    }
     // TODO add search filters
     // load noitification messages
     const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
@@ -117,6 +136,14 @@ export const notificationMessageList = api(
 export const notificationMessageAllRead = api(
   { expose: true, auth: true, method: 'GET', path: '/notification/allread/:userId' },
   async (request: NotificationMessageReadAllRequest): Promise<void> => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user permission
+    if (userId !== request.userId) {
+      // user not allowed to access
+      throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
+    }
     // update all notification ad readed
     const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
     await notificationMessageQry().update('readed', true).where('userId', request.userId);
@@ -129,19 +156,16 @@ export const notificationMessageAllRead = api(
 export const notificationMessageRead = api(
   { expose: true, auth: true, method: 'GET', path: '/notification/read/:userId/:notificationMessageId' },
   async (request: NotificationMessageReadRequest): Promise<void> => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user permission
+    if (userId !== request.userId) {
+      // user not allowed to access
+      throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
+    }
     // update specified notification ad readed
     const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
     await notificationMessageQry().update('readed', true).where('userId', request.userId).andWhere('id', request.notificationMessageId);
   }
 ); // notificationMessageRead
-
-// setInterval(() => {
-//   log.debug('START');
-//   notify.publish({
-//     id: 1,
-//     message: 'prova',
-//     readed: false,
-//     timestamp: new Date(),
-//     userId: 3,
-//   });
-// }, 5000);
