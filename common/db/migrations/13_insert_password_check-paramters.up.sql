@@ -1,0 +1,1 @@
+INSERT INTO "public"."SystemParameter" ("group", "code", "name", "type", "value", "description") VALUES ('PASSWORD_CHECK', 'EXP_NOTIFICATION_DAYS', 'Password expiration notification days', 'NUMBER', '15', 'The nummber of days before password expiration for sending user notification (-1 unlimited)');

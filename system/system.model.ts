@@ -103,4 +103,6 @@ export interface PasswordCheckParameters {
   historyUnusable: number;
   // password expiration in days
   expirationDays: number;
+  // password notification before expiration in days
+  expirationNotificationDays: number;
 } // PasswordCheckParameters

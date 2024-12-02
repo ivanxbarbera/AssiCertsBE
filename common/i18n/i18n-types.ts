@@ -28,6 +28,15 @@ type RootTranslation = {
 	 */
 	AUTHENTICATION_ACCESS_UNKNOWN_USER: string
 	/**
+	 * P​a​s​s​w​o​r​d​ ​u​t​e​n​t​e​ ​s​c​a​d​u​t​a
+	 */
+	AUTHENTICATION_ACCESS_PASSWORD_EXPIRED: string
+	/**
+	 * L​a​ ​t​u​a​ ​p​a​s​s​w​o​r​d​ ​s​c​a​d​r​à​ ​t​r​a​ ​{​e​x​p​I​n​D​a​y​s​}​ ​g​i​o​r​n​i
+	 * @param {number} expInDays
+	 */
+	AUTHENTICATION_ACCESS_PASSWORD_NOTIFICATION: RequiredParams<'expInDays'>
+	/**
 	 * U​t​e​n​t​e​ ​n​o​n​ ​a​u​t​o​r​i​z​z​a​t​o​ ​a​d​ ​a​c​c​e​d​e​r​e​ ​a​i​ ​d​a​t​i​ ​r​i​c​h​i​e​s​t​i
 	 */
 	AUTHENTICATION_ACCESS_USER_NOT_ALLOWED: string
@@ -43,6 +52,10 @@ type RootTranslation = {
 	 * N​o​n​ ​a​u​t​e​n​t​i​c​a​t​o
 	 */
 	AUTHENTICATION_AUTHENTICATION_NOT_AUTHENTICATED: string
+	/**
+	 * P​a​s​s​w​o​r​d​ ​u​t​e​n​t​e​ ​s​c​a​d​u​t​a
+	 */
+	AUTHENTICATION_AUTHENTICATION_PASSWORD_EXPIRED: string
 	/**
 	 * U​t​e​n​t​e​ ​n​o​n​ ​a​u​t​o​r​i​z​z​a​t​o​ ​a​d​ ​a​c​c​e​d​e​r​e​ ​a​i​ ​d​a​t​i​ ​r​i​c​h​i​e​s​t​i
 	 */
@@ -71,6 +84,10 @@ type RootTranslation = {
 	 * U​t​e​n​t​e​ ​c​o​n​ ​l​a​ ​m​a​i​l​ ​i​n​d​i​c​a​t​a​ ​e​s​i​s​t​e​n​t​e
 	 */
 	USER_USER_EMAIL_ALREADY_EXIST: string
+	/**
+	 * S​t​o​r​i​c​o​ ​p​a​s​s​w​o​r​d​ ​u​t​e​n​t​e​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	USER_USER_PASSWORD_HISTORY_NOT_FOUND: string
 	/**
 	 * R​i​c​h​i​e​s​t​a​ ​d​i​ ​r​i​g​e​n​e​r​a​z​i​o​n​e​ ​p​a​s​s​w​o​r​d​ ​n​o​n​ ​t​r​o​v​a​t​a
 	 */
@@ -185,6 +202,14 @@ export type TranslationFunctions = {
 	 */
 	AUTHENTICATION_ACCESS_UNKNOWN_USER: () => LocalizedString
 	/**
+	 * Password utente scaduta
+	 */
+	AUTHENTICATION_ACCESS_PASSWORD_EXPIRED: () => LocalizedString
+	/**
+	 * La tua password scadrà tra {expInDays} giorni
+	 */
+	AUTHENTICATION_ACCESS_PASSWORD_NOTIFICATION: (arg: { expInDays: number }) => LocalizedString
+	/**
 	 * Utente non autorizzato ad accedere ai dati richiesti
 	 */
 	AUTHENTICATION_ACCESS_USER_NOT_ALLOWED: () => LocalizedString
@@ -200,6 +225,10 @@ export type TranslationFunctions = {
 	 * Non autenticato
 	 */
 	AUTHENTICATION_AUTHENTICATION_NOT_AUTHENTICATED: () => LocalizedString
+	/**
+	 * Password utente scaduta
+	 */
+	AUTHENTICATION_AUTHENTICATION_PASSWORD_EXPIRED: () => LocalizedString
 	/**
 	 * Utente non autorizzato ad accedere ai dati richiesti
 	 */
@@ -228,6 +257,10 @@ export type TranslationFunctions = {
 	 * Utente con la mail indicata esistente
 	 */
 	USER_USER_EMAIL_ALREADY_EXIST: () => LocalizedString
+	/**
+	 * Storico password utente non trovato
+	 */
+	USER_USER_PASSWORD_HISTORY_NOT_FOUND: () => LocalizedString
 	/**
 	 * Richiesta di rigenerazione password non trovata
 	 */

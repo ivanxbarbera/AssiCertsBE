@@ -147,6 +147,7 @@ export const systemParametersPasswordCheck = api(
       minSpecials: passwordCheckParametersObject.PASSWORD_CHECK_MIN_SPECIALS,
       historyUnusable: passwordCheckParametersObject.PASSWORD_CHECK_HISTORY_UNUSABLE,
       expirationDays: passwordCheckParametersObject.PASSWORD_CHECK_EXPIRATION_DAYS,
+      expirationNotificationDays: passwordCheckParametersObject.PASSWORD_CHECK_EXP_NOTIFICATION_DAYS,
     };
   }
 ); // systemParametersPasswordCheck

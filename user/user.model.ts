@@ -236,3 +236,23 @@ export interface UserPasswordHistoryCheckResponse {
   // password compliance. true can be used, false otherwise
   compliant: boolean;
 } // UserPasswordCheckResponse
+
+/**
+ * User password expiration request.
+ * Check the number of remaining days before password expiration.
+ */
+export interface UserPasswordExpirationRequest {
+  userId: number;
+} // UserPasswordExpirationRequest
+
+/**
+ * User password expiration response.
+ */
+export interface UserPasswordExpirationResponse {
+  // number of days before password expiration
+  remainigDays: number;
+  // true if password is expired, false otherwise
+  expired: boolean;
+  // true if a notification to user will be send, false otherwise
+  notificationRequired: boolean;
+} // UserPasswordExpirationResponse

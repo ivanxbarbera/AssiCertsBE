@@ -13,7 +13,7 @@ export interface NotificationHandshake {
  */
 export interface NotificationMessage {
   // notification identifier
-  id: number;
+  id?: number;
   // destination user identifier
   userId: number;
   // notification message
@@ -58,3 +58,13 @@ export interface NotificationMessageReadRequest {
   // notification identifier
   notificationMessageId: number;
 } // NotificationMessageReadRequest
+
+/**
+ * Notification message to be sended to user.
+ */
+export interface NotificationMessageSendRequest {
+  // user identfier
+  userId: number;
+  // notification message
+  message: string;
+} // NotificationMessageSendRequest

@@ -12,6 +12,7 @@ import {
   NotificationMessageListResponse,
   NotificationMessageReadAllRequest,
   NotificationMessageReadRequest,
+  NotificationMessageSendRequest,
 } from './notification.model';
 import { orm } from '../common/db/db';
 import { userDetails } from '../user/user';
@@ -169,3 +170,26 @@ export const notificationMessageRead = api(
     await notificationMessageQry().update('readed', true).where('userId', request.userId).andWhere('id', request.notificationMessageId);
   }
 ); // notificationMessageRead
+
+/**
+ * Send a new notification message.
+ * Add new notification message e send it to the corresponding user.
+ */
+export const sendNotificationMessage = api(
+  { expose: true, auth: true, method: 'GET', path: '/notification/send/:userId' },
+  async (request: NotificationMessageSendRequest): Promise<void> => {
+    // create new notification message
+    const newNotificationMessage: NotificationMessage = {
+      userId: request.userId,
+      message: request.message,
+      timestamp: new Date(),
+      readed: false,
+    };
+    // save notification message
+    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
+    const notificationMessageRst = await notificationMessageQry().insert(newNotificationMessage, ['id']);
+    const id = notificationMessageRst[0].id;
+    // notify message
+    await notify.publish(newNotificationMessage);
+  }
+); // sendNotificationMessage

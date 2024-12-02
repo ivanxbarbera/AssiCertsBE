@@ -1,11 +1,12 @@
-import { PasswordCheckParameters } from './../system/system.model';
 // libraries
 import { api, APIError } from 'encore.dev/api';
 import { SignJWT } from 'jose';
 import bcrypt from 'bcryptjs';
 import { getAuthData } from '~encore/auth';
 import { createTransport, Transporter } from 'nodemailer';
+import moment from 'moment';
 // application modules
+import { PasswordCheckParameters } from './../system/system.model';
 import { secret } from 'encore.dev/config';
 import { SMTPParameters } from './../system/system.model';
 import { systemParametersPasswordCheck, systemParametersSmtp } from './../system/system';
@@ -29,6 +30,8 @@ import {
   UserPasswordHistoryCheckResponse,
   UserPasswordHistoryCheckRequest,
   UserPasswordHistory,
+  UserPasswordExpirationRequest,
+  UserPasswordExpirationResponse,
 } from './user.model';
 import { orm } from '../common/db/db';
 import { Validators } from '../common/utility/validators.utility';
@@ -317,7 +320,7 @@ export const userPasswordChange = api(
 ); // userPasswordChange
 
 /**
- * User password hostory check.
+ * User password history check.
  * Check if password is usable checking user passwords history .
  */
 export const userPasswordHistoryCheck = api(
@@ -645,3 +648,51 @@ const generateRandomPassword = async () => {
     .join('');
   return password;
 }; // generateRandomPassword
+
+/**
+ * User password hostory check.
+ * Check if password is usable checking user passwords history .
+ */
+export const userPasswordExpirationCheck = api(
+  { expose: true, auth: false, method: 'GET', path: '/user/password-expiration-check/:userId' },
+  async (request: UserPasswordExpirationRequest): Promise<UserPasswordExpirationResponse> => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user permission
+    if (userId !== request.userId) {
+      // user not allowed to change password
+      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED());
+    }
+    // get password expiration data
+    return getUserPasswordExpiration(request.userId);
+  }
+); // userPasswordExpirationCheck
+
+/**
+ * Get data about user password expiration.
+ * @param userId user unique identificator
+ * @returns user password expiration data
+ */
+export const getUserPasswordExpiration = async (userId: number): Promise<UserPasswordExpirationResponse> => {
+  // load last user history password
+  const userPasswordHistoryQry = () => orm<UserPasswordHistory>('UserPasswordHistory');
+  const userPasswordHistory = await userPasswordHistoryQry().first().where('userId', userId).orderBy('date', 'DESC');
+  if (!userPasswordHistory) {
+    // last password history not found
+    throw APIError.notFound(locz().USER_USER_PASSWORD_HISTORY_NOT_FOUND());
+  }
+  // calculate the difference in days
+  const daysFromLastChange = moment().diff(moment(userPasswordHistory.date), 'days');
+  // load password constraints
+  const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();
+  // estimate remaninig days
+  const remainigDays = passwordCheckParams.expirationDays - daysFromLastChange;
+  // prepare response
+  const response: UserPasswordExpirationResponse = {
+    remainigDays,
+    expired: remainigDays <= 0,
+    notificationRequired: remainigDays < passwordCheckParams.expirationNotificationDays,
+  };
+  return response;
+}; // getUserPasswordExpiration

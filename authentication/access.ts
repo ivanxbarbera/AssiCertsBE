@@ -8,9 +8,11 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { AuthenticationData } from './authentication.model';
 import { AuthenticationUser, LoginRenewBearerRequest, LoginRequest, LoginBearerResponse, LoginCookieResponse } from './access.model';
 import { secret } from 'encore.dev/config';
-import { userStatusUnlock } from '../user/user';
+import { getUserPasswordExpiration, userStatusUnlock } from '../user/user';
 import locz from '../common/i18n';
 import { getAuthData } from '~encore/auth';
+import { UserPasswordExpirationResponse } from '../user/user.model';
+import { sendNotificationMessage } from '../notification/notification';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const jwtDurationInSeconds = secret('JWTDurationInMinute');
@@ -27,6 +29,12 @@ export const loginBearer = api({ expose: true, method: 'POST', path: '/login' },
   const authentication = await authenticationQry().first('id', 'email', 'passwordHash').where('email', request.email).where('disabled', false);
   const userAllowed = authentication && bcrypt.compareSync(request.password, authentication.passwordHash);
   if (userAllowed) {
+    // check password expiration
+    const passwordEpiration: UserPasswordExpirationResponse = await getUserPasswordExpiration(authentication.id);
+    if (passwordEpiration.expired) {
+      // user password expired
+      throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_PASSWORD_EXPIRED());
+    }
     // user allowed to access
     const userId = authentication.id;
     // unlock user status
@@ -67,6 +75,20 @@ export const loginCookie = api.raw(
       const authentication = await authenticationQry().first('id', 'email', 'passwordHash').where('email', email).where('disabled', false);
       const userAllowed = authentication && bcrypt.compareSync(password!, authentication.passwordHash);
       if (userAllowed) {
+        // check password expiration
+        const passwordEpiration: UserPasswordExpirationResponse = await getUserPasswordExpiration(authentication.id);
+        if (passwordEpiration.expired) {
+          // user password expired
+          throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_PASSWORD_EXPIRED());
+        }
+        // check password notification
+        if (passwordEpiration.notificationRequired) {
+          // send notification to user
+          sendNotificationMessage({
+            userId: authentication.id,
+            message: locz().AUTHENTICATION_ACCESS_PASSWORD_NOTIFICATION({ expInDays: passwordEpiration.remainigDays }),
+          });
+        }
         // user allowed to access
         const userId: number = authentication.id;
         // unlock user status
