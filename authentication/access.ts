@@ -118,7 +118,6 @@ const checkUserPasswordExpiration = async (userId: number) => {
   // check password notification
   if (passwordEpiration.notificationRequired) {
     // check if notification has already been sent today
-    // TODO MIC check last notification by type
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const notificationCount = (
