@@ -18,6 +18,8 @@ export interface UserProfileResponse {
   name: string;
   // logged user surname
   surname: string;
+  // logged user fiscal code
+  fiscalCode: string;
   // logged user site locking status. true is locked, false is unlocked
   siteLocked: boolean;
 } // UserProfileResponse
