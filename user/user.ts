@@ -32,6 +32,8 @@ import {
   UserPasswordHistory,
   UserPasswordExpirationRequest,
   UserPasswordExpirationResponse,
+  UserStatusRequest,
+  UserStatusResponse,
 } from './user.model';
 import { orm } from '../common/db/db';
 import { Validators } from '../common/utility/validators.utility';
@@ -696,3 +698,29 @@ export const getUserPasswordExpiration = async (userId: number): Promise<UserPas
   };
   return response;
 }; // getUserPasswordExpiration
+
+/**
+ * User status information.
+ * Returns user status information, a subset of user details.
+ */
+export const userStatusGet = api(
+  { expose: true, auth: true, method: 'GET', path: '/user/status/:id' },
+  async (request: UserStatusRequest): Promise<UserStatusResponse> => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user permission
+    if (userId !== request.id) {
+      // user not allowed to access
+      throw APIError.permissionDenied(locz().USER_USER_STATUS_USER_NOT_ALLOWED());
+    }
+    // return user profile data
+    const userStatusQry = () => orm<UserStatusResponse>('User');
+    const userStatus = await userStatusQry().first('name', 'surname', 'siteLocked').where('id', request.id);
+    if (!userStatus) {
+      // user not founded
+      throw APIError.notFound(locz().USER_USER_STATUS_USER_NOT_FOUND());
+    }
+    return userStatus;
+  }
+); // userStatusGet

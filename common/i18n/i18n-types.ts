@@ -101,6 +101,14 @@ type RootTranslation = {
 	 */
 	USER_USER_RESET_REQ_USED: string
 	/**
+	 * U​t​e​n​t​e​ ​n​o​n​ ​a​u​t​o​r​i​z​z​a​t​o​ ​a​d​ ​a​c​c​e​d​e​r​e​ ​a​i​ ​d​a​t​i​ ​r​i​c​h​i​e​s​t​i
+	 */
+	USER_USER_STATUS_USER_NOT_ALLOWED: string
+	/**
+	 * S​t​a​t​o​ ​u​t​e​n​t​e​ ​r​i​c​h​i​e​s​t​o​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	USER_USER_STATUS_USER_NOT_FOUND: string
+	/**
 	 * U​t​e​n​t​e​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	USER_USER_USER_NOT_FOUND: string
@@ -273,6 +281,14 @@ export type TranslationFunctions = {
 	 * Richiesta di rigenerazione password già usata
 	 */
 	USER_USER_RESET_REQ_USED: () => LocalizedString
+	/**
+	 * Utente non autorizzato ad accedere ai dati richiesti
+	 */
+	USER_USER_STATUS_USER_NOT_ALLOWED: () => LocalizedString
+	/**
+	 * Stato utente richiesto non trovato
+	 */
+	USER_USER_STATUS_USER_NOT_FOUND: () => LocalizedString
 	/**
 	 * Utente non trovato
 	 */

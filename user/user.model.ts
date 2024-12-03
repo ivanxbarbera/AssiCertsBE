@@ -256,3 +256,25 @@ export interface UserPasswordExpirationResponse {
   // true if a notification to user will be send, false otherwise
   notificationRequired: boolean;
 } // UserPasswordExpirationResponse
+
+/**
+ * User status data request.
+ * Request for user status information.
+ */
+export interface UserStatusRequest {
+  // identifier of the logged user
+  id: number;
+} // UserStatusRequest
+
+/**
+ * User status information.
+ * Contains a restricted set of user data.
+ */
+export interface UserStatusResponse {
+  // logged user name
+  name: string;
+  // logged user surname
+  surname: string;
+  // logged user site locking status. true is locked, false is unlocked
+  siteLocked: boolean;
+} // UserStatusResponse

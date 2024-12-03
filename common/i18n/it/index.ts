@@ -22,6 +22,8 @@ const it = {
   USER_USER_RESET_REQ_NOT_FOUND: 'Richiesta di rigenerazione password non trovata',
   USER_USER_RESET_REQ_EXPIRED: 'Richiesta di rigenerazione password scaduta',
   USER_USER_RESET_REQ_USED: 'Richiesta di rigenerazione password già usata',
+  USER_USER_STATUS_USER_NOT_ALLOWED: 'Utente non autorizzato ad accedere ai dati richiesti',
+  USER_USER_STATUS_USER_NOT_FOUND: 'Stato utente richiesto non trovato',
   USER_USER_USER_NOT_FOUND: 'Utente non trovato',
   USER_USER_USER_NOT_ALLOWED: 'Utente non autorizzato ad accedere ai dati richiesti',
   USER_USER_OLD_PASSWORD: 'Password precedente non corretta',

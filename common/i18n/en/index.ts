@@ -22,6 +22,8 @@ const en = {
   USER_USER_RESET_REQ_NOT_FOUND: 'Password reset request not fouded',
   USER_USER_RESET_REQ_EXPIRED: 'Password reset request expired',
   USER_USER_RESET_REQ_USED: 'Password reset request already used',
+  USER_USER_STATUS_USER_NOT_ALLOWED: 'User not allowed to access requested data',
+  USER_USER_STATUS_USER_NOT_FOUND: 'Requested user profile not found',
   USER_USER_USER_NOT_FOUND: 'User not founded',
   USER_USER_USER_NOT_ALLOWED: 'User not allowed to access requested data',
   USER_USER_OLD_PASSWORD: 'Wrong old password',
