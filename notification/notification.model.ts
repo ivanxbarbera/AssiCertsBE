@@ -22,6 +22,8 @@ export interface NotificationMessage {
   timestamp: Date;
   // true if notification readed by user, false othewise
   readed: boolean;
+  // notification message type
+  type: NotificationMessageType;
 } // NotificationMessage
 
 /**
@@ -30,7 +32,12 @@ export interface NotificationMessage {
 export interface NotificationMessageListRequest {
   // user identfier
   userId: number;
+  // list only unread notification messages
   onlyUnread?: boolean;
+  // order notification messages cronologically descending, otherwise ascending
+  sortDesdending?: boolean;
+  // max number of returned notification messages
+  maxMessages?: number;
 } // NotificationMessageListRequest
 
 /**
@@ -67,4 +74,15 @@ export interface NotificationMessageSendRequest {
   userId: number;
   // notification message
   message: string;
+  // notification message type
+  type: NotificationMessageType;
 } // NotificationMessageSendRequest
+
+/**
+ * Notification message types.
+ */
+export enum NotificationMessageType {
+  Generic = 'GENERIC',
+  PasswordExpiration = 'PASSWORD_EXPIRATION',
+  UserMaintenance = 'USER_MAINTENANCE',
+} // NotificationMessageType

@@ -1,7 +1,6 @@
 // libraries
 import { api, APIError, StreamOut } from 'encore.dev/api';
 import { Subscription, Topic } from 'encore.dev/pubsub';
-import log from 'encore.dev/log';
 import { getAuthData } from '~encore/auth';
 import locz from '../common/i18n';
 // application module
@@ -18,6 +17,7 @@ import { orm } from '../common/db/db';
 import { userDetails } from '../user/user';
 import { UserResponse } from '../user/user.model';
 import { AuthenticationData } from '../authentication/authentication.model';
+import { General } from '../common/utility/general.utility';
 
 /**
  * Connected strams that listen for notifications.
@@ -74,8 +74,9 @@ export const notify = new Topic<NotificationMessage>('notify', {
 }); // notify
 
 /**
- * Search for notification messages.
- * Apply filters and return a list of notification messages.
+ * Resend notification messages.
+ * Apply filters and resend the notification messages list using websocket.
+ * Before each resend there's a pause for preserving selected order.
  */
 export const resendNotificationMessageList = api(
   { expose: true, auth: true, method: 'GET', path: '/notification/resend/:userId' },
@@ -112,10 +113,12 @@ export const notificationMessageList = api(
       // user not allowed to access
       throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
     }
+    // set notification filters
+    const orderBy = request.sortDesdending ? 'DESC' : 'ASC';
     // TODO add search filters
     // load noitification messages
-    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
-    const notificationMessages = await notificationMessageQry()
+    let notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
+    let notificationMessageQryPrep = notificationMessageQry()
       .select()
       .where((whereBuilder) => {
         whereBuilder.where('userId', request.userId);
@@ -123,7 +126,11 @@ export const notificationMessageList = api(
           whereBuilder.andWhere('readed', false);
         }
       })
-      .orderBy('timestamp');
+      .orderBy('timestamp', orderBy);
+    if (request.maxMessages && request.maxMessages > 0) {
+      notificationMessageQryPrep.limit(request.maxMessages);
+    }
+    const notificationMessages = await notificationMessageQryPrep;
     // return notification messages
     return {
       notificationMessages,
@@ -184,6 +191,7 @@ export const sendNotificationMessage = api(
       message: request.message,
       timestamp: new Date(),
       readed: false,
+      type: request.type,
     };
     // save notification message
     const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');

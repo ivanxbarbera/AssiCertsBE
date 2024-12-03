@@ -13,7 +13,7 @@ import locz from '../common/i18n';
 import { getAuthData } from '~encore/auth';
 import { UserPasswordExpirationResponse } from '../user/user.model';
 import { sendNotificationMessage } from '../notification/notification';
-import { user } from '~encore/clients';
+import { NotificationMessageType } from '../notification/notification.model';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const jwtDurationInSeconds = secret('JWTDurationInMinute');
@@ -121,15 +121,20 @@ const checkUserPasswordExpiration = async (userId: number) => {
     // TODO MIC check last notification by type
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const notificationCount = (await orm('NotificationMessage').count('id').where('userId', userId).andWhere('timestamp', '>=', today))[0][
-      'count'
-    ] as number;
+    const notificationCount = (
+      await orm('NotificationMessage')
+        .count('id')
+        .where('userId', userId)
+        .andWhere('type', NotificationMessageType.PasswordExpiration)
+        .andWhere('timestamp', '>=', today)
+    )[0]['count'] as number;
     if (notificationCount == 0) {
       // notification not sended today
       // send notification to user
       sendNotificationMessage({
         userId,
         message: locz().AUTHENTICATION_ACCESS_PASSWORD_NOTIFICATION({ expInDays: passwordEpiration.remainigDays }),
+        type: NotificationMessageType.PasswordExpiration,
       });
     }
   }
