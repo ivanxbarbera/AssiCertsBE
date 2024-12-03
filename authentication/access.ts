@@ -13,6 +13,7 @@ import locz from '../common/i18n';
 import { getAuthData } from '~encore/auth';
 import { UserPasswordExpirationResponse } from '../user/user.model';
 import { sendNotificationMessage } from '../notification/notification';
+import { user } from '~encore/clients';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const jwtDurationInSeconds = secret('JWTDurationInMinute');
@@ -29,14 +30,10 @@ export const loginBearer = api({ expose: true, method: 'POST', path: '/login' },
   const authentication = await authenticationQry().first('id', 'email', 'passwordHash').where('email', request.email).where('disabled', false);
   const userAllowed = authentication && bcrypt.compareSync(request.password, authentication.passwordHash);
   if (userAllowed) {
-    // check password expiration
-    const passwordEpiration: UserPasswordExpirationResponse = await getUserPasswordExpiration(authentication.id);
-    if (passwordEpiration.expired) {
-      // user password expired
-      throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_PASSWORD_EXPIRED());
-    }
     // user allowed to access
     const userId = authentication.id;
+    // check password expiration
+    checkUserPasswordExpiration(userId);
     // unlock user status
     await userStatusUnlock(userId);
     // generate token
@@ -75,22 +72,10 @@ export const loginCookie = api.raw(
       const authentication = await authenticationQry().first('id', 'email', 'passwordHash').where('email', email).where('disabled', false);
       const userAllowed = authentication && bcrypt.compareSync(password!, authentication.passwordHash);
       if (userAllowed) {
-        // check password expiration
-        const passwordEpiration: UserPasswordExpirationResponse = await getUserPasswordExpiration(authentication.id);
-        if (passwordEpiration.expired) {
-          // user password expired
-          throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_PASSWORD_EXPIRED());
-        }
-        // check password notification
-        if (passwordEpiration.notificationRequired) {
-          // send notification to user
-          sendNotificationMessage({
-            userId: authentication.id,
-            message: locz().AUTHENTICATION_ACCESS_PASSWORD_NOTIFICATION({ expInDays: passwordEpiration.remainigDays }),
-          });
-        }
         // user allowed to access
         const userId: number = authentication.id;
+        // check password expiration
+        checkUserPasswordExpiration(userId);
         // unlock user status
         await userStatusUnlock(userId);
         // generate token
@@ -117,6 +102,38 @@ export const loginCookie = api.raw(
     }
   }
 ); // loginCookie
+
+/**
+ * Check user password expiration.
+ * If password expired throws an exception, if password near to expiration sends a notification to the user.
+ * @param userId user identificator
+ */
+const checkUserPasswordExpiration = async (userId: number) => {
+  // check password expiration
+  const passwordEpiration: UserPasswordExpirationResponse = await getUserPasswordExpiration(userId);
+  if (passwordEpiration.expired) {
+    // user password expired
+    throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_PASSWORD_EXPIRED());
+  }
+  // check password notification
+  if (passwordEpiration.notificationRequired) {
+    // check if notification has already been sent today
+    // TODO MIC check last notification by type
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const notificationCount = (await orm('NotificationMessage').count('id').where('userId', userId).andWhere('timestamp', '>=', today))[0][
+      'count'
+    ] as number;
+    if (notificationCount == 0) {
+      // notification not sended today
+      // send notification to user
+      sendNotificationMessage({
+        userId,
+        message: locz().AUTHENTICATION_ACCESS_PASSWORD_NOTIFICATION({ expInDays: passwordEpiration.remainigDays }),
+      });
+    }
+  }
+}; // checkUserPasswordExpiration
 
 /**
  * Login renew for Bearer authentication.
