@@ -38,8 +38,6 @@ import {
 import { orm } from '../common/db/db';
 import { Validators } from '../common/utility/validators.utility';
 import { AuthenticationData } from '../authentication/authentication.model';
-import { userProfileGet } from './profile/profile';
-import { UserProfileResponse } from './profile/profile.model';
 import { AuthenticationUser } from '../authentication/access.model';
 import locz from '../common/i18n';
 
@@ -444,7 +442,7 @@ export const userPasswordCheck = api(
  */
 export const userSiteLock = api(
   { expose: true, auth: true, method: 'PATCH', path: '/user/lock-site' },
-  async (request: UserSiteLockRequest): Promise<UserProfileResponse> => {
+  async (request: UserSiteLockRequest): Promise<UserStatusResponse> => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
@@ -456,7 +454,7 @@ export const userSiteLock = api(
     // update user lock status
     await orm('User').where('id', request.id).update('siteLocked', true);
     // return user profile
-    return await userProfileGet({
+    return await userStatusGet({
       id: request.id,
     });
   }
@@ -468,7 +466,7 @@ export const userSiteLock = api(
  */
 export const userSiteUnlock = api(
   { expose: true, auth: true, method: 'PATCH', path: '/user/unlock-site' },
-  async (request: UserSiteUnlockRequest): Promise<UserProfileResponse> => {
+  async (request: UserSiteUnlockRequest): Promise<UserStatusResponse> => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
@@ -488,7 +486,7 @@ export const userSiteUnlock = api(
     // update user lock status
     await userStatusUnlock(userId);
     // return user profile
-    return await userProfileGet({
+    return await userStatusGet({
       id: request.id,
     });
   }

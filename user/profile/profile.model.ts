@@ -23,3 +23,19 @@ export interface UserProfileResponse {
   // logged user site locking status. true is locked, false is unlocked
   siteLocked: boolean;
 } // UserProfileResponse
+
+/**
+ * User create and update data.
+ */
+export interface UserProfileEditRequest {
+  // identifier of the user profile
+  id: number;
+  // user email
+  email: string;
+  // user name
+  name: string;
+  // user surname
+  surname: string;
+  // user fiscal code
+  fiscalCode?: string;
+} // UserProfileEditRequest
