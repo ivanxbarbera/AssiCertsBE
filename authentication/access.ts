@@ -16,7 +16,7 @@ import { sendNotificationMessage } from '../notification/notification';
 import { NotificationMessageType } from '../notification/notification.model';
 
 const jwtSercretKey = secret('JWTSecretKey');
-const jwtDurationInSeconds = secret('JWTDurationInMinute');
+const jwtDurationInMinutes = secret('JWTDurationInMinute');
 
 /**
  * User login with Bearer JWT.
@@ -37,7 +37,7 @@ export const loginBearer = api({ expose: true, method: 'POST', path: '/login' },
     // unlock user status
     await userStatusUnlock(userId);
     // generate token
-    const expiresIn: number = +jwtDurationInSeconds();
+    const expiresIn: number = +jwtDurationInMinutes();
     const token: string = await new SignJWT({ userID: userId })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
@@ -79,7 +79,7 @@ export const loginCookie = api.raw(
         // unlock user status
         await userStatusUnlock(userId);
         // generate token
-        const expiresIn: number = +jwtDurationInSeconds();
+        const expiresIn: number = +jwtDurationInMinutes();
         const token: string = await new SignJWT({ userID: userId })
           .setProtectedHeader({ alg: 'HS256' })
           .setIssuedAt()
@@ -166,7 +166,7 @@ export const loginRenewBearer = api(
     }
     // user allowed to access
     // generate new token
-    const expiresIn: number = +jwtDurationInSeconds();
+    const expiresIn: number = +jwtDurationInMinutes();
     const token: string = await new SignJWT({ userID: tokenUserId })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
@@ -205,7 +205,7 @@ export const loginRenewCookie = api.raw(
       throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_USER_NOT_ALLOWED());
     }
     // generate token
-    const expiresIn: number = +jwtDurationInSeconds();
+    const expiresIn: number = +jwtDurationInMinutes();
     const token: string = await new SignJWT({ userID: userIdRequest })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()

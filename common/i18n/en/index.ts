@@ -11,6 +11,7 @@ const en = {
   AUTHENTICATION_AUTHENTICATION_MALFORMED_REQUEST: 'Malformed request',
   AUTHENTICATION_AUTHENTICATION_NOT_AUTHENTICATED: 'Not authenticated',
   AUTHENTICATION_AUTHENTICATION_PASSWORD_EXPIRED: 'User password expired',
+  FILE_FILE_NOT_FOUND: 'File not founded',
   NOTIFICATION_USER_NOT_ALLOWED: 'User not allowed to access requested data',
   USER_PROFILE_PROFILE_USER_NOT_ALLOWED: 'User not allowed to access requested data',
   USER_PROFILE_PROFILE_USER_NOT_FOUND: 'Requested user profile not found',

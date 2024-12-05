@@ -11,3 +11,4 @@ MailSMTPAuthenticationUsername: ""
 MailSMTPAuthenticationPassword: ""
 MailSMTPAuthenticationDefaultSender: "noreply@assihub.it"
 MailSMTPAuthenticationSubjectPrefix: "[Assihub]"
+FileDownloadDurationInMinutes: "5",

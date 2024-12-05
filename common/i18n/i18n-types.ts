@@ -57,6 +57,10 @@ type RootTranslation = {
 	 */
 	AUTHENTICATION_AUTHENTICATION_PASSWORD_EXPIRED: string
 	/**
+	 * F​i​l​e​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	FILE_FILE_NOT_FOUND: string
+	/**
 	 * U​t​e​n​t​e​ ​n​o​n​ ​a​u​t​o​r​i​z​z​a​t​o​ ​a​d​ ​a​c​c​e​d​e​r​e​ ​a​i​ ​d​a​t​i​ ​r​i​c​h​i​e​s​t​i
 	 */
 	NOTIFICATION_USER_NOT_ALLOWED: string
@@ -237,6 +241,10 @@ export type TranslationFunctions = {
 	 * Password utente scaduta
 	 */
 	AUTHENTICATION_AUTHENTICATION_PASSWORD_EXPIRED: () => LocalizedString
+	/**
+	 * File non trovato
+	 */
+	FILE_FILE_NOT_FOUND: () => LocalizedString
 	/**
 	 * Utente non autorizzato ad accedere ai dati richiesti
 	 */

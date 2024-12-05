@@ -10,6 +10,7 @@
     "typesafe-i18n": "typesafe-i18n"
   },
   "devDependencies": {
+    "@types/busboy": "^1.5.4",
     "@types/node": "^20.5.7",
     "typescript": "^5.2.2",
     "vitest": "^1.5.0"
@@ -19,6 +20,7 @@
     "@types/nodemailer": "^6.4.16",
     "@types/pg": "^8.11.10",
     "bcryptjs": "^2.4.3",
+    "busboy": "^1.6.0",
     "cookie": "^1.0.1",
     "encore.dev": "^1.41.12",
     "jose": "^5.9.6",

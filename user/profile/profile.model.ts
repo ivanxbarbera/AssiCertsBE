@@ -12,6 +12,8 @@ export interface UserProfileRequest {
  * Contains a restricted set of user data.
  */
 export interface UserProfileResponse {
+  // identifier of the user profile
+  id: number;
   // loggend user email
   email: string;
   // logged user name
