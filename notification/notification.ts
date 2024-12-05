@@ -11,6 +11,7 @@ import {
   NotificationMessageListResponse,
   NotificationMessageReadAllRequest,
   NotificationMessageReadRequest,
+  NotificationMessageRequest,
   NotificationMessageSendRequest,
 } from './notification.model';
 import { orm } from '../common/db/db';
@@ -103,7 +104,7 @@ export const resendNotificationMessageList = api(
  * Apply filters and return a list of notification messages.
  */
 export const notificationMessageList = api(
-  { expose: true, auth: true, method: 'GET', path: '/notification/:userId' },
+  { expose: true, auth: true, method: 'GET', path: '/notification' },
   async (request: NotificationMessageListRequest): Promise<NotificationMessageListResponse> => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
@@ -201,3 +202,21 @@ export const sendNotificationMessage = api(
     await notify.publish(newNotificationMessage);
   }
 ); // sendNotificationMessage
+
+/**
+ * Load notification message details.
+ */
+export const notificationMessageDetails = api(
+  { expose: true, auth: true, method: 'GET', path: '/notification/:id' },
+  async (request: NotificationMessageRequest): Promise<NotificationMessage> => {
+    // load notification message
+    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
+    const notificationMessage = await notificationMessageQry().first().where('id', request.id);
+    if (!notificationMessage) {
+      // notification message not found
+      throw APIError.notFound(locz().NOTIFICATION_NOTIFICATION_NOT_FOUND());
+    }
+    // return notification message
+    return notificationMessage;
+  }
+); // notificationMessageDetails

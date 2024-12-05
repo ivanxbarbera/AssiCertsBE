@@ -86,3 +86,11 @@ export enum NotificationMessageType {
   PasswordExpiration = 'PASSWORD_EXPIRATION',
   UserMaintenance = 'USER_MAINTENANCE',
 } // NotificationMessageType
+
+/**
+ * Nofitication messages details request.
+ */
+export interface NotificationMessageRequest {
+  // notification message identfier
+  id: number;
+} // NotificationMessageRequest

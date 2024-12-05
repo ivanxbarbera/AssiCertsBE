@@ -61,6 +61,10 @@ type RootTranslation = {
 	 */
 	FILE_FILE_NOT_FOUND: string
 	/**
+	 * N​o​t​i​f​i​c​a​ ​n​o​n​ ​t​r​o​v​a​t​a
+	 */
+	NOTIFICATION_NOTIFICATION_NOT_FOUND: string
+	/**
 	 * U​t​e​n​t​e​ ​n​o​n​ ​a​u​t​o​r​i​z​z​a​t​o​ ​a​d​ ​a​c​c​e​d​e​r​e​ ​a​i​ ​d​a​t​i​ ​r​i​c​h​i​e​s​t​i
 	 */
 	NOTIFICATION_USER_NOT_ALLOWED: string
@@ -245,6 +249,10 @@ export type TranslationFunctions = {
 	 * File non trovato
 	 */
 	FILE_FILE_NOT_FOUND: () => LocalizedString
+	/**
+	 * Notifica non trovata
+	 */
+	NOTIFICATION_NOTIFICATION_NOT_FOUND: () => LocalizedString
 	/**
 	 * Utente non autorizzato ad accedere ai dati richiesti
 	 */

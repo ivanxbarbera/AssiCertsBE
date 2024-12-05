@@ -12,6 +12,7 @@ const it = {
   AUTHENTICATION_AUTHENTICATION_NOT_AUTHENTICATED: 'Non autenticato',
   AUTHENTICATION_AUTHENTICATION_PASSWORD_EXPIRED: 'Password utente scaduta',
   FILE_FILE_NOT_FOUND: 'File non trovato',
+  NOTIFICATION_NOTIFICATION_NOT_FOUND: 'Notifica non trovata',
   NOTIFICATION_USER_NOT_ALLOWED: 'Utente non autorizzato ad accedere ai dati richiesti',
   USER_PROFILE_PROFILE_USER_NOT_ALLOWED: 'Utente non autorizzato ad accedere ai dati richiesti',
   USER_PROFILE_PROFILE_USER_NOT_FOUND: 'Profilo utente richiesto non trovato',
