@@ -28,7 +28,7 @@ const fileDownloadDurationInMinutes = secret('FileDownloadDurationInMinutes');
  * @param fileEntry file to be prepared for response
  * @returns file to be sent in response
  */
-const prepareFileEntryResponse = async (fileEntry: FileEntry): Promise<FileEntryResponse> => {
+const fileEntryPrepareResponse = async (fileEntry: FileEntry): Promise<FileEntryResponse> => {
   // generate token
   const expiresIn: number = +fileDownloadDurationInMinutes();
   const token: string = await new SignJWT({ userId: fileEntry.userId, fileId: fileEntry.id })
@@ -48,7 +48,7 @@ const prepareFileEntryResponse = async (fileEntry: FileEntry): Promise<FileEntry
   };
   // return file response
   return fileEntryResponse;
-}; // prepareFileEntryResponse
+}; // fileEntryPrepareResponse
 
 /**
  * Search for files.
@@ -70,7 +70,7 @@ export const fileEntryList = api(
     // prepare files for response
     const fileEntries: FileEntryResponse[] = await Promise.all(
       fileEntriesRst.map(async (fileEntryRst) => {
-        return await prepareFileEntryResponse(fileEntryRst);
+        return await fileEntryPrepareResponse(fileEntryRst);
       })
     );
     // return files
@@ -94,14 +94,14 @@ export const fileEntryDetails = api(
       throw APIError.notFound(locz().FILE_FILE_NOT_FOUND());
     }
     // return file entry
-    return await prepareFileEntryResponse(fileEntry);
+    return await fileEntryPrepareResponse(fileEntry);
   }
 ); // fileEntryDetails
 
 /**
  * Upload a new file associate to the spicified user.
  */
-export const uploadFileEntry = api.raw(
+export const fileEntryUpload = api.raw(
   { expose: true, auth: true, method: 'POST', path: '/file' },
   async (request: IncomingMessage, response: ServerResponse<IncomingMessage>) => {
     // get authentication data
@@ -191,12 +191,12 @@ export const uploadFileEntry = api.raw(
     request.pipe(bb);
     return;
   }
-); // uploadFileEntry
+); // fileEntryUpload
 
 /**
  * Download file entry blob.
  */
-export const downloadFileEntryBlob = api.raw({ expose: true, method: 'GET', path: '/file/blob/:id/:token' }, async (request, response) => {
+export const fileEntryDownloadBlob = api.raw({ expose: true, method: 'GET', path: '/file/blob/:id/:token' }, async (request, response) => {
   try {
     // get request paramenters
     const { id, token } = (currentRequest() as APICallMeta).pathParams;
@@ -227,4 +227,4 @@ export const downloadFileEntryBlob = api.raw({ expose: true, method: 'GET', path
     response.writeHead(500);
     response.end((err as Error).message);
   }
-}); // downloadFileEntryBlob
+}); // fileEntryDownloadBlob
