@@ -7,6 +7,7 @@ import locz from '../common/i18n';
 import {
   NotificationHandshake,
   NotificationMessage,
+  NotificationMessageFull,
   NotificationMessageListRequest,
   NotificationMessageListResponse,
   NotificationMessageReadAllRequest,
@@ -19,6 +20,8 @@ import { userDetails } from '../user/user';
 import { UserResponse } from '../user/user.model';
 import { AuthenticationData } from '../authentication/authentication.model';
 import { General } from '../common/utility/general.utility';
+import { fileEntryDownloadBlob, fileEntryList } from '../file/file';
+import { FileEntryListResponse, FileEntryResponse, FileEntryType } from '../file/file.model';
 
 /**
  * Connected strams that listen for notifications.
@@ -244,3 +247,33 @@ export const notificationMessageDetails = api(
     return notificationMessage;
   }
 ); // notificationMessageDetails
+
+/**
+ * Load notification message details.
+ */
+export const notificationMessageDetailsFull = api(
+  { expose: true, auth: true, method: 'GET', path: '/notification/full/:id' },
+  async (request: NotificationMessageRequest): Promise<NotificationMessageFull> => {
+    // load notification message
+    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
+    const notificationMessage = await notificationMessageQry().first().where('id', request.id);
+    if (!notificationMessage) {
+      // notification message not found
+      throw APIError.notFound(locz().NOTIFICATION_NOTIFICATION_NOT_FOUND());
+    }
+    // load related notification user
+    const user = await userDetails({ id: notificationMessage.userId });
+    // prepare notificaion message full response
+    const notificationMessageFull: NotificationMessageFull = {
+      ...notificationMessage,
+      user,
+    };
+    // load user profile image
+    const fileEntries: FileEntryResponse[] = (await fileEntryList({ userId: user.id, type: FileEntryType.ProfileImage })).fileEntries;
+    if (fileEntries && fileEntries.length > 0) {
+      notificationMessageFull.userProfileImage = fileEntries[0];
+    }
+    // return full notification message
+    return notificationMessageFull;
+  }
+); // notificationMessageDetailsFull

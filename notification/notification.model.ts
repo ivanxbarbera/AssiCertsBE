@@ -1,3 +1,6 @@
+import { FileEntry } from '../file/file.model';
+import { User, UserResponse } from '../user/user.model';
+
 /**
  * Notification handshake.
  * Passed at connection time.
@@ -25,6 +28,17 @@ export interface NotificationMessage {
   // notification message type
   type: NotificationMessageType;
 } // NotificationMessage
+
+/**
+ * Full notification message.
+ * Message to be sent to connected client with full data, also related objects.
+ */
+export interface NotificationMessageFull extends NotificationMessage {
+  // destination user
+  user: UserResponse;
+  // user profile image
+  userProfileImage?: FileEntry;
+} // NotificationMessageFull
 
 /**
  * Nofitication messages search list request.
