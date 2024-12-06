@@ -10,7 +10,7 @@ import {
   NotificationMessageListRequest,
   NotificationMessageListResponse,
   NotificationMessageReadAllRequest,
-  NotificationMessageReadRequest,
+  NotificationMessageReadUnreadRequest,
   NotificationMessageRequest,
   NotificationMessageSendRequest,
 } from './notification.model';
@@ -164,7 +164,7 @@ export const notificationMessageAllRead = api(
  */
 export const notificationMessageRead = api(
   { expose: true, auth: true, method: 'GET', path: '/notification/read/:userId/:notificationMessageId' },
-  async (request: NotificationMessageReadRequest): Promise<void> => {
+  async (request: NotificationMessageReadUnreadRequest): Promise<NotificationMessage> => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
@@ -176,8 +176,32 @@ export const notificationMessageRead = api(
     // update specified notification ad readed
     const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
     await notificationMessageQry().update('readed', true).where('userId', request.userId).andWhere('id', request.notificationMessageId);
+    // load notification message
+    return notificationMessageDetails({ id: request.notificationMessageId });
   }
 ); // notificationMessageRead
+
+/**
+ * Mark a notification ad unreaded.
+ */
+export const notificationMessageUnread = api(
+  { expose: true, auth: true, method: 'GET', path: '/notification/unread/:userId/:notificationMessageId' },
+  async (request: NotificationMessageReadUnreadRequest): Promise<NotificationMessage> => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user permission
+    if (userId !== request.userId) {
+      // user not allowed to access
+      throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
+    }
+    // update specified notification ad unreaded
+    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
+    await notificationMessageQry().update('readed', false).where('userId', request.userId).andWhere('id', request.notificationMessageId);
+    // load notification message
+    return notificationMessageDetails({ id: request.notificationMessageId });
+  }
+); // notificationMessageUnread
 
 /**
  * Send a new notification message.

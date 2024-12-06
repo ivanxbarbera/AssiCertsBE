@@ -57,9 +57,9 @@ export interface NotificationMessageReadAllRequest {
 } // NotificationMessageReadAllRequest
 
 /**
- * Nofitication messages mark read all request.
+ * Nofitication messages mark read or unread request.
  */
-export interface NotificationMessageReadRequest {
+export interface NotificationMessageReadUnreadRequest {
   // user identfier
   userId: number;
   // notification identifier
