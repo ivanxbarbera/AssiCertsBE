@@ -6,8 +6,6 @@ export interface User {
   id?: number;
   // user email
   email: string;
-  // user encoded password
-  passwordHash: string;
   // user name
   name: string;
   // user surname
@@ -188,6 +186,7 @@ export interface UserSiteUnlockRequest {
  * User password compliance to contraints check request.
  */
 export interface UserPasswordCheckRequest {
+  // user password
   password: string;
 } // UserPasswordCheckRequest
 
@@ -214,9 +213,13 @@ export interface UserPasswordCheckResponse {
 } // UserPasswordCheckResponse
 
 export interface UserPasswordHistory {
+  // password history indentificator
   id?: number;
+  // user indentificator
   userId: number;
+  // password change data
   date: Date;
+  // user encoded password
   passwordHash: string;
 } // UserPasswordHistory
 
@@ -225,7 +228,9 @@ export interface UserPasswordHistory {
  * Check if password has been already used by user before.
  */
 export interface UserPasswordHistoryCheckRequest {
+  // user identificator
   userId: number;
+  // user password
   password: string;
 } // UserPasswordCheckRequest
 
@@ -242,6 +247,7 @@ export interface UserPasswordHistoryCheckResponse {
  * Check the number of remaining days before password expiration.
  */
 export interface UserPasswordExpirationRequest {
+  // user identificator
   userId: number;
 } // UserPasswordExpirationRequest
 

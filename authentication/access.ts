@@ -28,7 +28,12 @@ const jwtDurationInMinutes = secret('JWTDurationInMinute');
 export const loginBearer = api({ expose: true, method: 'POST', path: '/login' }, async (request: LoginRequest): Promise<LoginBearerResponse> => {
   // load user profile data
   const authenticationQry = () => orm<AuthenticationUser>('User');
-  const authentication = await authenticationQry().first('id', 'email', 'passwordHash').where('email', request.email).where('disabled', false);
+  const authentication = await authenticationQry()
+    .first('User.id as id', 'UserPasswordHistory.passwordHash as passwordHash')
+    .join('UserPasswordHistory', 'User.id', '=', 'UserPasswordHistory.userId')
+    .where('User.email', request.email)
+    .where('User.disabled', false)
+    .orderBy('UserPasswordHistory.date', 'desc');
   const userAllowed = authentication && bcrypt.compareSync(request.password, authentication.passwordHash);
   if (userAllowed) {
     // user allowed to access
@@ -71,7 +76,12 @@ export const loginCookie = api.raw(
       // user authentication data founded
       // load user profile data
       const authenticationQry = () => orm<AuthenticationUser>('User');
-      const authentication = await authenticationQry().first('id', 'email', 'passwordHash').where('email', email).where('disabled', false);
+      const authentication = await authenticationQry()
+        .first('User.id as id', 'UserPasswordHistory.passwordHash as passwordHash')
+        .join('UserPasswordHistory', 'User.id', 'UserPasswordHistory.userId')
+        .where('User.email', email)
+        .where('User.disabled', false)
+        .orderBy('UserPasswordHistory.date', 'desc');
       const userAllowed = authentication && bcrypt.compareSync(password!, authentication.passwordHash);
       if (userAllowed) {
         // user allowed to access

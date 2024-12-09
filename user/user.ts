@@ -76,7 +76,6 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   // prepare user to be saved
   const newUser: User = {
     email: request.email,
-    passwordHash: passwordHash,
     name: request.name,
     surname: request.surname,
     siteLocked: false,
@@ -215,8 +214,6 @@ export const userPasswordResetConfirm = api(
     }
     // encrypt password
     const passwordHash = bcrypt.hashSync(request.password);
-    // update user password
-    await orm('User').where('id', user!.id).update('passwordHash', passwordHash);
     // insert user password history
     const newUserPasswordHistory: UserPasswordHistory = {
       userId: user.id!,
@@ -293,7 +290,11 @@ export const userPasswordChange = api(
       throw APIError.invalidArgument(locz().USER_USER_USED_PASSWORD());
     }
     // load user
-    const user = await orm<User>('User').first().where('id', request.userId).where('disabled', false);
+    const user = await orm<User>('User')
+      .first('User.id as id', 'UserPasswordHistory.passwordHash as passwordHash')
+      .join('UserPasswordHistory', 'User.id', 'UserPasswordHistory.userId')
+      .where('User.id', request.userId)
+      .where('User.disabled', false);
     if (!user) {
       // user not fouded
       throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
@@ -305,8 +306,6 @@ export const userPasswordChange = api(
     }
     // encrypt password
     const passwordHash = bcrypt.hashSync(request.password);
-    // update user password
-    await orm('User').where('id', user!.id).update('passwordHash', passwordHash);
     // insert user password history
     const newUserPasswordHistory: UserPasswordHistory = {
       userId: user.id!,
@@ -477,7 +476,10 @@ export const userSiteUnlock = api(
     }
     // load user profile data
     const authenticationQry = () => orm<AuthenticationUser>('User');
-    const authentication = await authenticationQry().first('id', 'email', 'passwordHash').where('id', request.id);
+    const authentication = await authenticationQry()
+      .first('User.id as id', 'UserPasswordHistory.passwordHash as passwordHash')
+      .join('UserPasswordHistory', 'User.id', 'UserPasswordHistory.userId')
+      .where('User.id', request.id);
     const userAllowed = authentication && bcrypt.compareSync(request.password, authentication.passwordHash);
     if (!userAllowed) {
       // user not allowed to unlock site
@@ -529,12 +531,6 @@ export const userDetails = api(
       // user not found
       throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
     }
-    // remove internal fields
-    ['passwordHash'].forEach((field: string) => {
-      if (field in user) {
-        delete (user as any)[field];
-      }
-    });
     // return user
     return user;
   }
@@ -557,7 +553,6 @@ export const userInsert = api(
     const passwordHash = bcrypt.hashSync(password);
     const newUser: User = {
       ...request,
-      passwordHash,
       siteLocked: false,
     };
     // insert user
