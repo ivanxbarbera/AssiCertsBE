@@ -14,6 +14,7 @@ import { getAuthData } from '~encore/auth';
 import { UserPasswordExpirationResponse } from '../user/user.model';
 import { sendNotificationMessage } from '../notification/notification';
 import { NotificationMessageType } from '../notification/notification.model';
+import log from 'encore.dev/log';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const jwtDurationInMinutes = secret('JWTDurationInMinute');
@@ -33,7 +34,7 @@ export const loginBearer = api({ expose: true, method: 'POST', path: '/login' },
     // user allowed to access
     const userId = authentication.id;
     // check password expiration
-    checkUserPasswordExpiration(userId);
+    await checkUserPasswordExpiration(userId);
     // unlock user status
     await userStatusUnlock(userId);
     // generate token
@@ -61,6 +62,7 @@ export const loginBearer = api({ expose: true, method: 'POST', path: '/login' },
 export const loginCookie = api.raw(
   { expose: true, method: 'GET', path: '/login' },
   async (request: IncomingMessage, response: ServerResponse<IncomingMessage>) => {
+    // try {
     // get request parameters from url
     const url = new URL(request.url || '', `http://${request.headers.host}`);
     const email = url.searchParams.get('email');
@@ -75,7 +77,7 @@ export const loginCookie = api.raw(
         // user allowed to access
         const userId: number = authentication.id;
         // check password expiration
-        checkUserPasswordExpiration(userId);
+        await checkUserPasswordExpiration(userId);
         // unlock user status
         await userStatusUnlock(userId);
         // generate token
@@ -100,8 +102,13 @@ export const loginCookie = api.raw(
       // user authenticatio data not fouded
       throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_EMAIL_PASSWORD_REQUIRED());
     }
+    // } catch (error) {
+    //   log.debug(JSON.stringify(error));
+    //   response.writeHead(500);
+    //   response.end((error as Error).message);
+    // }
   }
-); // loginCookie
+); //error loginCookie
 
 /**
  * Check user password expiration.
