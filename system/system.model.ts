@@ -106,3 +106,11 @@ export interface PasswordCheckParameters {
   // password notification before expiration in days
   expirationNotificationDays: number;
 } // PasswordCheckParameters
+
+/**
+ * User configuration parameters.
+ */
+export interface UserCheckParameters {
+  // user email allowed domains
+  allowedDomains: string[];
+} // UserCheckParameters

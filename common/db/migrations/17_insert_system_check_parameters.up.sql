@@ -1,0 +1,1 @@
+INSERT INTO "public"."SystemParameter" ("group", "code", "name", "type", "value", "description") VALUES ('USER_CHECK', 'ALLOWED_DOMAINS', 'Allowed email domains', 'TEXT', '', 'The list of user email domains allowed to register and sign in, separated by coma. Empty no limitation.');

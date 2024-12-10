@@ -3,6 +3,7 @@ import { api, APIError } from 'encore.dev/api';
 import {
   PasswordCheckParameters,
   SMTPParameters,
+  UserCheckParameters,
   SystemParameter,
   SystemParameterRequest,
   SystemParameterResponse,
@@ -128,7 +129,7 @@ export const systemParametersSmtp = api({ expose: false, method: 'GET', path: '/
 }); // systemParametersSmtp
 
 /**
- * Password check paramters.
+ * Password check parameters.
  * Load password check parameter configuration stored in system parameters
  */
 export const systemParametersPasswordCheck = api(
@@ -151,3 +152,26 @@ export const systemParametersPasswordCheck = api(
     };
   }
 ); // systemParametersPasswordCheck
+
+/**
+ * User check parameters.
+ * Load user check parameters configuration stored in system parameters
+ */
+export const systemParametersUserCheck = api(
+  { expose: false, method: 'GET', path: '/system/parameters/user-check' },
+  async (): Promise<UserCheckParameters> => {
+    // load system parameters from user parameters
+    const response: SystemParameterResponse = await systemParameter({ group: 'USER_CHECK' });
+    // convert system parameters to single object
+    const userCheckParametersObject = systemParameterToObject(response.systemParameters);
+    // prepare parameters
+    let allowedDomains = [];
+    if (userCheckParametersObject.USER_CHECK_ALLOWED_DOMAINS && userCheckParametersObject.USER_CHECK_ALLOWED_DOMAINS.trim() != '') {
+      allowedDomains = userCheckParametersObject.USER_CHECK_ALLOWED_DOMAINS.split(',');
+    }
+    // create user paramters
+    return {
+      allowedDomains,
+    };
+  }
+); // systemParametersUserCheck

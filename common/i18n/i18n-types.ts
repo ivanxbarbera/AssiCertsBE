@@ -57,6 +57,10 @@ type RootTranslation = {
 	 */
 	AUTHENTICATION_AUTHENTICATION_PASSWORD_EXPIRED: string
 	/**
+	 * E​r​r​o​r​e​ ​n​e​l​l​'​i​n​v​i​o​ ​d​e​l​l​a​ ​M​a​i​l​.​ ​C​o​n​t​a​t​t​a​r​e​ ​i​l​ ​s​u​p​p​o​r​t​o​ ​t​e​c​n​i​c​o​.
+	 */
+	EMAIL_SEND_ERROR: string
+	/**
 	 * F​i​l​e​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	FILE_FILE_NOT_FOUND: string
@@ -76,6 +80,10 @@ type RootTranslation = {
 	 * P​r​o​f​i​l​o​ ​u​t​e​n​t​e​ ​r​i​c​h​i​e​s​t​o​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	USER_PROFILE_PROFILE_USER_NOT_FOUND: string
+	/**
+	 * I​l​ ​d​o​m​i​n​i​o​ ​d​e​l​l​a​ ​e​m​a​i​l​ ​n​o​n​ ​è​ ​t​r​a​ ​q​u​e​l​l​i​ ​c​o​n​s​e​n​t​i​t​i
+	 */
+	USER_USER_DOMAIN_NOT_ALLOWED: string
 	/**
 	 * P​a​s​s​w​o​r​d​ ​e​ ​c​o​n​f​e​r​m​a​ ​p​a​s​s​w​o​r​d​ ​d​e​v​o​n​o​ ​c​o​i​n​c​i​d​e​r​e
 	 */
@@ -246,6 +254,10 @@ export type TranslationFunctions = {
 	 */
 	AUTHENTICATION_AUTHENTICATION_PASSWORD_EXPIRED: () => LocalizedString
 	/**
+	 * Errore nell'invio della Mail. Contattare il supporto tecnico.
+	 */
+	EMAIL_SEND_ERROR: () => LocalizedString
+	/**
 	 * File non trovato
 	 */
 	FILE_FILE_NOT_FOUND: () => LocalizedString
@@ -265,6 +277,10 @@ export type TranslationFunctions = {
 	 * Profilo utente richiesto non trovato
 	 */
 	USER_PROFILE_PROFILE_USER_NOT_FOUND: () => LocalizedString
+	/**
+	 * Il dominio della email non è tra quelli consentiti
+	 */
+	USER_USER_DOMAIN_NOT_ALLOWED: () => LocalizedString
 	/**
 	 * Password e conferma password devono coincidere
 	 */

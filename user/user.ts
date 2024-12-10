@@ -5,11 +5,12 @@ import bcrypt from 'bcryptjs';
 import { getAuthData } from '~encore/auth';
 import { createTransport, Transporter } from 'nodemailer';
 import moment from 'moment';
-// application modules
-import { PasswordCheckParameters } from './../system/system.model';
 import { secret } from 'encore.dev/config';
+// application modules
+import { UserCheckParameters } from './../system/system.model';
+import { PasswordCheckParameters } from './../system/system.model';
 import { SMTPParameters } from './../system/system.model';
-import { systemParametersPasswordCheck, systemParametersSmtp } from './../system/system';
+import { systemParametersPasswordCheck, systemParametersSmtp, systemParametersUserCheck } from './../system/system';
 import {
   UserPasswordResetRequest,
   UserPasswordReset,
@@ -61,12 +62,22 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
     // password not compliant
     throw APIError.invalidArgument(locz().USER_USER_PASSWORD_NOT_COMPLIANT());
   }
+  // check email compliace
   if (!Validators.isValidEmail(request.email)) {
     // email is not well formed
     throw APIError.invalidArgument(locz().USER_USER_EMAIL_MALFORMED());
   }
+  // check user parameters
+  const userCheckParameters: UserCheckParameters = await systemParametersUserCheck();
+  // check for email existence in allowed domains
+  if (userCheckParameters.allowedDomains.length > 0) {
+    const emailDomain = request.email.split('@')[1]; // Get the domain part of the email
+    if (!userCheckParameters.allowedDomains.includes(emailDomain)) {
+      throw APIError.invalidArgument(locz().USER_USER_DOMAIN_NOT_ALLOWED());
+    }
+  }
   // check for mail existance
-  const emailCount = (await orm('User').count('id').where('email', request.email))[0]['id'] as number;
+  const emailCount = (await orm('User').count('id').where('email', request.email))[0]['count'] as number;
   if (emailCount > 0) {
     // email already exists
     throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST());
@@ -93,27 +104,31 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   const userPasswordHistoryQry = () => orm('UserPasswordHistory');
   const userPasswordHistoryRst = await userPasswordHistoryQry().insert(newUserPasswordHistory, ['id']);
   // send email to user
-  const resetUrl = frontendBaseURL() + '/authentication';
-  const smptParameters: SMTPParameters = await systemParametersSmtp();
-  const smtpTransport: any = {
-    host: smptParameters.host,
-    port: smptParameters.port,
-    secure: smptParameters.secure,
-  };
-  if (smptParameters.authentication) {
-    smtpTransport.auth = {
-      user: smptParameters.authenticationUsername,
-      pass: smptParameters.authenticationPassowrd,
+  try {
+    const smptParameters: SMTPParameters = await systemParametersSmtp();
+    const smtpTransport: any = {
+      host: smptParameters.host,
+      port: smptParameters.port,
+      secure: smptParameters.secure,
     };
+    if (smptParameters.authentication) {
+      smtpTransport.auth = {
+        user: smptParameters.authenticationUsername,
+        pass: smptParameters.authenticationPassowrd,
+      };
+    }
+    const transporter: Transporter = createTransport(smtpTransport);
+    await transporter.sendMail({
+      from: smptParameters.defaultSender, // sender address
+      to: newUser.email, // list of receivers
+      subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_REGISTER_EMAIL_SUBJECT()).trim(),
+      text: locz().USER_USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT({ name: newUser.name }),
+      html: locz().USER_USER_PASSWORD_REGISTER_EMAIL_BODY_HTML({ name: newUser.name }),
+    });
+  } catch (error) {
+    // error sending email
+    throw APIError.unavailable(locz().EMAIL_SEND_ERROR());
   }
-  const transporter: Transporter = createTransport(smtpTransport);
-  await transporter.sendMail({
-    from: smptParameters.defaultSender, // sender address
-    to: newUser.email, // list of receivers
-    subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_REGISTER_EMAIL_SUBJECT()).trim(),
-    text: locz().USER_USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT({ name: newUser.name }),
-    html: locz().USER_USER_PASSWORD_REGISTER_EMAIL_BODY_HTML({ name: newUser.name }),
-  });
 }); // userRegister
 
 /**
@@ -140,27 +155,32 @@ export const userPasswordReset = api({ expose: true, method: 'GET', path: '/user
     // save password reset request
     await orm('UserPasswordReset').insert(userPasswordReset);
     // send email to user
-    const resetUrl = frontendBaseURL() + '/authentication/reset-password;token=' + token;
-    const smptParameters: SMTPParameters = await systemParametersSmtp();
-    const smtpTransport: any = {
-      host: smptParameters.host,
-      port: smptParameters.port,
-      secure: smptParameters.secure,
-    };
-    if (smptParameters.authentication) {
-      smtpTransport.auth = {
-        user: smptParameters.authenticationUsername,
-        pass: smptParameters.authenticationPassowrd,
+    try {
+      const resetUrl = frontendBaseURL() + '/authentication/reset-password;token=' + token;
+      const smptParameters: SMTPParameters = await systemParametersSmtp();
+      const smtpTransport: any = {
+        host: smptParameters.host,
+        port: smptParameters.port,
+        secure: smptParameters.secure,
       };
+      if (smptParameters.authentication) {
+        smtpTransport.auth = {
+          user: smptParameters.authenticationUsername,
+          pass: smptParameters.authenticationPassowrd,
+        };
+      }
+      const transporter: Transporter = createTransport(smtpTransport);
+      await transporter.sendMail({
+        from: smptParameters.defaultSender, // sender address
+        to: user.email, // list of receivers
+        subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_RESET_EMAIL_SUBJECT()).trim(),
+        text: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
+        html: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+      });
+    } catch (error) {
+      // error sending email
+      throw APIError.unavailable(locz().EMAIL_SEND_ERROR());
     }
-    const transporter: Transporter = createTransport(smtpTransport);
-    await transporter.sendMail({
-      from: smptParameters.defaultSender, // sender address
-      to: user.email, // list of receivers
-      subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_RESET_EMAIL_SUBJECT()).trim(),
-      text: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
-      html: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
-    });
   }
 }); // userPasswordReset
 
@@ -225,27 +245,32 @@ export const userPasswordResetConfirm = api(
     // update password reset request
     await orm('UserPasswordReset').where('id', userPasswordReset.id).update('used', true);
     // send email to user
-    const resetUrl = frontendBaseURL() + '/authentication';
-    const smptParameters: SMTPParameters = await systemParametersSmtp();
-    const smtpTransport: any = {
-      host: smptParameters.host,
-      port: smptParameters.port,
-      secure: smptParameters.secure,
-    };
-    if (smptParameters.authentication) {
-      smtpTransport.auth = {
-        user: smptParameters.authenticationUsername,
-        pass: smptParameters.authenticationPassowrd,
+    try {
+      const resetUrl = frontendBaseURL() + '/authentication';
+      const smptParameters: SMTPParameters = await systemParametersSmtp();
+      const smtpTransport: any = {
+        host: smptParameters.host,
+        port: smptParameters.port,
+        secure: smptParameters.secure,
       };
+      if (smptParameters.authentication) {
+        smtpTransport.auth = {
+          user: smptParameters.authenticationUsername,
+          pass: smptParameters.authenticationPassowrd,
+        };
+      }
+      const transporter: Transporter = createTransport(smtpTransport);
+      await transporter.sendMail({
+        from: smptParameters.defaultSender, // sender address
+        to: user.email, // list of receivers
+        subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT()).trim(),
+        text: locz().USER_USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
+        html: locz().USER_USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+      });
+    } catch (error) {
+      // error sending email
+      throw APIError.unavailable(locz().EMAIL_SEND_ERROR());
     }
-    const transporter: Transporter = createTransport(smtpTransport);
-    await transporter.sendMail({
-      from: smptParameters.defaultSender, // sender address
-      to: user.email, // list of receivers
-      subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT()).trim(),
-      text: locz().USER_USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
-      html: locz().USER_USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
-    });
     // return response to caller
     const response: UserPasswordResetConfirmResponse = {
       email: user.email,
@@ -542,8 +567,17 @@ export const userDetails = api(
 export const userInsert = api(
   { expose: true, auth: true, method: 'POST', path: '/user' },
   async (request: UserEditRequest): Promise<UserResponse> => {
-    // check for mail existance
-    const emailCount = (await orm('User').count('id').where('email', request.email))[0]['id'] as number;
+    // check user parameters
+    const userCheckParameters: UserCheckParameters = await systemParametersUserCheck();
+    // check for email existence in allowed domains
+    if (userCheckParameters.allowedDomains.length > 0) {
+      const emailDomain = request.email.split('@')[1]; // Get the domain part of the email
+      if (!userCheckParameters.allowedDomains.includes(emailDomain)) {
+        throw APIError.invalidArgument(locz().USER_USER_DOMAIN_NOT_ALLOWED());
+      }
+    }
+    // check user email
+    const emailCount = (await orm('User').count('id').where('email', request.email))[0]['count'] as number;
     if (emailCount > 0) {
       // email already exists
       throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST());
@@ -589,8 +623,17 @@ export const userUpdate = api(
     }
     if (user.email !== request.email) {
       // user changed his email
+      // check user parameters
+      const userCheckParameters: UserCheckParameters = await systemParametersUserCheck();
+      // check for email existence in allowed domains
+      if (userCheckParameters.allowedDomains.length > 0) {
+        const emailDomain = request.email.split('@')[1]; // Get the domain part of the email
+        if (!userCheckParameters.allowedDomains.includes(emailDomain)) {
+          throw APIError.invalidArgument(locz().USER_USER_DOMAIN_NOT_ALLOWED());
+        }
+      }
       // check for mail existance
-      const emailCount = (await orm('User').count('id').where('email', request.email))[0]['id'] as number;
+      const emailCount = (await orm('User').count('id').where('email', request.email))[0]['count'] as number;
       if (emailCount > 0) {
         // email already exists
         throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST());

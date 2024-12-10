@@ -49,7 +49,7 @@ export const userProfileUpdate = api(
     if (userProfile.email !== request.email) {
       // user changed his email
       // check for mail existance
-      const emailCount = (await orm('User').count('id').where('email', request.email))[0]['id'] as number;
+      const emailCount = (await orm('User').count('id').where('email', request.email))[0]['count'] as number;
       if (emailCount > 0) {
         // email already exists
         throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST());
