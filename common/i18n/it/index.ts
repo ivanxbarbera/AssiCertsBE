@@ -15,6 +15,7 @@ const it = {
   FILE_FILE_NOT_FOUND: 'File non trovato',
   NOTIFICATION_NOTIFICATION_NOT_FOUND: 'Notifica non trovata',
   NOTIFICATION_USER_NOT_ALLOWED: 'Utente non autorizzato ad accedere ai dati richiesti',
+  SYSTEM_SYSTEM_PARAMETER_NOT_FOUND: 'Parametro di sistema non trovato',
   USER_PROFILE_PROFILE_USER_NOT_ALLOWED: 'Utente non autorizzato ad accedere ai dati richiesti',
   USER_PROFILE_PROFILE_USER_NOT_FOUND: 'Profilo utente richiesto non trovato',
   USER_USER_DOMAIN_NOT_ALLOWED: 'Il dominio della email non è tra quelli consentiti',

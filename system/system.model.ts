@@ -50,18 +50,52 @@ export interface SystemParameter {
  */
 export interface SystemParameterRequest {
   // parameter group code
-  group: string;
+  group?: string;
   // parameter code
   code?: string;
-} // SystemParameterRequest
+} // SystemParameterListRequest
 
 /**
  * System parameter response for loaded parameter values.
  */
 export interface SystemParameterResponse {
-  // paramters list
+  // system parameters list
   systemParameters: SystemParameter[];
 } // SystemParameterResponse
+
+/**
+ * System parameter list.
+ */
+export interface SystemParameterList {
+  // parameter indentifier
+  id: number;
+  // parameter name
+  name: string;
+  // parameter type
+  type: string;
+  // parameter value
+  value: string;
+  // parameter description
+  description: string;
+} // SystemParameter
+
+/**
+ * System parameter response for loaded parameter values.
+ */
+export interface SystemParameterListResponse {
+  // paramters list
+  systemParameters: SystemParameterList[];
+} // SystemParameterListResponse
+
+/**
+ * System parameter edit request.
+ */
+export interface SystemParameterEditRequest {
+  // parameter indentifier
+  id: number;
+  // parameter value
+  value: string;
+} // SystemParameterEditRequest
 
 /**
  * SMPT server configuration parameters.

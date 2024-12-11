@@ -15,6 +15,7 @@ const en = {
   FILE_FILE_NOT_FOUND: 'File not founded',
   NOTIFICATION_NOTIFICATION_NOT_FOUND: 'Notification not found',
   NOTIFICATION_USER_NOT_ALLOWED: 'User not allowed to access requested data',
+  SYSTEM_SYSTEM_PARAMETER_NOT_FOUND: 'System parameter not founded',
   USER_PROFILE_PROFILE_USER_NOT_ALLOWED: 'User not allowed to access requested data',
   USER_PROFILE_PROFILE_USER_NOT_FOUND: 'Requested user profile not found',
   USER_USER_DOMAIN_NOT_ALLOWED: 'Email domain is not in allowed list',

@@ -73,6 +73,10 @@ type RootTranslation = {
 	 */
 	NOTIFICATION_USER_NOT_ALLOWED: string
 	/**
+	 * P​a​r​a​m​e​t​r​o​ ​d​i​ ​s​i​s​t​e​m​a​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	SYSTEM_SYSTEM_PARAMETER_NOT_FOUND: string
+	/**
 	 * U​t​e​n​t​e​ ​n​o​n​ ​a​u​t​o​r​i​z​z​a​t​o​ ​a​d​ ​a​c​c​e​d​e​r​e​ ​a​i​ ​d​a​t​i​ ​r​i​c​h​i​e​s​t​i
 	 */
 	USER_PROFILE_PROFILE_USER_NOT_ALLOWED: string
@@ -269,6 +273,10 @@ export type TranslationFunctions = {
 	 * Utente non autorizzato ad accedere ai dati richiesti
 	 */
 	NOTIFICATION_USER_NOT_ALLOWED: () => LocalizedString
+	/**
+	 * Parametro di sistema non trovato
+	 */
+	SYSTEM_SYSTEM_PARAMETER_NOT_FOUND: () => LocalizedString
 	/**
 	 * Utente non autorizzato ad accedere ai dati richiesti
 	 */

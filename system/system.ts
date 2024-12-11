@@ -6,12 +6,16 @@ import {
   UserCheckParameters,
   SystemParameter,
   SystemParameterRequest,
-  SystemParameterResponse,
+  SystemParameterListResponse,
   SystemVersion,
   SystemVersionResponse,
+  SystemParameterResponse,
+  SystemParameterList,
+  SystemParameterEditRequest,
 } from './system.model';
 import { orm } from '../common/db/db';
 import { secret } from 'encore.dev/config';
+import locz from '../common/i18n';
 
 const APPLICATION_VERSION: string = '0.0.1';
 const APPLICATION_VERSION_DATE: Date = new Date(2024, 11 - 1, 14);
@@ -40,11 +44,13 @@ export const systemVersion = api({ expose: true, method: 'GET', path: '/system/v
  * Load system parameters based on given group and code (optional).
  */
 export const systemParameter = api(
-  { expose: false, method: 'GET', path: '/system/parameter' },
+  { expose: false, method: 'GET', path: '/internal/system/parameter' },
   async (request: SystemParameterRequest): Promise<SystemParameterResponse> => {
     // load system parametes
     let systemParameterQry = () => orm<SystemParameter>('SystemParameter');
-    systemParameterQry().where('group', request.group);
+    if (request.group) {
+      systemParameterQry().where('group', request.group);
+    }
     if (request.code) {
       systemParameterQry().where('code', request.code);
     }
@@ -114,26 +120,29 @@ const mailSMTPAuthenticationSubjectPrefix: string = secret('MailSMTPAuthenticati
  * SMTP parameters.
  * Load SMTP configuration stored in system parameters.
  */
-export const systemParametersSmtp = api({ expose: false, method: 'GET', path: '/system/parameters/smtp' }, async (): Promise<SMTPParameters> => {
-  // create smtp paramters
-  return {
-    host: mailSMTPHost,
-    port: mailSMTPPort,
-    secure: mailSMTPSecure,
-    authentication: mailSMTPAuthentication,
-    authenticationUsername: mailSMTPAuthenticationUsername,
-    authenticationPassowrd: mailSMTPAuthenticationPassword,
-    defaultSender: mailSMTPAuthenticationDefaultSender,
-    subjectPrefix: mailSMTPAuthenticationSubjectPrefix,
-  };
-}); // systemParametersSmtp
+export const systemParametersSmtp = api(
+  { expose: false, method: 'GET', path: '/internal/system/parameter/smtp' },
+  async (): Promise<SMTPParameters> => {
+    // create smtp paramters
+    return {
+      host: mailSMTPHost,
+      port: mailSMTPPort,
+      secure: mailSMTPSecure,
+      authentication: mailSMTPAuthentication,
+      authenticationUsername: mailSMTPAuthenticationUsername,
+      authenticationPassowrd: mailSMTPAuthenticationPassword,
+      defaultSender: mailSMTPAuthenticationDefaultSender,
+      subjectPrefix: mailSMTPAuthenticationSubjectPrefix,
+    };
+  }
+); // systemParametersSmtp
 
 /**
  * Password check parameters.
  * Load password check parameter configuration stored in system parameters
  */
 export const systemParametersPasswordCheck = api(
-  { expose: false, method: 'GET', path: '/system/parameters/password-check' },
+  { expose: false, method: 'GET', path: '/internal/system/parameter/password-check' },
   async (): Promise<PasswordCheckParameters> => {
     // load smtp parameters from system parameters
     const response: SystemParameterResponse = await systemParameter({ group: 'PASSWORD_CHECK' });
@@ -158,7 +167,7 @@ export const systemParametersPasswordCheck = api(
  * Load user check parameters configuration stored in system parameters
  */
 export const systemParametersUserCheck = api(
-  { expose: false, method: 'GET', path: '/system/parameters/user-check' },
+  { expose: false, method: 'GET', path: '/internal/system/parameter/user-check' },
   async (): Promise<UserCheckParameters> => {
     // load system parameters from user parameters
     const response: SystemParameterResponse = await systemParameter({ group: 'USER_CHECK' });
@@ -175,3 +184,38 @@ export const systemParametersUserCheck = api(
     };
   }
 ); // systemParametersUserCheck
+
+/**
+ * System parameter list.
+ * Load system parameters list.
+ */
+export const systemParameterList = api(
+  { expose: true, auth: true, method: 'GET', path: '/system/parameter' },
+  async (): Promise<SystemParameterListResponse> => {
+    // load system parameters
+    let systemParameterQry = () => orm<SystemParameterList>('SystemParameter');
+    const systemParameters: SystemParameterList[] = await systemParameterQry().select('id', 'name', 'type', 'value', 'description');
+    return { systemParameters };
+  }
+); // systemParameterList
+
+/**
+ * Update existing system parameter.
+ */
+export const systemParameterUpdate = api(
+  { expose: true, auth: true, method: 'PATCH', path: '/system/parameter/:id' },
+  async (request: SystemParameterEditRequest): Promise<SystemParameterListResponse> => {
+    // load system parameter
+    const systemParameterQry = () => orm<SystemParameterListResponse>('SystemParameter');
+    const systemParameter = await systemParameterQry().first().where('id', request.id);
+    if (!systemParameter) {
+      // system parameter not found
+      throw APIError.notFound(locz().SYSTEM_SYSTEM_PARAMETER_NOT_FOUND());
+    }
+    // update system paramter
+    const systemParameterUpdateQry = () => orm('SystemParameter');
+    const resutlQry = await systemParameterUpdateQry().where('id', request.id).update(request, ['id']);
+    // return updated user
+    return systemParameterList();
+  }
+); // userUpdate
