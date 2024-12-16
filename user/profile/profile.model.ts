@@ -17,8 +17,8 @@ export interface UserProfileRequest {
 export interface UserProfileResponse {
   // identifier of the user profile
   id: number;
-  // user type
-  type: UserRole;
+  // user role
+  role: UserRole;
   // loggend user email
   email: string;
   // logged user name

@@ -11,6 +11,7 @@ import { UserRole } from '../user/user.model';
  * @return authorization check response
  */
 export const authorizationOperationUserCheck = (request: AuthorizationOperationUserCheck): AuthorizationOperationResponse => {
+  // TODO MIC move checks to database
   // check cases
   if (
     (request.operationCode == 'loginRenewBearer' ||
