@@ -16,12 +16,14 @@ import {
   NotificationMessageSendRequest,
 } from './notification.model';
 import { orm } from '../common/db/db';
-import { userDetails } from '../user/user';
+import { userDetail } from '../user/user';
 import { UserResponse } from '../user/user.model';
 import { AuthenticationData } from '../authentication/authentication.model';
-import { General } from '../common/utility/general.utility';
-import { fileEntryDownloadBlob, fileEntryList } from '../file/file';
-import { FileEntryListResponse, FileEntryResponse, FileEntryType } from '../file/file.model';
+import { fileEntryList } from '../file/file';
+import { FileEntryResponse, FileEntryType } from '../file/file.model';
+import { authorizationOperationUserCheck } from '../authorization/authorization';
+import { AuthorizationOperationResponse } from '../authorization/authorization.model';
+import log from 'encore.dev/log';
 
 /**
  * Connected strams that listen for notifications.
@@ -42,7 +44,7 @@ export const notificationStream = api.streamOut<NotificationHandshake, Notificat
     // add new connection to connected list
     connectedStreams.set(handshake.userId, stream);
     // load user details
-    const user: UserResponse = await userDetails({ id: handshake.userId });
+    const user: UserResponse = await userDetail({ id: handshake.userId });
     new Subscription(notify, 'send-notification', {
       handler: async (notificationMessage: NotificationMessage) => {
         try {
@@ -88,9 +90,14 @@ export const resendNotificationMessageList = api(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== request.userId) {
-      // user not allowed to access
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'resendNotificationMessageList',
+      requestingUserId: userId,
+      destinationUserIds: [request.userId],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get status
       throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
     }
     // load noitification messages
@@ -112,9 +119,14 @@ export const notificationMessageList = api(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== request.userId) {
-      // user not allowed to access
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'notificationMessageList',
+      requestingUserId: userId,
+      destinationUserIds: [request.userId],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get status
       throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
     }
     // set notification filters
@@ -151,9 +163,14 @@ export const notificationMessageAllRead = api(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== request.userId) {
-      // user not allowed to access
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'notificationMessageAllRead',
+      requestingUserId: userId,
+      destinationUserIds: [request.userId],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get status
       throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
     }
     // update all notification ad readed
@@ -171,9 +188,14 @@ export const notificationMessageRead = api(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== request.userId) {
-      // user not allowed to access
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'notificationMessageRead',
+      requestingUserId: userId,
+      destinationUserIds: [request.userId],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get status
       throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
     }
     // update specified notification ad readed
@@ -193,9 +215,14 @@ export const notificationMessageUnread = api(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== request.userId) {
-      // user not allowed to access
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'notificationMessageUnread',
+      requestingUserId: userId,
+      destinationUserIds: [request.userId],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get status
       throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
     }
     // update specified notification ad unreaded
@@ -213,6 +240,7 @@ export const notificationMessageUnread = api(
 export const sendNotificationMessage = api(
   { expose: true, auth: true, method: 'GET', path: '/notification/send/:userId' },
   async (request: NotificationMessageSendRequest): Promise<void> => {
+    // TODO MIC check for authorization
     // create new notification message
     const newNotificationMessage: NotificationMessage = {
       userId: request.userId,
@@ -243,6 +271,19 @@ export const notificationMessageDetails = api(
       // notification message not found
       throw APIError.notFound(locz().NOTIFICATION_NOTIFICATION_NOT_FOUND());
     }
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'notificationMessageDetails',
+      requestingUserId: userId,
+      destinationUserIds: [notificationMessage.userId],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get status
+      throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
+    }
     // return notification message
     return notificationMessage;
   }
@@ -261,8 +302,21 @@ export const notificationMessageDetailsFull = api(
       // notification message not found
       throw APIError.notFound(locz().NOTIFICATION_NOTIFICATION_NOT_FOUND());
     }
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'notificationMessageDetailsFull',
+      requestingUserId: userId,
+      destinationUserIds: [notificationMessage.userId],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get status
+      throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
+    }
     // load related notification user
-    const user = await userDetails({ id: notificationMessage.userId });
+    const user = await userDetail({ id: notificationMessage.userId });
     // prepare notificaion message full response
     const notificationMessageFull: NotificationMessageFull = {
       ...notificationMessage,

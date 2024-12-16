@@ -1,9 +1,23 @@
 /**
+ * User type.
+ */
+export enum UserRole {
+  // standard access user
+  Member = 'MEMBER',
+  // privileged user
+  Administrator = 'ADMIN',
+  // full access and site administrator user
+  SuperAdministrator = 'SUPERADMIN',
+} // UserType
+
+/**
  * User data.
  */
 export interface User {
   // user unique identificator
   id?: number;
+  // user role
+  role: UserRole;
   // user email
   email: string;
   // user name
@@ -33,6 +47,8 @@ export interface UserRequest {
 export interface UserResponse {
   // user unique identificator
   id?: number;
+  // user role
+  role: UserRole;
   // user email
   email: string;
   // user name
@@ -53,6 +69,8 @@ export interface UserResponse {
 export interface UserEditRequest {
   // user unique identificator
   id?: number;
+  // user role
+  role: UserRole;
   // user email
   email: string;
   // user name
@@ -72,6 +90,8 @@ export interface UserEditRequest {
 export interface UserList {
   // user unique identificator
   id: number;
+  // user role
+  role: UserRole;
   // user email
   email: string;
   // user name
@@ -277,6 +297,8 @@ export interface UserStatusRequest {
  * Contains a restricted set of user data.
  */
 export interface UserStatusResponse {
+  // user role
+  role: UserRole;
   // logged user name
   name: string;
   // logged user surname

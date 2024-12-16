@@ -16,6 +16,9 @@ import {
 import { orm } from '../common/db/db';
 import { secret } from 'encore.dev/config';
 import locz from '../common/i18n';
+import { AuthorizationOperationResponse } from '../authorization/authorization.model';
+import { authorizationOperationUserCheck } from '../authorization/authorization';
+import { getAuthData } from '~encore/auth';
 
 const APPLICATION_VERSION: string = '0.0.1';
 const APPLICATION_VERSION_DATE: Date = new Date(2024, 11 - 1, 14);
@@ -192,6 +195,15 @@ export const systemParametersUserCheck = api(
 export const systemParameterList = api(
   { expose: true, auth: true, method: 'GET', path: '/system/parameter' },
   async (): Promise<SystemParameterListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'systemParameterList',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
     // load system parameters
     let systemParameterQry = () => orm<SystemParameterList>('SystemParameter');
     const systemParameters: SystemParameterList[] = await systemParameterQry().select('id', 'name', 'type', 'value', 'description');
@@ -205,12 +217,21 @@ export const systemParameterList = api(
 export const systemParameterUpdate = api(
   { expose: true, auth: true, method: 'PATCH', path: '/system/parameter/:id' },
   async (request: SystemParameterEditRequest): Promise<SystemParameterListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'systemParameterUpdate',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
     // load system parameter
     const systemParameterQry = () => orm<SystemParameterListResponse>('SystemParameter');
     const systemParameter = await systemParameterQry().first().where('id', request.id);
     if (!systemParameter) {
       // system parameter not found
-      throw APIError.notFound(locz().SYSTEM_SYSTEM_PARAMETER_NOT_FOUND());
+      throw APIError.notFound(locz().SYSTEM_PARAMETER_NOT_FOUND());
     }
     // update system paramter
     const systemParameterUpdateQry = () => orm('SystemParameter');
@@ -218,4 +239,4 @@ export const systemParameterUpdate = api(
     // return updated user
     return systemParameterList();
   }
-); // userUpdate
+); // systemParameterUpdate

@@ -57,6 +57,7 @@ const fileEntryPrepareResponse = async (fileEntry: FileEntry): Promise<FileEntry
 export const fileEntryList = api(
   { expose: true, auth: true, method: 'GET', path: '/file' },
   async (request: FileEntryListRequest): Promise<FileEntryListResponse> => {
+    // TODO MIC check for authorization
     // load files
     const fileEntriesQry = () => orm<FileEntry>('FileEntry');
     // add search filters
@@ -86,6 +87,7 @@ export const fileEntryList = api(
 export const fileEntryDetails = api(
   { expose: true, auth: true, method: 'GET', path: '/file/:id' },
   async (request: FileEntryRequest): Promise<FileEntryResponse> => {
+    // TODO MIC check for authorization
     // load file
     const fileEntryQry = () => orm<FileEntryResponse>('FileEntry');
     const fileEntry = await fileEntryQry().first('id', 'userId', 'type', 'mimeType', 'filename').where('id', request.id);
@@ -107,6 +109,7 @@ export const fileEntryUpload = api.raw(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
+    // TODO MIC check for authorization
     // read file from request
     const fileEntry: FileEntry = { userId, mimeType: '', type: FileEntryType.Generic, filename: '', data: [] };
     const bb = busboy({
@@ -212,6 +215,7 @@ export const fileEntryDownloadBlob = api.raw({ expose: true, method: 'GET', path
       response.end('File not found');
       return;
     }
+    // TODO MIC check for authorization
     // check authorization
     if (payload.userId !== fileEntry.userId || payload.fileId !== fileEntry.id) {
       // file not found

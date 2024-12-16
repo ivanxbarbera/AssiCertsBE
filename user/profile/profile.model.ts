@@ -1,3 +1,6 @@
+// application modules
+import { UserRole } from '../user.model';
+
 /**
  * User profile data request.
  * Request for user profile details.
@@ -14,6 +17,8 @@ export interface UserProfileRequest {
 export interface UserProfileResponse {
   // identifier of the user profile
   id: number;
+  // user type
+  type: UserRole;
   // loggend user email
   email: string;
   // logged user name

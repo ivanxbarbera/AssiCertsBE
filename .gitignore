@@ -5,3 +5,5 @@ encore.gen.cue
 encore.app
 node_modules
 /encore.gen
+
+.continue/*

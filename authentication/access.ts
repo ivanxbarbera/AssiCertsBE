@@ -15,6 +15,8 @@ import { UserPasswordExpirationResponse } from '../user/user.model';
 import { sendNotificationMessage } from '../notification/notification';
 import { NotificationMessageType } from '../notification/notification.model';
 import log from 'encore.dev/log';
+import { authorizationOperationUserCheck } from '../authorization/authorization';
+import { AuthorizationOperationResponse } from '../authorization/authorization.model';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const jwtDurationInMinutes = secret('JWTDurationInMinute');
@@ -168,9 +170,14 @@ export const loginRenewBearer = api(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== request.userId) {
-      // user not allowed to access
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'loginRenewBearer',
+      requestingUserId: userId,
+      destinationUserIds: [request.userId],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get status
       throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_USER_NOT_ALLOWED());
     }
     // get data from request
@@ -216,9 +223,14 @@ export const loginRenewCookie = api.raw(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== userIdRequest) {
-      // user not allowed to access
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'loginRenewCookie',
+      requestingUserId: userId,
+      destinationUserIds: [userIdRequest],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get status
       throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_USER_NOT_ALLOWED());
     }
     // generate token

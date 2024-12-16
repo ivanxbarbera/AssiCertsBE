@@ -5,8 +5,9 @@ import { jwtVerify } from 'jose';
 import cookie from 'cookie';
 import { AuthenticationData, AuthenticationParams } from './authentication.model';
 import locz from '../common/i18n';
-import { UserPasswordExpirationResponse } from '../user/user.model';
+import { User, UserPasswordExpirationResponse } from '../user/user.model';
 import { getUserPasswordExpiration } from '../user/user';
+import { orm } from '../common/db/db';
 
 /**
  * JWT Secret.
@@ -34,26 +35,34 @@ export const authenticationHandler = authHandler<AuthenticationParams, Authentic
     token = cookies.auth ? cookies.auth! : '';
   } else {
     // token cannot be renewed
-    throw APIError.unauthenticated(locz().AUTHENTICATION_AUTHENTICATION_MALFORMED_REQUEST());
+    throw APIError.unauthenticated(locz().AUTHENTICATION_MALFORMED_REQUEST());
   }
   try {
     // extract payload from token
     const { payload } = await jwtVerify<AuthenticationData>(token, new TextEncoder().encode(jwtSercretKey()));
+    // load user
+    const userQry = () => orm<User>('User');
+    const user = await userQry().first().where('id', payload.userID).andWhere('disabled', false);
+    if (!user) {
+      // user not founded
+      throw APIError.permissionDenied(locz().AUTHENTICATION_USER_NOT_FOUND());
+    }
     // prepare authentication response
     const response: AuthenticationData = {
       userID: '' + payload.userID,
+      userRole: user.role,
     };
     // check password expiration
     const passwordEpiration: UserPasswordExpirationResponse = await getUserPasswordExpiration(parseInt(payload.userID));
     if (passwordEpiration.expired) {
       // user password expired
-      throw APIError.permissionDenied(locz().AUTHENTICATION_AUTHENTICATION_PASSWORD_EXPIRED());
+      throw APIError.permissionDenied(locz().AUTHENTICATION_PASSWORD_EXPIRED());
     }
     // return authentication data
     return response;
   } catch (exception) {
     // token verification error
-    throw APIError.unauthenticated(locz().AUTHENTICATION_AUTHENTICATION_NOT_AUTHENTICATED());
+    throw APIError.unauthenticated(locz().AUTHENTICATION_NOT_AUTHENTICATED());
   }
 }); // authenticationHandler
 

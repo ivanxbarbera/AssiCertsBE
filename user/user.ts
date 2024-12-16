@@ -35,12 +35,15 @@ import {
   UserPasswordExpirationResponse,
   UserStatusRequest,
   UserStatusResponse,
+  UserRole,
 } from './user.model';
 import { orm } from '../common/db/db';
 import { Validators } from '../common/utility/validators.utility';
 import { AuthenticationData } from '../authentication/authentication.model';
 import { AuthenticationUser } from '../authentication/access.model';
 import locz from '../common/i18n';
+import { authorizationOperationUserCheck } from '../authorization/authorization';
+import { AuthorizationOperationResponse } from '../authorization/authorization.model';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const frontendBaseURL = secret('FrontendBaseURL');
@@ -54,18 +57,18 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   // check data
   if (request.password !== request.passwordConfirm) {
     // password are different
-    throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH());
+    throw APIError.invalidArgument(locz().USER_PASSWORD_MATCH());
   }
   // check password compliance
   const passwordCheck: UserPasswordCheckResponse = await userPasswordCheck({ password: request.password });
   if (!passwordCheck.compliant) {
     // password not compliant
-    throw APIError.invalidArgument(locz().USER_USER_PASSWORD_NOT_COMPLIANT());
+    throw APIError.invalidArgument(locz().USER_PASSWORD_NOT_COMPLIANT());
   }
   // check email compliace
   if (!Validators.isValidEmail(request.email)) {
     // email is not well formed
-    throw APIError.invalidArgument(locz().USER_USER_EMAIL_MALFORMED());
+    throw APIError.invalidArgument(locz().USER_EMAIL_MALFORMED());
   }
   // check user parameters
   const userCheckParameters: UserCheckParameters = await systemParametersUserCheck();
@@ -73,19 +76,20 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   if (userCheckParameters.allowedDomains.length > 0) {
     const emailDomain = request.email.split('@')[1]; // Get the domain part of the email
     if (!userCheckParameters.allowedDomains.includes(emailDomain)) {
-      throw APIError.invalidArgument(locz().USER_USER_DOMAIN_NOT_ALLOWED());
+      throw APIError.invalidArgument(locz().USER_DOMAIN_NOT_ALLOWED());
     }
   }
   // check for mail existance
   const emailCount = (await orm('User').count('id').where('email', request.email))[0]['count'] as number;
   if (emailCount > 0) {
     // email already exists
-    throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST());
+    throw APIError.alreadyExists(locz().USER_EMAIL_ALREADY_EXIST());
   }
   // encrypt password
   const passwordHash = bcrypt.hashSync(request.password);
   // prepare user to be saved
   const newUser: User = {
+    role: UserRole.Member,
     email: request.email,
     name: request.name,
     surname: request.surname,
@@ -121,9 +125,9 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
     await transporter.sendMail({
       from: smptParameters.defaultSender, // sender address
       to: newUser.email, // list of receivers
-      subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_REGISTER_EMAIL_SUBJECT()).trim(),
-      text: locz().USER_USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT({ name: newUser.name }),
-      html: locz().USER_USER_PASSWORD_REGISTER_EMAIL_BODY_HTML({ name: newUser.name }),
+      subject: (smptParameters.subjectPrefix + ' ' + locz().USER_PASSWORD_REGISTER_EMAIL_SUBJECT()).trim(),
+      text: locz().USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT({ name: newUser.name }),
+      html: locz().USER_PASSWORD_REGISTER_EMAIL_BODY_HTML({ name: newUser.name }),
     });
   } catch (error) {
     // error sending email
@@ -173,9 +177,9 @@ export const userPasswordReset = api({ expose: true, method: 'GET', path: '/user
       await transporter.sendMail({
         from: smptParameters.defaultSender, // sender address
         to: user.email, // list of receivers
-        subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_RESET_EMAIL_SUBJECT()).trim(),
-        text: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
-        html: locz().USER_USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+        subject: (smptParameters.subjectPrefix + ' ' + locz().USER_PASSWORD_RESET_EMAIL_SUBJECT()).trim(),
+        text: locz().USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
+        html: locz().USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
       });
     } catch (error) {
       // error sending email
@@ -195,27 +199,27 @@ export const userPasswordResetConfirm = api(
     // check data
     if (request.password !== request.passwordConfirm) {
       // password are different
-      throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH());
+      throw APIError.invalidArgument(locz().USER_PASSWORD_MATCH());
     }
     // check password compliance
     const passwordCheck: UserPasswordCheckResponse = await userPasswordCheck({ password: request.password });
     if (!passwordCheck.compliant) {
       // password not compliant
-      throw APIError.invalidArgument(locz().USER_USER_PASSWORD_NOT_COMPLIANT());
+      throw APIError.invalidArgument(locz().USER_PASSWORD_NOT_COMPLIANT());
     }
     // load password reset data
     const userPasswordReset = await orm<UserPasswordReset>('UserPasswordReset').first().where('token', request.token);
     if (!userPasswordReset) {
       // request not fouded
-      throw APIError.notFound(locz().USER_USER_RESET_REQ_NOT_FOUND());
+      throw APIError.notFound(locz().USER_RESET_REQ_NOT_FOUND());
     }
     if (Date.now() > userPasswordReset.expiresAt.getTime()) {
       // request expired
-      throw APIError.resourceExhausted(locz().USER_USER_RESET_REQ_EXPIRED());
+      throw APIError.resourceExhausted(locz().USER_RESET_REQ_EXPIRED());
     }
     if (userPasswordReset.used) {
       // request already used
-      throw APIError.permissionDenied(locz().USER_USER_RESET_REQ_USED());
+      throw APIError.permissionDenied(locz().USER_RESET_REQ_USED());
     }
     // check password history
     const passwordHistoryCheck: UserPasswordHistoryCheckResponse = await userPasswordHistoryCheck({
@@ -224,13 +228,13 @@ export const userPasswordResetConfirm = api(
     });
     if (!passwordHistoryCheck.compliant) {
       // password not compliant
-      throw APIError.invalidArgument(locz().USER_USER_USED_PASSWORD());
+      throw APIError.invalidArgument(locz().USER_USED_PASSWORD());
     }
     // load user
     const user = await orm<User>('User').first().where('id', userPasswordReset.userId);
     if (!user) {
       // user not fouded
-      throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
+      throw APIError.notFound(locz().USER_USER_NOT_FOUND());
     }
     // encrypt password
     const passwordHash = bcrypt.hashSync(request.password);
@@ -263,9 +267,9 @@ export const userPasswordResetConfirm = api(
       await transporter.sendMail({
         from: smptParameters.defaultSender, // sender address
         to: user.email, // list of receivers
-        subject: (smptParameters.subjectPrefix + ' ' + locz().USER_USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT()).trim(),
-        text: locz().USER_USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
-        html: locz().USER_USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+        subject: (smptParameters.subjectPrefix + ' ' + locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT()).trim(),
+        text: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
+        html: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
       });
     } catch (error) {
       // error sending email
@@ -289,21 +293,26 @@ export const userPasswordChange = api(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== request.userId) {
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'userPasswordChange',
+      requestingUserId: userId,
+      destinationUserIds: [request.userId],
+    });
+    if (!authorizationCheck.canBePerformed) {
       // user not allowed to change password
-      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED());
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // check data
     if (request.password !== request.passwordConfirm) {
       // password are different
-      throw APIError.invalidArgument(locz().USER_USER_PASSWORD_MATCH());
+      throw APIError.invalidArgument(locz().USER_PASSWORD_MATCH());
     }
     // check password compliance
     const passwordCheck: UserPasswordCheckResponse = await userPasswordCheck({ password: request.password });
     if (!passwordCheck.compliant) {
       // password not compliant
-      throw APIError.invalidArgument(locz().USER_USER_PASSWORD_NOT_COMPLIANT());
+      throw APIError.invalidArgument(locz().USER_PASSWORD_NOT_COMPLIANT());
     }
     // check password history
     const passwordHistoryCheck: UserPasswordHistoryCheckResponse = await userPasswordHistoryCheck({
@@ -312,7 +321,7 @@ export const userPasswordChange = api(
     });
     if (!passwordHistoryCheck.compliant) {
       // password not compliant
-      throw APIError.invalidArgument(locz().USER_USER_USED_PASSWORD());
+      throw APIError.invalidArgument(locz().USER_USED_PASSWORD());
     }
     // load user
     const user = await orm<User>('User')
@@ -322,12 +331,12 @@ export const userPasswordChange = api(
       .where('User.disabled', false);
     if (!user) {
       // user not fouded
-      throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
+      throw APIError.notFound(locz().USER_USER_NOT_FOUND());
     }
     // check current password
     if (!bcrypt.compareSync(request.password, user.passwordHash)) {
       // wrong previous password
-      throw APIError.invalidArgument(locz().USER_USER_OLD_PASSWORD());
+      throw APIError.invalidArgument(locz().USER_OLD_PASSWORD());
     }
     // encrypt password
     const passwordHash = bcrypt.hashSync(request.password);
@@ -353,10 +362,15 @@ export const userPasswordHistoryCheck = api(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== request.userId) {
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'userPasswordHistoryCheck',
+      requestingUserId: userId,
+      destinationUserIds: [request.userId],
+    });
+    if (!authorizationCheck.canBePerformed) {
       // user not allowed to change password
-      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED());
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load password constraints
     const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();
@@ -470,10 +484,15 @@ export const userSiteLock = api(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== request.id) {
-      // user not allowed to access
-      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED());
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'userSiteLock',
+      requestingUserId: userId,
+      destinationUserIds: [request.id],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to lock
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // update user lock status
     await orm('User').where('id', request.id).update('siteLocked', true);
@@ -494,10 +513,15 @@ export const userSiteUnlock = api(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== request.id) {
-      // user not allowed to access
-      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED());
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'userSiteUnlock',
+      requestingUserId: userId,
+      destinationUserIds: [request.id],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to unlock
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load user profile data
     const authenticationQry = () => orm<AuthenticationUser>('User');
@@ -536,7 +560,20 @@ export const userList = api({ expose: true, auth: true, method: 'GET', path: '/u
   // TODO add search filters
   // load users
   const usersQry = () => orm<UserList>('User');
-  const users = await usersQry().select('id', 'email', 'name', 'surname', 'disabled').orderBy('surname').orderBy('name');
+  const users = await usersQry().select('id', 'role', 'email', 'name', 'surname', 'disabled').orderBy('surname').orderBy('name');
+  // check authorization
+  const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+    operationCode: 'userList',
+    requestingUserRole: getAuthData()?.userRole,
+    destinationUserRoles: users.map((user) => {
+      const role: UserRole = user.role;
+      return role;
+    }),
+  });
+  if (!authorizationCheck.canBePerformed) {
+    // user not allowed to get details
+    throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+  }
   // return users
   return {
     users,
@@ -546,20 +583,32 @@ export const userList = api({ expose: true, auth: true, method: 'GET', path: '/u
 /**
  * Load user details.
  */
-export const userDetails = api(
-  { expose: true, auth: true, method: 'GET', path: '/user/:id' },
-  async (request: UserRequest): Promise<UserResponse> => {
-    // load user
-    const userQry = () => orm<UserResponse>('User');
-    const user = await userQry().first().where('id', request.id);
-    if (!user) {
-      // user not found
-      throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
-    }
-    // return user
-    return user;
+export const userDetail = api({ expose: true, auth: true, method: 'GET', path: '/user/:id' }, async (request: UserRequest): Promise<UserResponse> => {
+  // load user
+  const userQry = () => orm<UserResponse>('User');
+  const user = await userQry().first().where('id', request.id);
+  if (!user) {
+    // user not found
+    throw APIError.notFound(locz().USER_USER_NOT_FOUND());
   }
-); // userDetails
+  // get authentication data
+  const authenticationData: AuthenticationData = getAuthData()!;
+  const userId = parseInt(authenticationData.userID);
+  // check authorization
+  const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+    operationCode: 'userDetail',
+    requestingUserId: userId,
+    destinationUserIds: [user.id!],
+    requestingUserRole: authenticationData.userRole,
+    destinationUserRoles: [user.role],
+  });
+  if (!authorizationCheck.canBePerformed) {
+    // user not allowed to get details
+    throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+  }
+  // return user
+  return user;
+}); // userDetail
 
 /**
  * Insert new user.
@@ -567,20 +616,30 @@ export const userDetails = api(
 export const userInsert = api(
   { expose: true, auth: true, method: 'POST', path: '/user' },
   async (request: UserEditRequest): Promise<UserResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'userInsert',
+      requestingUserRole: getAuthData()?.userRole,
+      destinationUserRoles: [request.role],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+    }
     // check user parameters
     const userCheckParameters: UserCheckParameters = await systemParametersUserCheck();
     // check for email existence in allowed domains
     if (userCheckParameters.allowedDomains.length > 0) {
       const emailDomain = request.email.split('@')[1]; // Get the domain part of the email
       if (!userCheckParameters.allowedDomains.includes(emailDomain)) {
-        throw APIError.invalidArgument(locz().USER_USER_DOMAIN_NOT_ALLOWED());
+        throw APIError.invalidArgument(locz().USER_DOMAIN_NOT_ALLOWED());
       }
     }
     // check user email
     const emailCount = (await orm('User').count('id').where('email', request.email))[0]['count'] as number;
     if (emailCount > 0) {
       // email already exists
-      throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST());
+      throw APIError.alreadyExists(locz().USER_EMAIL_ALREADY_EXIST());
     }
     // add internal fields
     const password = await generateRandomPassword();
@@ -604,7 +663,7 @@ export const userInsert = api(
     // request for password regeneration
     userPasswordReset({ email: request.email });
     // return created user
-    return userDetails({ id });
+    return userDetail({ id });
   }
 ); // userInsert
 
@@ -614,12 +673,22 @@ export const userInsert = api(
 export const userUpdate = api(
   { expose: true, auth: true, method: 'PATCH', path: '/user/:id' },
   async (request: UserEditRequest): Promise<UserResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'userUpdate',
+      requestingUserRole: getAuthData()?.userRole,
+      destinationUserRoles: [request.role],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+    }
     // load user
     const userQry = () => orm<UserResponse>('User');
     const user = await userQry().first().where('id', request.id);
     if (!user) {
       // user not found
-      throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
+      throw APIError.notFound(locz().USER_USER_NOT_FOUND());
     }
     if (user.email !== request.email) {
       // user changed his email
@@ -629,21 +698,21 @@ export const userUpdate = api(
       if (userCheckParameters.allowedDomains.length > 0) {
         const emailDomain = request.email.split('@')[1]; // Get the domain part of the email
         if (!userCheckParameters.allowedDomains.includes(emailDomain)) {
-          throw APIError.invalidArgument(locz().USER_USER_DOMAIN_NOT_ALLOWED());
+          throw APIError.invalidArgument(locz().USER_DOMAIN_NOT_ALLOWED());
         }
       }
       // check for mail existance
       const emailCount = (await orm('User').count('id').where('email', request.email))[0]['count'] as number;
       if (emailCount > 0) {
         // email already exists
-        throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST());
+        throw APIError.alreadyExists(locz().USER_EMAIL_ALREADY_EXIST());
       }
     }
     // update user
     const userUpdateQry = () => orm('User');
     const resutlQry = await userUpdateQry().where('id', request.id).update(request, ['id']);
     // return updated user
-    return userDetails({ id: resutlQry[0].id });
+    return userDetail({ id: resutlQry[0].id });
   }
 ); // userUpdate
 
@@ -697,10 +766,15 @@ export const userPasswordExpirationCheck = api(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== request.userId) {
-      // user not allowed to change password
-      throw APIError.permissionDenied(locz().USER_USER_USER_NOT_ALLOWED());
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'userPasswordExpirationCheck',
+      requestingUserId: userId,
+      destinationUserIds: [request.userId],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to lock
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // get password expiration data
     return getUserPasswordExpiration(request.userId);
@@ -718,7 +792,7 @@ export const getUserPasswordExpiration = async (userId: number): Promise<UserPas
   const userPasswordHistory = await userPasswordHistoryQry().first().where('userId', userId).orderBy('date', 'DESC');
   if (!userPasswordHistory) {
     // last password history not found
-    throw APIError.notFound(locz().USER_USER_PASSWORD_HISTORY_NOT_FOUND());
+    throw APIError.notFound(locz().USER_PASSWORD_HISTORY_NOT_FOUND());
   }
   // calculate the difference in days
   const daysFromLastChange = moment().diff(moment(userPasswordHistory.date), 'days');
@@ -745,17 +819,22 @@ export const userStatusGet = api(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== request.id) {
-      // user not allowed to access
-      throw APIError.permissionDenied(locz().USER_USER_STATUS_USER_NOT_ALLOWED());
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'userStatusGet',
+      requestingUserId: userId,
+      destinationUserIds: [request.id],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get status
+      throw APIError.permissionDenied(locz().USER_STATUS_USER_NOT_ALLOWED());
     }
     // return user profile data
     const userStatusQry = () => orm<UserStatusResponse>('User');
-    const userStatus = await userStatusQry().first('name', 'surname', 'siteLocked').where('id', request.id);
+    const userStatus = await userStatusQry().first('role', 'name', 'surname', 'siteLocked').where('id', request.id);
     if (!userStatus) {
       // user not founded
-      throw APIError.notFound(locz().USER_USER_STATUS_USER_NOT_FOUND());
+      throw APIError.notFound(locz().USER_STATUS_USER_NOT_FOUND());
     }
     return userStatus;
   }

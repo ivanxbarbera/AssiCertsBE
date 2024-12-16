@@ -6,6 +6,8 @@ import { UserProfileEditRequest, UserProfileRequest, UserProfileResponse } from 
 import { AuthenticationData } from '../../authentication/authentication.model';
 import { orm } from '../../common/db/db';
 import locz from '../../common/i18n';
+import { authorizationOperationUserCheck } from '../../authorization/authorization';
+import { AuthorizationOperationResponse } from '../../authorization/authorization.model';
 
 /**
  * User profile details.
@@ -17,17 +19,22 @@ export const userProfileGet = api(
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
-    // check user permission
-    if (userId !== request.id) {
-      // user not allowed to access
-      throw APIError.permissionDenied(locz().USER_PROFILE_PROFILE_USER_NOT_ALLOWED());
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'userProfileGet',
+      requestingUserId: userId,
+      destinationUserIds: [request.id],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get status
+      throw APIError.permissionDenied(locz().USER_PROFILE_USER_NOT_ALLOWED());
     }
     // return user profile data
     const userProfileQry = () => orm<UserProfileResponse>('User');
     const userProfile = await userProfileQry().first().where('id', request.id);
     if (!userProfile) {
       // user not founded
-      throw APIError.notFound(locz().USER_PROFILE_PROFILE_USER_NOT_FOUND());
+      throw APIError.notFound(locz().USER_PROFILE_USER_NOT_FOUND());
     }
     return userProfile;
   }
@@ -39,12 +46,25 @@ export const userProfileGet = api(
 export const userProfileUpdate = api(
   { expose: true, auth: true, method: 'PATCH', path: '/user/profile/:id' },
   async (request: UserProfileEditRequest): Promise<UserProfileResponse> => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check user authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'userProfileUpdate',
+      requestingUserId: userId,
+      destinationUserIds: [request.id],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get status
+      throw APIError.permissionDenied(locz().USER_PROFILE_USER_NOT_ALLOWED());
+    }
     // load user profile
     const userProfileQry = () => orm<UserProfileResponse>('User');
     const userProfile = await userProfileQry().first().where('id', request.id);
     if (!userProfile) {
       // user not found
-      throw APIError.notFound(locz().USER_USER_USER_NOT_FOUND());
+      throw APIError.notFound(locz().USER_PROFILE_USER_NOT_FOUND());
     }
     if (userProfile.email !== request.email) {
       // user changed his email
@@ -52,7 +72,7 @@ export const userProfileUpdate = api(
       const emailCount = (await orm('User').count('id').where('email', request.email))[0]['count'] as number;
       if (emailCount > 0) {
         // email already exists
-        throw APIError.alreadyExists(locz().USER_USER_EMAIL_ALREADY_EXIST());
+        throw APIError.alreadyExists(locz().USER_PROFILE_EMAIL_ALREADY_EXIST());
       }
     }
     // update user profile
