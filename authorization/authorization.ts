@@ -62,7 +62,6 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
   if (
     (request.operationCode == 'systemParameterList' || request.operationCode == 'systemParameterUpdate') &&
     request.requestingUserRole &&
-    request.destinationUserRoles &&
     request.requestingUserRole == UserRole.SuperAdministrator // superadmin can access system parameters
   ) {
     return {
