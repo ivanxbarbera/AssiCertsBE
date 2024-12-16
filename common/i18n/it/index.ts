@@ -51,6 +51,7 @@ const it = {
     'Ciao {name: string},<br>sei stato correttamente registrato su Assihub. Attendi che un amministratore abiliti il tuo account.',
   USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT:
     'Ciao {name: string},\nsei stato correttamente registrato su Assihub. Attendi che un amministratore abiliti il tuo accout.\n',
+  USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE: "L'utente {name: string} {surname: string} si è appena registrato.",
   USER_ACTIVATED_EMAIL_SUBJECT: 'Attivazione confermata',
   USER_ACTIVATED_EMAIL_BODY_HTML:
     'Ciao {name: string},<br>il tuo account è stato attivato da un amministratore. Per accedere clicca sul link seguente.<br><a href="{link: string}">Accedi ad Assihub</a>',

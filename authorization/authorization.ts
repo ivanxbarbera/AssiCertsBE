@@ -1,6 +1,12 @@
 import { api } from 'encore.dev/api';
-import { AuthorizationOperationResponse, AuthorizationOperationUserCheck } from './authorization.model';
-import { UserRole } from '../user/user.model';
+import {
+  AuthorizationDestinationUserCheck,
+  AuthorizationDestinationUserCheckResponse,
+  AuthorizationOperationResponse,
+  AuthorizationOperationUserCheck,
+} from './authorization.model';
+import { UserList, UserRole } from '../user/user.model';
+import { orm } from '../common/db/db';
 
 // TODO MIC !!this is a temporary solution!!
 
@@ -74,3 +80,30 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
     canBePerformed: false,
   };
 }; // authorizationOperationRoleCheck
+
+/**
+ * Return the list of users that can perform requested operation.
+ * @param request authorization request
+ * @returns authorized users list
+ */
+export const authorizationDestinationUserCheck = async (
+  request: AuthorizationDestinationUserCheck
+): Promise<AuthorizationDestinationUserCheckResponse> => {
+  // TODO MIC move checks to database
+  if (request.operationCode == 'userRegisterActivate') {
+    // load users authorized to activate new registered users
+    // only superadmin can activate users
+    const usersQry = () => orm<{ id: number }>('User');
+    const users = await usersQry().select('id').where('role', UserRole.SuperAdministrator).andWhere('disabled', false);
+    const userIds: number[] = users.map((user) => {
+      return user.id;
+    });
+    return {
+      userIds,
+    };
+  }
+  // no user authorized
+  return {
+    userIds: [],
+  };
+}; // authorizationDestinationUserList

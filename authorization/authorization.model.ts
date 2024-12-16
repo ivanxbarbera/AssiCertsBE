@@ -24,3 +24,19 @@ export interface AuthorizationOperationResponse {
   // true if the operation can be performed, false otherwise
   canBePerformed: boolean;
 } // AuthorizationOperationResponse
+
+/**
+ * Request for getting users authorized to perform an operation.
+ */
+export interface AuthorizationDestinationUserCheck {
+  // the code of the operation to perform
+  operationCode: string;
+} // AuthorizationDestinationUserCheck
+
+/**
+ * Rsponse for getting users authorized to perform an operation.
+ */
+export interface AuthorizationDestinationUserCheckResponse {
+  // the list of the allowed users
+  userIds: number[];
+} // AuthorizationDestinationUserCheckResponse

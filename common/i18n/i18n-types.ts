@@ -209,6 +209,12 @@ type RootTranslation = {
 	 */
 	USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT: RequiredParams<'name'>
 	/**
+	 * L​'​u​t​e​n​t​e​ ​{​n​a​m​e​}​ ​{​s​u​r​n​a​m​e​}​ ​s​i​ ​è​ ​a​p​p​e​n​a​ ​r​e​g​i​s​t​r​a​t​o​.
+	 * @param {string} name
+	 * @param {string} surname
+	 */
+	USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE: RequiredParams<'name' | 'surname'>
+	/**
 	 * A​t​t​i​v​a​z​i​o​n​e​ ​c​o​n​f​e​r​m​a​t​a
 	 */
 	USER_ACTIVATED_EMAIL_SUBJECT: string
@@ -411,6 +417,10 @@ sei stato correttamente registrato su Assihub. Attendi che un amministratore abi
 
 	 */
 	USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT: (arg: { name: string }) => LocalizedString
+	/**
+	 * L'utente {name} {surname} si è appena registrato.
+	 */
+	USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE: (arg: { name: string, surname: string }) => LocalizedString
 	/**
 	 * Attivazione confermata
 	 */

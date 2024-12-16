@@ -42,8 +42,10 @@ import { Validators } from '../common/utility/validators.utility';
 import { AuthenticationData } from '../authentication/authentication.model';
 import { AuthenticationUser } from '../authentication/access.model';
 import locz from '../common/i18n';
-import { authorizationOperationUserCheck } from '../authorization/authorization';
-import { AuthorizationOperationResponse } from '../authorization/authorization.model';
+import { authorizationDestinationUserCheck, authorizationOperationUserCheck } from '../authorization/authorization';
+import { AuthorizationDestinationUserCheckResponse, AuthorizationOperationResponse } from '../authorization/authorization.model';
+import { sendNotificationMessage } from '../notification/notification';
+import { NotificationMessageType } from '../notification/notification.model';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const frontendBaseURL = secret('FrontendBaseURL');
@@ -74,7 +76,7 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   const userCheckParameters: UserCheckParameters = await systemParametersUserCheck();
   // check for email existence in allowed domains
   if (userCheckParameters.allowedDomains.length > 0) {
-    const emailDomain = request.email.split('@')[1]; // Get the domain part of the email
+    const emailDomain = request.email.split('@')[1];
     if (!userCheckParameters.allowedDomains.includes(emailDomain)) {
       throw APIError.invalidArgument(locz().USER_DOMAIN_NOT_ALLOWED());
     }
@@ -133,6 +135,19 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
     // error sending email
     throw APIError.unavailable(locz().EMAIL_SEND_ERROR());
   }
+  // send notify to admin users for confirmation
+  // get authorized users
+  const destinationUserCheck: AuthorizationDestinationUserCheckResponse = await authorizationDestinationUserCheck({
+    operationCode: 'userRegisterActivate',
+  });
+  // send notification to users
+  destinationUserCheck.userIds.forEach((userId) => {
+    sendNotificationMessage({
+      userId,
+      message: locz().USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE({ name: newUser.name, surname: newUser.surname }),
+      type: NotificationMessageType.UserMaintenance,
+    });
+  });
 }); // userRegister
 
 /**
