@@ -831,7 +831,7 @@ export const userStatusGet = api(
     }
     // return user profile data
     const userStatusQry = () => orm<UserStatusResponse>('User');
-    const userStatus = await userStatusQry().first('role', 'name', 'surname', 'siteLocked').where('id', request.id);
+    const userStatus = await userStatusQry().first('name', 'surname', 'siteLocked').where('id', request.id);
     if (!userStatus) {
       // user not founded
       throw APIError.notFound(locz().USER_STATUS_USER_NOT_FOUND());

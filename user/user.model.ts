@@ -297,8 +297,6 @@ export interface UserStatusRequest {
  * Contains a restricted set of user data.
  */
 export interface UserStatusResponse {
-  // user role
-  role: UserRole;
   // logged user name
   name: string;
   // logged user surname
