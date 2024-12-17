@@ -24,7 +24,6 @@ import { fileEntryList } from '../file/file';
 import { FileEntryResponse, FileEntryType } from '../file/file.model';
 import { authorizationOperationUserCheck } from '../authorization/authorization';
 import { AuthorizationOperationResponse } from '../authorization/authorization.model';
-import log from 'encore.dev/log';
 
 /**
  * Connected strams that listen for notifications.
@@ -105,7 +104,6 @@ export const resendNotificationMessageList = api(
     const notificationMessageListResponse: NotificationMessageListResponse = await notificationMessageList(request);
     const notificationMessages: NotificationMessage[] = notificationMessageListResponse.notificationMessages;
     notificationMessages.reverse().forEach(async (notificationMessage: NotificationMessage) => {
-      log.debug(JSON.stringify(notificationMessage));
       await notify.publish(notificationMessage);
     });
   }
