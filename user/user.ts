@@ -3,14 +3,12 @@ import { api, APIError } from 'encore.dev/api';
 import { SignJWT } from 'jose';
 import bcrypt from 'bcryptjs';
 import { getAuthData } from '~encore/auth';
-import { createTransport, Transporter } from 'nodemailer';
 import moment from 'moment';
 import { secret } from 'encore.dev/config';
 // application modules
 import { UserCheckParameters } from './../system/system.model';
 import { PasswordCheckParameters } from './../system/system.model';
-import { SMTPParameters } from './../system/system.model';
-import { systemParametersPasswordCheck, systemParametersSmtp, systemParametersUserCheck } from './../system/system';
+import { systemParametersPasswordCheck, systemParametersUserCheck } from './../system/system';
 import {
   UserPasswordResetRequest,
   UserPasswordReset,
@@ -47,6 +45,7 @@ import { AuthorizationDestinationUserCheckResponse, AuthorizationOperationRespon
 import { sendNotificationMessage } from '../notification/notification';
 import { NotificationMessageType } from '../notification/notification.model';
 import { DbUtility } from '../common/utility/db.utility';
+import { GeneralUtility } from '../common/utility/general.utility';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const frontendBaseURL = secret('FrontendBaseURL');
@@ -113,25 +112,11 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   const userPasswordHistoryRst = await userPasswordHistoryQry().insert(newUserPasswordHistory, ['id']);
   // send email to user
   try {
-    const smptParameters: SMTPParameters = await systemParametersSmtp();
-    const smtpTransport: any = {
-      host: smptParameters.host,
-      port: smptParameters.port,
-      secure: smptParameters.secure,
-    };
-    if (smptParameters.authentication) {
-      smtpTransport.auth = {
-        user: smptParameters.authenticationUsername,
-        pass: smptParameters.authenticationPassowrd,
-      };
-    }
-    const transporter: Transporter = createTransport(smtpTransport);
-    await transporter.sendMail({
-      from: smptParameters.defaultSender, // sender address
-      to: newUser.email, // list of receivers
-      subject: (smptParameters.subjectPrefix + ' ' + locz().USER_PASSWORD_REGISTER_EMAIL_SUBJECT()).trim(),
-      text: locz().USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT({ name: newUser.name }),
-      html: locz().USER_PASSWORD_REGISTER_EMAIL_BODY_HTML({ name: newUser.name }),
+    await GeneralUtility.emailSend({
+      recipients: newUser.email,
+      subject: locz().USER_PASSWORD_REGISTER_EMAIL_SUBJECT(),
+      bodyHtml: locz().USER_PASSWORD_REGISTER_EMAIL_BODY_HTML({ name: newUser.name }),
+      bodyText: locz().USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT({ name: newUser.name }),
     });
   } catch (error) {
     // error sending email
@@ -180,25 +165,11 @@ export const userPasswordReset = api({ expose: true, method: 'GET', path: '/user
     // send email to user
     try {
       const resetUrl = frontendBaseURL() + '/authentication/reset-password;token=' + token;
-      const smptParameters: SMTPParameters = await systemParametersSmtp();
-      const smtpTransport: any = {
-        host: smptParameters.host,
-        port: smptParameters.port,
-        secure: smptParameters.secure,
-      };
-      if (smptParameters.authentication) {
-        smtpTransport.auth = {
-          user: smptParameters.authenticationUsername,
-          pass: smptParameters.authenticationPassowrd,
-        };
-      }
-      const transporter: Transporter = createTransport(smtpTransport);
-      await transporter.sendMail({
-        from: smptParameters.defaultSender, // sender address
-        to: user.email, // list of receivers
-        subject: (smptParameters.subjectPrefix + ' ' + locz().USER_PASSWORD_RESET_EMAIL_SUBJECT()).trim(),
-        text: locz().USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
-        html: locz().USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+      await GeneralUtility.emailSend({
+        recipients: user.email,
+        subject: locz().USER_PASSWORD_RESET_EMAIL_SUBJECT(),
+        bodyHtml: locz().USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
+        bodyText: locz().USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
       });
     } catch (error) {
       // error sending email
@@ -270,25 +241,11 @@ export const userPasswordResetConfirm = api(
     // send email to user
     try {
       const resetUrl = frontendBaseURL() + '/authentication';
-      const smptParameters: SMTPParameters = await systemParametersSmtp();
-      const smtpTransport: any = {
-        host: smptParameters.host,
-        port: smptParameters.port,
-        secure: smptParameters.secure,
-      };
-      if (smptParameters.authentication) {
-        smtpTransport.auth = {
-          user: smptParameters.authenticationUsername,
-          pass: smptParameters.authenticationPassowrd,
-        };
-      }
-      const transporter: Transporter = createTransport(smtpTransport);
-      await transporter.sendMail({
-        from: smptParameters.defaultSender, // sender address
-        to: user.email, // list of receivers
-        subject: (smptParameters.subjectPrefix + ' ' + locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT()).trim(),
-        text: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
-        html: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+      await GeneralUtility.emailSend({
+        recipients: user.email,
+        subject: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT(),
+        bodyHtml: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
+        bodyText: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
       });
     } catch (error) {
       // error sending email
@@ -735,25 +692,11 @@ export const userUpdate = api(
       // user reactivated
       // send email to user
       try {
-        const smptParameters: SMTPParameters = await systemParametersSmtp();
-        const smtpTransport: any = {
-          host: smptParameters.host,
-          port: smptParameters.port,
-          secure: smptParameters.secure,
-        };
-        if (smptParameters.authentication) {
-          smtpTransport.auth = {
-            user: smptParameters.authenticationUsername,
-            pass: smptParameters.authenticationPassowrd,
-          };
-        }
-        const transporter: Transporter = createTransport(smtpTransport);
-        await transporter.sendMail({
-          from: smptParameters.defaultSender, // sender address
-          to: request.email, // list of receivers
-          subject: (smptParameters.subjectPrefix + ' ' + locz().USER_ACTIVATED_EMAIL_SUBJECT()).trim(),
-          text: locz().USER_ACTIVATED_EMAIL_BODY_TEXT({ name: request.name, link: frontendBaseURL() }),
-          html: locz().USER_ACTIVATED_EMAIL_BODY_HTML({ name: request.name, link: frontendBaseURL(), siteName: frontendBaseName() }),
+        await GeneralUtility.emailSend({
+          recipients: request.email,
+          subject: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT(),
+          bodyHtml: locz().USER_ACTIVATED_EMAIL_BODY_HTML({ name: request.name, link: frontendBaseURL(), siteName: frontendBaseName() }),
+          bodyText: locz().USER_ACTIVATED_EMAIL_BODY_TEXT({ name: request.name, link: frontendBaseURL() }),
         });
       } catch (error) {
         // error sending email
