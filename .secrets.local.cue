@@ -3,6 +3,7 @@ JWTDurationInMinute: "60",
 APIPrefix: "/api/v1"
 BaseURL: "http://localhost:4000"
 FrontendBaseURL: "http://localhost:4200"
+FrontendBaseName: "Assihub"
 MailSMTPHost: "localhost"
 MailSMTPPort: "1025"
 MailSMTPSecure: "false"

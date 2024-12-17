@@ -50,6 +50,7 @@ import { DbUtility } from '../common/utility/db.utility';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const frontendBaseURL = secret('FrontendBaseURL');
+const frontendBaseName = secret('FrontendBaseName');
 
 /**
  * User registration.
@@ -729,6 +730,36 @@ export const userUpdate = api(
     // update user
     const userUpdateQry = () => orm('User');
     const resutlQry = await userUpdateQry().where('id', request.id).update(request, ['id']);
+    // check user reactivation
+    if (user.disabled && !request.disabled) {
+      // user reactivated
+      // send email to user
+      try {
+        const smptParameters: SMTPParameters = await systemParametersSmtp();
+        const smtpTransport: any = {
+          host: smptParameters.host,
+          port: smptParameters.port,
+          secure: smptParameters.secure,
+        };
+        if (smptParameters.authentication) {
+          smtpTransport.auth = {
+            user: smptParameters.authenticationUsername,
+            pass: smptParameters.authenticationPassowrd,
+          };
+        }
+        const transporter: Transporter = createTransport(smtpTransport);
+        await transporter.sendMail({
+          from: smptParameters.defaultSender, // sender address
+          to: request.email, // list of receivers
+          subject: (smptParameters.subjectPrefix + ' ' + locz().USER_ACTIVATED_EMAIL_SUBJECT()).trim(),
+          text: locz().USER_ACTIVATED_EMAIL_BODY_TEXT({ name: request.name, link: frontendBaseURL() }),
+          html: locz().USER_ACTIVATED_EMAIL_BODY_HTML({ name: request.name, link: frontendBaseURL(), siteName: frontendBaseName() }),
+        });
+      } catch (error) {
+        // error sending email
+        throw APIError.unavailable(locz().EMAIL_SEND_ERROR());
+      }
+    }
     // return updated user
     return userDetail({ id: resutlQry[0].id });
   }

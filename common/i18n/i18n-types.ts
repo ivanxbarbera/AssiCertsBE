@@ -223,11 +223,12 @@ type RootTranslation = {
 	 */
 	USER_ACTIVATED_EMAIL_SUBJECT: string
 	/**
-	 * C​i​a​o​ ​{​n​a​m​e​}​,​<​b​r​>​i​l​ ​t​u​o​ ​a​c​c​o​u​n​t​ ​è​ ​s​t​a​t​o​ ​a​t​t​i​v​a​t​o​ ​d​a​ ​u​n​ ​a​m​m​i​n​i​s​t​r​a​t​o​r​e​.​ ​P​e​r​ ​a​c​c​e​d​e​r​e​ ​c​l​i​c​c​a​ ​s​u​l​ ​l​i​n​k​ ​s​e​g​u​e​n​t​e​.​<​b​r​>​<​a​ ​h​r​e​f​=​"​{​l​i​n​k​}​"​>​A​c​c​e​d​i​ ​a​d​ ​A​s​s​i​h​u​b​<​/​a​>
+	 * C​i​a​o​ ​{​n​a​m​e​}​,​<​b​r​>​i​l​ ​t​u​o​ ​a​c​c​o​u​n​t​ ​è​ ​s​t​a​t​o​ ​a​t​t​i​v​a​t​o​ ​d​a​ ​u​n​ ​a​m​m​i​n​i​s​t​r​a​t​o​r​e​.​ ​P​e​r​ ​a​c​c​e​d​e​r​e​ ​c​l​i​c​c​a​ ​s​u​l​ ​l​i​n​k​ ​s​e​g​u​e​n​t​e​.​<​b​r​>​<​a​ ​h​r​e​f​=​"​{​l​i​n​k​}​"​>​A​c​c​e​d​i​ ​a​d​ ​{​s​i​t​e​N​a​m​e​}​<​/​a​>
 	 * @param {string} link
 	 * @param {string} name
+	 * @param {string} siteName
 	 */
-	USER_ACTIVATED_EMAIL_BODY_HTML: RequiredParams<'link' | 'name'>
+	USER_ACTIVATED_EMAIL_BODY_HTML: RequiredParams<'link' | 'name' | 'siteName'>
 	/**
 	 * C​i​a​o​ ​{​n​a​m​e​}​,​
 ​s​e​i​ ​s​t​a​t​o​ ​c​o​r​r​e​t​t​a​m​e​n​t​e​ ​r​e​g​i​s​t​r​a​t​o​ ​s​u​ ​A​s​s​i​h​u​b​.​ ​P​e​r​ ​a​c​c​e​d​e​r​e​ ​c​l​i​c​c​a​ ​s​u​ ​l​i​n​k​ ​s​e​g​u​e​n​t​e​.​
@@ -434,9 +435,9 @@ sei stato correttamente registrato su Assihub. Attendi che un amministratore abi
 	 */
 	USER_ACTIVATED_EMAIL_SUBJECT: () => LocalizedString
 	/**
-	 * Ciao {name},<br>il tuo account è stato attivato da un amministratore. Per accedere clicca sul link seguente.<br><a href="{link}">Accedi ad Assihub</a>
+	 * Ciao {name},<br>il tuo account è stato attivato da un amministratore. Per accedere clicca sul link seguente.<br><a href="{link}">Accedi ad {siteName}</a>
 	 */
-	USER_ACTIVATED_EMAIL_BODY_HTML: (arg: { link: string, name: string }) => LocalizedString
+	USER_ACTIVATED_EMAIL_BODY_HTML: (arg: { link: string, name: string, siteName: string }) => LocalizedString
 	/**
 	 * Ciao {name},
 sei stato correttamente registrato su Assihub. Per accedere clicca su link seguente.

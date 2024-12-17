@@ -56,7 +56,7 @@ const it = {
     "L'utente non è attivo. Tramite il link è possibile modificarlo per configurare il ruolo e attivarlo per consentirne la connessione.",
   USER_ACTIVATED_EMAIL_SUBJECT: 'Attivazione confermata',
   USER_ACTIVATED_EMAIL_BODY_HTML:
-    'Ciao {name: string},<br>il tuo account è stato attivato da un amministratore. Per accedere clicca sul link seguente.<br><a href="{link: string}">Accedi ad Assihub</a>',
+    'Ciao {name: string},<br>il tuo account è stato attivato da un amministratore. Per accedere clicca sul link seguente.<br><a href="{link: string}">Accedi ad {siteName: string}</a>',
   USER_ACTIVATED_EMAIL_BODY_TEXT:
     'Ciao {name: string},\nsei stato correttamente registrato su Assihub. Per accedere clicca su link seguente.\n{link: string}',
 } satisfies BaseTranslation;

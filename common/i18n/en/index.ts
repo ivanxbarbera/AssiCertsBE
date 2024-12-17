@@ -52,7 +52,7 @@ const en = {
     'The user is not active. Through the link it is possible to modify it to configure the role and activate it to allow it to connect.',
   USER_ACTIVATED_EMAIL_SUBJECT: 'Activation confirmed',
   USER_ACTIVATED_EMAIL_BODY_HTML:
-    'Hello {name},<br>your accound has been activated by an administrator. To login click on the link below..<br><a href="{link}">Accedi ad Assihub</a>',
+    'Hello {name},<br>your accound has been activated by an administrator. To login click on the link below.<br><a href="{link}">Login to {siteName}</a>',
   USER_ACTIVATED_EMAIL_BODY_TEXT: 'Hello {name},\nyour accound has been activated by an administrator. To login click on the link below.\n{link}',
 } satisfies Translation;
 
