@@ -30,6 +30,8 @@ export interface User {
   siteLocked: boolean;
   // user status, disabled or active
   disabled: boolean;
+  // user default language
+  language?: string;
 } // User
 
 /**
@@ -61,6 +63,8 @@ export interface UserResponse {
   siteLocked: boolean;
   // user status, disabled or active
   disabled: boolean;
+  // user default language
+  language?: string;
 } // UserResponse
 
 /**
@@ -81,6 +85,8 @@ export interface UserEditRequest {
   fiscalCode?: string;
   // user status, disabled or active
   disabled: boolean;
+  // user default language
+  language?: string;
 } // UserEditRequest
 
 /**

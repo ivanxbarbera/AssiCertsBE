@@ -29,6 +29,8 @@ export interface UserProfileResponse {
   fiscalCode: string;
   // logged user site locking status. true is locked, false is unlocked
   siteLocked: boolean;
+  // user default language
+  language?: string;
 } // UserProfileResponse
 
 /**
@@ -45,4 +47,6 @@ export interface UserProfileEditRequest {
   surname: string;
   // user fiscal code
   fiscalCode?: string;
+  // user default language
+  language?: string;
 } // UserProfileEditRequest
