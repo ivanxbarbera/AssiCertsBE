@@ -1,4 +1,4 @@
-export class General {
+export class GeneralUtility {
   /**
    * Syncronous timeout.
    * Awaiting on return promise will execute in syncronous mode.
@@ -8,4 +8,4 @@ export class General {
   static sleep = (milliseconds: number): Promise<void> => {
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
   }; // sleep
-} // General
+} // GeneralUtility

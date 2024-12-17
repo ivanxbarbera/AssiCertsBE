@@ -38,7 +38,7 @@ import {
   UserRole,
 } from './user.model';
 import { orm } from '../common/db/db';
-import { Validators } from '../common/utility/validators.utility';
+import { ValidatorsUtility } from '../common/utility/validators.utility';
 import { AuthenticationData } from '../authentication/authentication.model';
 import { AuthenticationUser } from '../authentication/access.model';
 import locz from '../common/i18n';
@@ -46,6 +46,7 @@ import { authorizationDestinationUserCheck, authorizationOperationUserCheck } fr
 import { AuthorizationDestinationUserCheckResponse, AuthorizationOperationResponse } from '../authorization/authorization.model';
 import { sendNotificationMessage } from '../notification/notification';
 import { NotificationMessageType } from '../notification/notification.model';
+import { DbUtility } from '../common/utility/db.utility';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const frontendBaseURL = secret('FrontendBaseURL');
@@ -68,7 +69,7 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
     throw APIError.invalidArgument(locz().USER_PASSWORD_NOT_COMPLIANT());
   }
   // check email compliace
-  if (!Validators.isValidEmail(request.email)) {
+  if (!ValidatorsUtility.isValidEmail(request.email)) {
     // email is not well formed
     throw APIError.invalidArgument(locz().USER_EMAIL_MALFORMED());
   }
@@ -144,8 +145,10 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   destinationUserCheck.userIds.forEach((userId) => {
     sendNotificationMessage({
       userId,
-      message: locz().USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE({ name: newUser.name, surname: newUser.surname }),
       type: NotificationMessageType.UserMaintenance,
+      message: locz().USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE({ name: newUser.name, surname: newUser.surname }),
+      detail: locz().USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE_DETAIL(),
+      entityId: id,
     });
   });
 }); // userRegister
@@ -591,7 +594,7 @@ export const userList = api({ expose: true, auth: true, method: 'GET', path: '/u
   }
   // return users
   return {
-    users,
+    users: DbUtility.removeNullFieldsList(users),
   };
 }); // userList
 
@@ -622,7 +625,7 @@ export const userDetail = api({ expose: true, auth: true, method: 'GET', path: '
     throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
   }
   // return user
-  return user;
+  return DbUtility.removeNullFields(user);
 }); // userDetail
 
 /**
@@ -851,6 +854,6 @@ export const userStatusGet = api(
       // user not founded
       throw APIError.notFound(locz().USER_STATUS_USER_NOT_FOUND());
     }
-    return userStatus;
+    return DbUtility.removeNullFields(userStatus);
   }
 ); // userStatusGet

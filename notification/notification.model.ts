@@ -1,5 +1,5 @@
 import { FileEntry } from '../file/file.model';
-import { User, UserResponse } from '../user/user.model';
+import { UserResponse } from '../user/user.model';
 
 /**
  * Notification handshake.
@@ -21,6 +21,10 @@ export interface NotificationMessage {
   userId: number;
   // notification message
   message: string;
+  // notification detail
+  detail?: string;
+  // related entity id
+  entityId?: number;
   // notification timestamp
   timestamp: Date;
   // true if notification readed by user, false othewise
@@ -88,6 +92,10 @@ export interface NotificationMessageSendRequest {
   userId: number;
   // notification message
   message: string;
+  // notification detail
+  detail?: string;
+  // related entity id
+  entityId?: number;
   // notification message type
   type: NotificationMessageType;
 } // NotificationMessageSendRequest

@@ -19,6 +19,7 @@ import locz from '../common/i18n';
 import { AuthorizationOperationResponse } from '../authorization/authorization.model';
 import { authorizationOperationUserCheck } from '../authorization/authorization';
 import { getAuthData } from '~encore/auth';
+import { DbUtility } from '../common/utility/db.utility';
 
 const APPLICATION_VERSION: string = '0.0.1';
 const APPLICATION_VERSION_DATE: Date = new Date(2024, 11 - 1, 14);
@@ -58,7 +59,7 @@ export const systemParameter = api(
       systemParameterQry().where('code', request.code);
     }
     const systemParameters = await systemParameterQry().select();
-    return { systemParameters };
+    return { systemParameters: DbUtility.removeNullFieldsList(systemParameters) };
   }
 ); // systemParameter
 
@@ -207,7 +208,7 @@ export const systemParameterList = api(
     // load system parameters
     let systemParameterQry = () => orm<SystemParameterList>('SystemParameter');
     const systemParameters: SystemParameterList[] = await systemParameterQry().select('id', 'name', 'type', 'value', 'description');
-    return { systemParameters };
+    return { systemParameters: DbUtility.removeNullFieldsList(systemParameters) };
   }
 ); // systemParameterList
 

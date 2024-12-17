@@ -1,4 +1,4 @@
-export class Validators {
+export class ValidatorsUtility {
   /**
    * Check if an email is well formatted.
    * @param email email to ckeck
@@ -8,4 +8,4 @@ export class Validators {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailPattern.test(email);
   };
-} // Validators
+} // ValidatorsUtility

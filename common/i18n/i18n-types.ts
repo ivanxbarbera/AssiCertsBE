@@ -215,6 +215,10 @@ type RootTranslation = {
 	 */
 	USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE: RequiredParams<'name' | 'surname'>
 	/**
+	 * L​'​u​t​e​n​t​e​ ​n​o​n​ ​è​ ​a​t​t​i​v​o​.​ ​T​r​a​m​i​t​e​ ​i​l​ ​l​i​n​k​ ​è​ ​p​o​s​s​i​b​i​l​e​ ​m​o​d​i​f​i​c​a​r​l​o​ ​p​e​r​ ​c​o​n​f​i​g​u​r​a​r​e​ ​i​l​ ​r​u​o​l​o​ ​e​ ​a​t​t​i​v​a​r​l​o​ ​p​e​r​ ​c​o​n​s​e​n​t​i​r​n​e​ ​l​a​ ​c​o​n​n​e​s​s​i​o​n​e​.
+	 */
+	USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE_DETAIL: string
+	/**
 	 * A​t​t​i​v​a​z​i​o​n​e​ ​c​o​n​f​e​r​m​a​t​a
 	 */
 	USER_ACTIVATED_EMAIL_SUBJECT: string
@@ -421,6 +425,10 @@ sei stato correttamente registrato su Assihub. Attendi che un amministratore abi
 	 * L'utente {name} {surname} si è appena registrato.
 	 */
 	USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE: (arg: { name: string, surname: string }) => LocalizedString
+	/**
+	 * L'utente non è attivo. Tramite il link è possibile modificarlo per configurare il ruolo e attivarlo per consentirne la connessione.
+	 */
+	USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE_DETAIL: () => LocalizedString
 	/**
 	 * Attivazione confermata
 	 */

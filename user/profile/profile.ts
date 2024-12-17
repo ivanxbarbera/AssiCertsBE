@@ -1,3 +1,4 @@
+import { DbUtility } from './../../common/utility/db.utility';
 // libraries
 import { api, APIError } from 'encore.dev/api';
 import { getAuthData } from '~encore/auth';
@@ -36,7 +37,7 @@ export const userProfileGet = api(
       // user not founded
       throw APIError.notFound(locz().USER_PROFILE_USER_NOT_FOUND());
     }
-    return userProfile;
+    return DbUtility.removeNullFields(userProfile);
   }
 ); // userProfileGet
 

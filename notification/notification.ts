@@ -16,6 +16,7 @@ import {
   NotificationMessageSendRequest,
 } from './notification.model';
 import { orm } from '../common/db/db';
+import { DbUtility } from './../common/utility/db.utility';
 import { userDetail } from '../user/user';
 import { UserResponse } from '../user/user.model';
 import { AuthenticationData } from '../authentication/authentication.model';
@@ -104,6 +105,7 @@ export const resendNotificationMessageList = api(
     const notificationMessageListResponse: NotificationMessageListResponse = await notificationMessageList(request);
     const notificationMessages: NotificationMessage[] = notificationMessageListResponse.notificationMessages;
     notificationMessages.reverse().forEach(async (notificationMessage: NotificationMessage) => {
+      log.debug(JSON.stringify(notificationMessage));
       await notify.publish(notificationMessage);
     });
   }
@@ -147,9 +149,8 @@ export const notificationMessageList = api(
       notificationMessageQryPrep.limit(request.maxMessages);
     }
     const notificationMessages = await notificationMessageQryPrep;
-    // return notification messages
     return {
-      notificationMessages,
+      notificationMessages: DbUtility.removeNullFieldsList(notificationMessages),
     };
   }
 ); // notificationMessageList
@@ -249,6 +250,12 @@ export const sendNotificationMessage = api(
       readed: false,
       type: request.type,
     };
+    if (request.detail && request.detail != null) {
+      newNotificationMessage.detail = request.detail;
+    }
+    if (request.entityId && request.entityId != null) {
+      newNotificationMessage.entityId = request.entityId;
+    }
     // save notification message
     const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
     const notificationMessageRst = await notificationMessageQry().insert(newNotificationMessage, ['id']);
@@ -285,7 +292,7 @@ export const notificationMessageDetails = api(
       throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
     }
     // return notification message
-    return notificationMessage;
+    return DbUtility.removeNullFields(notificationMessage);
   }
 ); // notificationMessageDetails
 
@@ -328,6 +335,6 @@ export const notificationMessageDetailsFull = api(
       notificationMessageFull.userProfileImage = fileEntries[0];
     }
     // return full notification message
-    return notificationMessageFull;
+    return DbUtility.removeNullFields(notificationMessageFull);
   }
 ); // notificationMessageDetailsFull

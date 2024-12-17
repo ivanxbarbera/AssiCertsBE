@@ -47,7 +47,9 @@ const en = {
   USER_PASSWORD_REGISTER_EMAIL_SUBJECT: 'Registration confirmed',
   USER_PASSWORD_REGISTER_EMAIL_BODY_HTML: 'Hello {name},<br>you are successfully registered to Assihub. To login click on the link below.<br>',
   USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT: 'Hello {name},\nyou are successfully registered to Assihub. To login click on the link below.\n',
-  USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE: 'The user {name} {surname} has just registered',
+  USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE: 'The user {name} {surname} has just registered.',
+  USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE_DETAIL:
+    'The user is not active. Through the link it is possible to modify it to configure the role and activate it to allow it to connect.',
   USER_ACTIVATED_EMAIL_SUBJECT: 'Activation confirmed',
   USER_ACTIVATED_EMAIL_BODY_HTML:
     'Hello {name},<br>your accound has been activated by an administrator. To login click on the link below..<br><a href="{link}">Accedi ad Assihub</a>',

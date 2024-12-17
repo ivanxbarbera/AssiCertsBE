@@ -19,6 +19,7 @@ import {
 import { orm } from '../common/db/db';
 import { AuthenticationData } from '../authentication/authentication.model';
 import locz from '../common/i18n';
+import { DbUtility } from '../common/utility/db.utility';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const fileDownloadDurationInMinutes = secret('FileDownloadDurationInMinutes');
@@ -47,7 +48,7 @@ const fileEntryPrepareResponse = async (fileEntry: FileEntry): Promise<FileEntry
     absoluteUrl: false,
   };
   // return file response
-  return fileEntryResponse;
+  return DbUtility.removeNullFields(fileEntryResponse);
 }; // fileEntryPrepareResponse
 
 /**
