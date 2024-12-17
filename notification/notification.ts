@@ -257,7 +257,7 @@ export const sendNotificationMessage = api(
     // save notification message
     const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
     const notificationMessageRst = await notificationMessageQry().insert(newNotificationMessage, ['id']);
-    const id = notificationMessageRst[0].id;
+    newNotificationMessage.id = notificationMessageRst[0].id;
     // notify message
     await notify.publish(newNotificationMessage);
   }
