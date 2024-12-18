@@ -58,12 +58,12 @@ export interface Municipality {
   provinceId: number;
 } // Municipality
 
-export interface MunicipalitySyncIstat {
+export interface MunicipalitySync {
   url: string;
-} // MunicipalitySyncIstat
+} // MunicipalitySync
 
-export interface MunicipalitySyncIstatResponse {
+export interface MunicipalitySyncResponse {
   processed: number;
   added: number;
   deprecated: number;
-} // MunicipalitySyncIstat
+} // MunicipalitySyncResponse

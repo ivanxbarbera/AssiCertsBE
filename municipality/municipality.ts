@@ -1,25 +1,28 @@
 // libraries
 import * as XLSX from 'xlsx';
 import { Readable } from 'stream';
-// application modules
-import { orm } from '../common/db/db';
-import { Municipality, MunicipalitySyncIstat, MunicipalitySyncIstatResponse, Nation, Province, Region } from './municipality.model';
+import { secret } from 'encore.dev/config';
 import axios from 'axios';
 import { api, APIError } from 'encore.dev/api';
+// application modules
+import { orm } from '../common/db/db';
+import { Municipality, MunicipalitySync, MunicipalitySyncResponse, Nation, Province, Region } from './municipality.model';
 import locz from '../common/i18n';
+
+const municipalitiyIstatXlsFileUrl = secret('MunicipalitiyIstatXlsFileUrl');
 
 /**
  * Process ISTAT excel file and update stored data.
  * @param filePath excel file input stream
- * @returns loading process results
+ * @returns updating process results
  */
-export const municipalityProcessIstatFile = async (stream: Readable): Promise<MunicipalitySyncIstatResponse> => {
+export const municipalityProcessIstatFile = async (stream: Readable): Promise<MunicipalitySyncResponse> => {
   // load current deprecated
   const currentDeprecated = (await orm('Municipality').where('deprecated', true).count())[0]['count'] as number;
   // start changes
   const trx = await orm.transaction();
   // init response
-  const response: MunicipalitySyncIstatResponse = {
+  const response: MunicipalitySyncResponse = {
     processed: 0,
     added: 0,
     deprecated: 0,
@@ -176,13 +179,13 @@ export const municipalityProcessIstatFile = async (stream: Readable): Promise<Mu
 }; // municipalityProcessIstatFile
 
 /**
- * Fetch the file from the given URL and process it.
+ * Fetch the ISTAT file from the given URL and process it.
  * @param url the url for downloading the ISTAT excel file
- * @returns loading process results
+ * @returns updating process results
  */
-export const municipalityUpdateFromIstat = api(
-  { expose: true, auth: true, method: 'POST', path: '/municipality/syncIstat' },
-  async (request: MunicipalitySyncIstat): Promise<MunicipalitySyncIstatResponse> => {
+export const municipalitySyncIstat = api(
+  { expose: true, auth: true, method: 'POST', path: '/municipality/sync/istat' },
+  async (request: MunicipalitySync): Promise<MunicipalitySyncResponse> => {
     try {
       // open url stream for downloading file
       const urlResponse = await axios.get(request.url, { responseType: 'stream' });
@@ -197,4 +200,30 @@ export const municipalityUpdateFromIstat = api(
       throw APIError.internal(locz().MUNICIPALITY_FILE_GET_ERROR());
     }
   }
-); // municipalityUpdateFromIstat
+); // municipalitySyncIstat
+
+/**
+ * Sync municipality and related fetcing all available data.
+ * @returns updating process results
+ */
+export const municipalitySync = api(
+  { expose: true, auth: true, method: 'GET', path: '/municipality/sync' },
+  async (): Promise<MunicipalitySyncResponse> => {
+    // prepare response
+    const response: MunicipalitySyncResponse = {
+      processed: 0,
+      added: 0,
+      deprecated: 0,
+    };
+    // sync from istat xls file source
+    const responseIstat = await municipalitySyncIstat({
+      url: municipalitiyIstatXlsFileUrl(),
+    });
+    // update response
+    response.processed += responseIstat.processed;
+    response.added += responseIstat.added;
+    response.deprecated += responseIstat.deprecated;
+    // return response
+    return response;
+  }
+); // municipalitySync

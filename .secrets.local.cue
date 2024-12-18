@@ -13,3 +13,4 @@ MailSMTPAuthenticationPassword: ""
 MailSMTPAuthenticationDefaultSender: "noreply@assihub.it"
 MailSMTPAuthenticationSubjectPrefix: "[Assihub]"
 FileDownloadDurationInMinutes: "5",
+MunicipalitiyIstatXlsFileUrl: "https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.xls",
