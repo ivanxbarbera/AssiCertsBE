@@ -14,6 +14,8 @@ const en = {
   AUTHENTICATION_USER_NOT_FOUND: 'Authenticated user not found',
   EMAIL_SEND_ERROR: 'Error sending email. Contact technical support.',
   FILE_FILE_NOT_FOUND: 'File not founded',
+  MUNICIPALITY_FILE_GET_ERROR: 'Error getting municipality file to be processed',
+  MUNICIPALITY_FILE_PROCESS_ERROR: 'Error processing municipality file',
   NOTIFICATION_NOTIFICATION_NOT_FOUND: 'Notification not found',
   NOTIFICATION_USER_NOT_ALLOWED: 'User not allowed to access requested data',
   SYSTEM_PARAMETER_NOT_FOUND: 'System parameter not founded',

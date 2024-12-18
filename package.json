@@ -15,10 +15,12 @@
     "@types/node": "^20.5.7",
     "@types/nodemailer": "^6.4.17",
     "@types/pg": "^8.11.10",
+    "@types/xlsx": "^0.0.35",
     "typescript": "^5.2.2",
     "vitest": "^1.5.0"
   },
   "dependencies": {
+    "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "busboy": "^1.6.0",
     "cookie": "^1.0.1",
@@ -28,7 +30,8 @@
     "moment": "^2.30.1",
     "nodemailer": "^6.9.16",
     "pg": "^8.13.1",
-    "typesafe-i18n": "^5.26.2"
+    "typesafe-i18n": "^5.26.2",
+    "xlsx": "^0.18.5"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.13.0"

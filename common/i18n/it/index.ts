@@ -14,6 +14,8 @@ const it = {
   AUTHENTICATION_USER_NOT_FOUND: 'Authenticated user not found',
   EMAIL_SEND_ERROR: "Errore nell'invio della Mail. Contattare il supporto tecnico.",
   FILE_FILE_NOT_FOUND: 'File non trovato',
+  MUNICIPALITY_FILE_GET_ERROR: 'Errore nel recupero del file dei comuni da elaborare',
+  MUNICIPALITY_FILE_PROCESS_ERROR: "Errore nel nell'elaborazione del file dei comnuni",
   NOTIFICATION_NOTIFICATION_NOT_FOUND: 'Notifica non trovata',
   NOTIFICATION_USER_NOT_ALLOWED: 'Utente non autorizzato ad accedere ai dati richiesti',
   SYSTEM_PARAMETER_NOT_FOUND: 'Parametro di sistema non trovato',

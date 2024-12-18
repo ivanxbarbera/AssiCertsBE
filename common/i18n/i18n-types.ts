@@ -69,6 +69,14 @@ type RootTranslation = {
 	 */
 	FILE_FILE_NOT_FOUND: string
 	/**
+	 * E​r​r​o​r​e​ ​n​e​l​ ​r​e​c​u​p​e​r​o​ ​d​e​l​ ​f​i​l​e​ ​d​e​i​ ​c​o​m​u​n​i​ ​d​a​ ​e​l​a​b​o​r​a​r​e
+	 */
+	MUNICIPALITY_FILE_GET_ERROR: string
+	/**
+	 * E​r​r​o​r​e​ ​n​e​l​ ​n​e​l​l​'​e​l​a​b​o​r​a​z​i​o​n​e​ ​d​e​l​ ​f​i​l​e​ ​d​e​i​ ​c​o​m​n​u​n​i
+	 */
+	MUNICIPALITY_FILE_PROCESS_ERROR: string
+	/**
 	 * N​o​t​i​f​i​c​a​ ​n​o​n​ ​t​r​o​v​a​t​a
 	 */
 	NOTIFICATION_NOTIFICATION_NOT_FOUND: string
@@ -292,6 +300,14 @@ export type TranslationFunctions = {
 	 * File non trovato
 	 */
 	FILE_FILE_NOT_FOUND: () => LocalizedString
+	/**
+	 * Errore nel recupero del file dei comuni da elaborare
+	 */
+	MUNICIPALITY_FILE_GET_ERROR: () => LocalizedString
+	/**
+	 * Errore nel nell'elaborazione del file dei comnuni
+	 */
+	MUNICIPALITY_FILE_PROCESS_ERROR: () => LocalizedString
 	/**
 	 * Notifica non trovata
 	 */
