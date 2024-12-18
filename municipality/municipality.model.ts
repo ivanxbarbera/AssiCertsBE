@@ -58,12 +58,22 @@ export interface Municipality {
   provinceId: number;
 } // Municipality
 
+/**
+ * Municipality synchronization request.
+ */
 export interface MunicipalitySync {
+  // url for getting source municipality data file
   url: string;
 } // MunicipalitySync
 
+/**
+ * Municipality synchronization response.
+ */
 export interface MunicipalitySyncResponse {
+  // number of municipality processed
   processed: number;
+  // number of new municipality added
   added: number;
+  // number of existing municipality deprecated
   deprecated: number;
 } // MunicipalitySyncResponse
