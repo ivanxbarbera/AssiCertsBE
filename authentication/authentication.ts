@@ -33,6 +33,9 @@ export const authenticationHandler = authHandler<AuthenticationParams, Authentic
     // get the token from cookie
     const cookies = cookie.parse(params.authorizationCookie);
     token = cookies.auth ? cookies.auth! : '';
+  } else if (params.authorizationMode === 'websocket') {
+    // get the token query string
+    token = params.token ? params.token : '';
   } else {
     // token cannot be renewed
     throw APIError.unauthenticated(locz().AUTHENTICATION_MALFORMED_REQUEST());

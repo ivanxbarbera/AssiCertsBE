@@ -39,7 +39,7 @@ const connectedStreams: Map<number, StreamOut<NotificationMessage>> = new Map();
  * If true send the notification, otherwise pass to the next client.
  */
 export const notificationStream = api.streamOut<NotificationHandshake, NotificationMessage>(
-  { expose: true, auth: false, path: '/notification/stream' },
+  { expose: true, auth: true, path: '/notification/stream' },
   async (handshake, stream) => {
     // add new connection to connected list
     connectedStreams.set(handshake.userId, stream);

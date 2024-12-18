@@ -1,5 +1,5 @@
 // libraries
-import { Header } from 'encore.dev/api';
+import { Header, Query } from 'encore.dev/api';
 // application modules
 import { UserRole } from '../user/user.model';
 
@@ -10,6 +10,8 @@ export interface AuthenticationParams {
   // Bearer ahtorization header field
   authorizationBearer?: Header<'Authorization'>;
   authorizationCookie?: Header<'Cookie'>;
+  authorizationMode?: Header<'Sec-Fetch-Mode'>;
+  token?: Query<string>;
 } // AuthenticationParams
 
 /**
