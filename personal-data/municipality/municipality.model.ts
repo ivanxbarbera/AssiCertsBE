@@ -77,3 +77,33 @@ export interface MunicipalitySyncResponse {
   // number of existing municipality deprecated
   deprecated: number;
 } // MunicipalitySyncResponse
+
+/**
+ * Municipality list item.
+ */
+export interface MunicipalityList {
+  // parameter indentifier
+  id: number;
+  // municipality name
+  name: string;
+  // municipality code
+  code: string;
+  // province name
+  provinceName: string;
+  // province code
+  provinceCode: string;
+  // region name
+  regionName: string;
+  // nation name
+  nationName: string;
+  // nation code
+  nationCode: string;
+} // SystemMunicipalityList
+
+/**
+ * System municipality response for loaded values.
+ */
+export interface MunicipalityListResponse {
+  // municipality list
+  municipalities: MunicipalityList[];
+} // SystemMunicipalityListResponse

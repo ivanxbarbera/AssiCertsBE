@@ -66,9 +66,11 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
     };
   }
   if (
-    (request.operationCode == 'systemParameterList' || request.operationCode == 'systemParameterUpdate') &&
+    (request.operationCode == 'systemParameterList' ||
+      request.operationCode == 'systemParameterUpdate' ||
+      request.operationCode == 'municipalityList') &&
     request.requestingUserRole &&
-    request.requestingUserRole == UserRole.SuperAdministrator // superadmin can access system parameters
+    request.requestingUserRole == UserRole.SuperAdministrator // superadmin can access system functionality
   ) {
     return {
       // authorized

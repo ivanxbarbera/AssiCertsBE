@@ -4,10 +4,23 @@ import { Readable } from 'stream';
 import { secret } from 'encore.dev/config';
 import axios from 'axios';
 import { api, APIError } from 'encore.dev/api';
+import { getAuthData } from '~encore/auth';
 // application modules
-import { orm } from '../common/db/db';
-import { Municipality, MunicipalitySync, MunicipalitySyncResponse, Nation, Province, Region } from './municipality.model';
-import locz from '../common/i18n';
+import { orm } from '../../common/db/db';
+import {
+  Municipality,
+  MunicipalityList,
+  MunicipalityListResponse,
+  MunicipalitySync,
+  MunicipalitySyncResponse,
+  Nation,
+  Province,
+  Region,
+} from './municipality.model';
+import locz from '../../common/i18n';
+import { AuthorizationOperationResponse } from '../../authorization/authorization.model';
+import { authorizationOperationUserCheck } from '../../authorization/authorization';
+import { DbUtility } from '../../common/utility/db.utility';
 
 const municipalitiyIstatXlsFileUrl = secret('MunicipalitiyIstatXlsFileUrl');
 
@@ -227,3 +240,40 @@ export const municipalitySync = api(
     return response;
   }
 ); // municipalitySync
+
+/**
+ * Municipality list.
+ * Load municipality list.
+ */
+export const municipalityList = api(
+  { expose: true, auth: true, method: 'GET', path: '/personal-data/municipality' },
+  async (): Promise<MunicipalityListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'municipalityList',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
+    // load municipalities
+    let systemParameterQry = () => orm<MunicipalityList>('Municipality');
+    const systemParameters: MunicipalityList[] = await systemParameterQry()
+      .join('Province', 'Province.id', 'Municipality.provinceId')
+      .join('Region', 'Region.id', 'Province.regionId')
+      .join('Nation', 'Nation.id', 'Region.nationId')
+      .select(
+        'Municipality.id as id',
+        'Municipality.name as name',
+        'Municipality.code as code',
+        'Province.name as provinceName',
+        'Province.code as provinceCode',
+        'Region.name as regionName',
+        'Nation.name as nationName',
+        'Nation.code as nationCode'
+      )
+      .orderBy('Municipality.name', 'asc');
+    return { municipalities: DbUtility.removeNullFieldsList(systemParameters) };
+  }
+); // municipalityList
