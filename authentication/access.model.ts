@@ -6,6 +6,8 @@ export interface LoginRequest {
   email: string;
   // user password
   password: string;
+  // captcha token
+  captchaToken?: string;
 } // LoginRequest
 
 /**

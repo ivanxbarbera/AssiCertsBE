@@ -45,6 +45,18 @@ type RootTranslation = {
 	 */
 	AUTHENTICATION_ACCESS_USER_ID_REQUIRED: string
 	/**
+	 * E​r​r​o​r​e​ ​n​e​l​ ​c​o​n​t​r​o​l​l​o​ ​d​i​ ​v​a​l​i​d​a​z​i​o​n​e​ ​d​e​l​ ​c​a​p​t​c​h​a
+	 */
+	AUTHENTICATION_ACCESS_CAPTCHA_INTERNAL: string
+	/**
+	 * E​r​r​o​r​e​ ​n​e​l​l​a​ ​g​e​s​t​i​o​n​e​ ​d​e​l​ ​c​a​p​t​c​h​a
+	 */
+	AUTHENTICATION_ACCESS_CAPTCHA_UNKNOWN: string
+	/**
+	 * L​a​ ​v​a​l​i​d​a​z​i​o​n​e​ ​d​e​l​ ​c​a​p​t​c​h​a​ ​è​ ​s​t​a​t​a​ ​r​i​f​i​u​t​a​t​a
+	 */
+	AUTHENTICATION_ACCESS_CAPTCHA_VALIDATION: string
+	/**
 	 * R​i​c​h​i​e​s​t​a​ ​n​o​n​ ​c​o​n​f​o​r​m​e
 	 */
 	AUTHENTICATION_MALFORMED_REQUEST: string
@@ -276,6 +288,18 @@ export type TranslationFunctions = {
 	 * Identificativo utente obbligatorio
 	 */
 	AUTHENTICATION_ACCESS_USER_ID_REQUIRED: () => LocalizedString
+	/**
+	 * Errore nel controllo di validazione del captcha
+	 */
+	AUTHENTICATION_ACCESS_CAPTCHA_INTERNAL: () => LocalizedString
+	/**
+	 * Errore nella gestione del captcha
+	 */
+	AUTHENTICATION_ACCESS_CAPTCHA_UNKNOWN: () => LocalizedString
+	/**
+	 * La validazione del captcha è stata rifiutata
+	 */
+	AUTHENTICATION_ACCESS_CAPTCHA_VALIDATION: () => LocalizedString
 	/**
 	 * Richiesta non conforme
 	 */

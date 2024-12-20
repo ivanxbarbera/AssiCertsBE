@@ -8,6 +8,10 @@ const en = {
   AUTHENTICATION_ACCESS_PASSWORD_NOTIFICATION: 'Your password will expire in {expInDays} days.',
   AUTHENTICATION_ACCESS_USER_NOT_ALLOWED: 'User not allowed to access requested data',
   AUTHENTICATION_ACCESS_USER_ID_REQUIRED: 'User identificator required',
+  AUTHENTICATION_ACCESS_CAPTCHA_INTERNAL: 'Error during captcha validation',
+  AUTHENTICATION_ACCESS_CAPTCHA_UNKNOWN: 'Error in captcha management',
+  AUTHENTICATION_ACCESS_CAPTCHA_VALIDATION: 'Captcha validation refused',
+
   AUTHENTICATION_MALFORMED_REQUEST: 'Malformed request',
   AUTHENTICATION_NOT_AUTHENTICATED: 'Not authenticated',
   AUTHENTICATION_PASSWORD_EXPIRED: 'User password expired',

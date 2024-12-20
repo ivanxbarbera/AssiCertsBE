@@ -4,22 +4,24 @@ import { jwtVerify, SignJWT } from 'jose';
 import { orm } from '../common/db/db';
 import bcrypt from 'bcryptjs';
 import { IncomingMessage, ServerResponse } from 'http';
+import { getAuthData } from '~encore/auth';
 // application modules
 import { AuthenticationData } from './authentication.model';
+import { CaptchaErrorType, CaptchaVerifyResponse } from './captcha.model';
 import { AuthenticationUser, LoginRenewBearerRequest, LoginRequest, LoginBearerResponse, LoginCookieResponse } from './access.model';
 import { secret } from 'encore.dev/config';
 import { getUserPasswordExpiration, userStatusUnlock } from '../user/user';
 import locz from '../common/i18n';
-import { getAuthData } from '~encore/auth';
 import { UserPasswordExpirationResponse } from '../user/user.model';
 import { sendNotificationMessage } from '../notification/notification';
 import { NotificationMessageType } from '../notification/notification.model';
-import log from 'encore.dev/log';
 import { authorizationOperationUserCheck } from '../authorization/authorization';
 import { AuthorizationOperationResponse } from '../authorization/authorization.model';
+import { captchaVerify } from './captcha';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const jwtDurationInMinutes = secret('JWTDurationInMinute');
+const captchaValdationEnabled = secret('CaptchaValdationEnabled');
 
 /**
  * User login with Bearer JWT.
@@ -28,6 +30,23 @@ const jwtDurationInMinutes = secret('JWTDurationInMinute');
  * If wrong return a permission denied error.
  */
 export const loginBearer = api({ expose: true, method: 'POST', path: '/login' }, async (request: LoginRequest): Promise<LoginBearerResponse> => {
+  if (captchaValdationEnabled() === 'true') {
+    // check chaptca
+    const captchaCheck: CaptchaVerifyResponse = await captchaVerify({
+      token: request.captchaToken ?? '',
+    });
+    if (!captchaCheck.validated) {
+      // chaptcha not validated
+      switch (captchaCheck.error) {
+        case CaptchaErrorType.Internal:
+          throw APIError.internal(locz().AUTHENTICATION_ACCESS_CAPTCHA_INTERNAL());
+        case CaptchaErrorType.Validation:
+          throw APIError.permissionDenied(locz().AUTHENTICATION_ACCESS_CAPTCHA_VALIDATION());
+        default:
+          throw APIError.unknown(locz().AUTHENTICATION_ACCESS_CAPTCHA_UNKNOWN());
+      }
+    }
+  }
   // load user profile data
   const authenticationQry = () => orm<AuthenticationUser>('User');
   const authentication = await authenticationQry()
