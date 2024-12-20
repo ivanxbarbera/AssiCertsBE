@@ -12,9 +12,9 @@ import {
 } from './captcha.model';
 
 const captchaValdationEnabled = secret('CaptchaValdationEnabled');
-const cloudFlareTurnstyleUrl = secret('CloudFlareTurnstyleUrl');
-const cloudFlareTurnstyleKeySecret = secret('CloudFlareTurnstyleKeySecret');
-const cloudFlareTurnstyleKeyPublic = secret('CloudFlareTurnstyleKeyPublic');
+const cloudFlareTurnstileUrl = secret('CloudFlareTurnstileUrl');
+const cloudFlareTurnstileKeySecret = secret('CloudFlareTurnstileKeySecret');
+const cloudFlareTurnstileKeyPublic = secret('CloudFlareTurnstileKeyPublic');
 
 /**
  * Return capthca status.
@@ -25,7 +25,7 @@ export const captchaStatusGet = api(
     // prepare response
     const response: CaptchaStatusResponse = {
       enabled: captchaValdationEnabled() === 'true',
-      publicKey: cloudFlareTurnstyleKeyPublic(),
+      publicKey: cloudFlareTurnstileKeyPublic(),
     };
     // return status
     return response;
@@ -38,31 +38,31 @@ export const captchaStatusGet = api(
 export const captchaVerify = api(
   { expose: false, method: 'POST', path: '/authentication/captcha/verify' },
   async (request: CaptchaVerifyRequest): Promise<CaptchaVerifyResponse> => {
-    // call turnstyle check
-    return cloudFlareTurnstyleVerify(request);
+    // call Turnstile check
+    return cloudFlareTurnstileVerify(request);
   }
 ); // captchaVerify
 
 /**
- * CloudFlare Turnstyle captcha verify.
+ * CloudFlare Turnstile captcha verify.
  */
-export const cloudFlareTurnstyleVerify = async (request: CaptchaVerifyRequest): Promise<CaptchaVerifyResponse> => {
+export const cloudFlareTurnstileVerify = async (request: CaptchaVerifyRequest): Promise<CaptchaVerifyResponse> => {
   // prepare cloudflare request
   // TODO MIC evaluate missing request data
-  const turnstyleRequest: CloudFlareTurnStyleRequest = {
-    secret: cloudFlareTurnstyleKeySecret(),
+  const TurnstileRequest: CloudFlareTurnStyleRequest = {
+    secret: cloudFlareTurnstileKeySecret(),
     response: request.token,
   };
-  const turnstyleUrl = cloudFlareTurnstyleUrl();
+  const TurnstileUrl = cloudFlareTurnstileUrl();
   // call cloudflare for validation
-  const turnstyleResponse = await fetch(turnstyleUrl, {
+  const TurnstileResponse = await fetch(TurnstileUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(turnstyleRequest),
+    body: JSON.stringify(TurnstileRequest),
   });
-  const data: CloudFlareTurnStyleResponse = (await turnstyleResponse.json()) as CloudFlareTurnStyleResponse;
+  const data: CloudFlareTurnStyleResponse = (await TurnstileResponse.json()) as CloudFlareTurnStyleResponse;
   // prepare verification response
   const response: CaptchaVerifyResponse = {
     validated: data.success,
@@ -77,4 +77,4 @@ export const cloudFlareTurnstyleVerify = async (request: CaptchaVerifyRequest): 
     response.error = isError ? CaptchaErrorType.Internal : isInvalid ? CaptchaErrorType.Validation : CaptchaErrorType.Unknown;
   }
   return response;
-}; // cloudFlareTurnstyleVerify
+}; // cloudFlareTurnstileVerify

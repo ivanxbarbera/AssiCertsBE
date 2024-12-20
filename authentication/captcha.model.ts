@@ -29,7 +29,7 @@ export interface CaptchaVerifyResponse {
 } // CaptchaVerifyResponse
 
 /**
- * Request for CloudFlare Turnstyle captcha verify.
+ * Request for CloudFlare Turnstile captcha verify.
  */
 export interface CloudFlareTurnStyleRequest {
   // private cloudflare key
@@ -43,10 +43,10 @@ export interface CloudFlareTurnStyleRequest {
 } // CloudFlareTurnStyleRequest
 
 /**
- * Response from CloudFlare Turnstyle captcha verify.
+ * Response from CloudFlare Turnstile captcha verify.
  */
 export interface CloudFlareTurnStyleResponse {
-  // turnstyle validation response, true validated, false otherwise
+  // Turnstile validation response, true validated, false otherwise
   success: boolean;
   // error code list on validation failure
   'error-codes': [];
