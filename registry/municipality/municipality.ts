@@ -197,7 +197,7 @@ export const municipalityProcessIstatFile = async (stream: Readable): Promise<Mu
  * @returns updating process results
  */
 export const municipalitySyncIstat = api(
-  { expose: true, auth: true, method: 'POST', path: '/personal-data/municipality/sync/istat' },
+  { expose: true, auth: true, method: 'POST', path: '/registry/municipality/sync/istat' },
   async (request: MunicipalitySync): Promise<MunicipalitySyncResponse> => {
     try {
       // open url stream for downloading file
@@ -220,7 +220,7 @@ export const municipalitySyncIstat = api(
  * @returns updating process results
  */
 export const municipalitySync = api(
-  { expose: true, auth: true, method: 'GET', path: '/personal-data/municipality/sync' },
+  { expose: true, auth: true, method: 'GET', path: '/registry/municipality/sync' },
   async (): Promise<MunicipalitySyncResponse> => {
     // prepare response
     const response: MunicipalitySyncResponse = {
@@ -246,7 +246,7 @@ export const municipalitySync = api(
  * Load municipality list.
  */
 export const municipalityList = api(
-  { expose: true, auth: true, method: 'GET', path: '/personal-data/municipality' },
+  { expose: true, auth: true, method: 'GET', path: '/registry/municipality' },
   async (): Promise<MunicipalityListResponse> => {
     // check authorization
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
