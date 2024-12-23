@@ -259,7 +259,7 @@ export const municipalityList = api(
     }
     // load municipalities
     let municipalityQry = () => orm<MunicipalityList>('Municipality');
-    const monicipalities: MunicipalityList[] = await municipalityQry()
+    const municipalities: MunicipalityList[] = await municipalityQry()
       .join('Province', 'Province.id', 'Municipality.provinceId')
       .join('Region', 'Region.id', 'Province.regionId')
       .join('Nation', 'Nation.id', 'Region.nationId')
@@ -274,6 +274,6 @@ export const municipalityList = api(
         'Nation.code as nationCode'
       )
       .orderBy('Municipality.name', 'asc');
-    return { municipalities: DbUtility.removeNullFieldsList(monicipalities) };
+    return { municipalities: DbUtility.removeNullFieldsList(municipalities) };
   }
 ); // municipalityList
