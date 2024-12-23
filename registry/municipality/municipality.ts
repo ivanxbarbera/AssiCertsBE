@@ -258,8 +258,8 @@ export const municipalityList = api(
       throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
     }
     // load municipalities
-    let systemParameterQry = () => orm<MunicipalityList>('Municipality');
-    const systemParameters: MunicipalityList[] = await systemParameterQry()
+    let municipalityQry = () => orm<MunicipalityList>('Municipality');
+    const monicipalities: MunicipalityList[] = await municipalityQry()
       .join('Province', 'Province.id', 'Municipality.provinceId')
       .join('Region', 'Region.id', 'Province.regionId')
       .join('Nation', 'Nation.id', 'Region.nationId')
@@ -274,6 +274,6 @@ export const municipalityList = api(
         'Nation.code as nationCode'
       )
       .orderBy('Municipality.name', 'asc');
-    return { municipalities: DbUtility.removeNullFieldsList(systemParameters) };
+    return { municipalities: DbUtility.removeNullFieldsList(monicipalities) };
   }
 ); // municipalityList
