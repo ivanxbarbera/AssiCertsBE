@@ -1,12 +1,20 @@
-import { api } from 'encore.dev/api';
+// libraries
+import { api, APIError } from 'encore.dev/api';
+// application modules
 import {
   AuthorizationDestinationUserCheck,
   AuthorizationDestinationUserCheckResponse,
+  AuthorizationList,
+  AuthorizationListResponse,
   AuthorizationOperationResponse,
   AuthorizationOperationUserCheck,
+  AuthorizationVisibility,
 } from './authorization.model';
-import { UserList, UserRole } from '../user/user.model';
+import { UserRole } from '../user/user.model';
 import { orm } from '../common/db/db';
+import locz from '../common/i18n';
+import { getAuthData } from '~encore/auth';
+import { DbUtility } from '../common/utility/db.utility';
 
 // TODO MIC !!this is a temporary solution!!
 
@@ -77,6 +85,12 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       canBePerformed: true,
     };
   }
+  if (request.operationCode == 'authorizationList' && request.requestingUserRole) {
+    return {
+      // authorized
+      canBePerformed: true,
+    };
+  }
   // not authorized
   return {
     canBePerformed: false,
@@ -109,3 +123,73 @@ export const authorizationDestinationUserCheck = async (
     userIds: [],
   };
 }; // authorizationDestinationUserList
+
+/**
+ * Authorization list.
+ * Load user authorization list.
+ */
+export const authorizationList = api(
+  { expose: true, auth: true, method: 'GET', path: '/authorization' },
+  async (): Promise<AuthorizationListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'authorizationList',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
+    // load authorizations
+    // TODO MIC move checks to database
+
+    const systemParameters: AuthorizationList[] = [
+      { name: 'Dashboard', code: 'dashboard', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
+      { name: 'Notifications', code: 'notification', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
+      { name: 'Production', code: 'production', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
+      { name: 'Administration', code: 'administration', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
+      { name: 'Portfolio Analisys', code: 'portfolio-analysis', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
+      {
+        name: 'Fiscal Year Premiums',
+        code: 'portfolio-analysis.fiscal-year-premium',
+        userRole: UserRole.Member,
+        visibility: AuthorizationVisibility.Disabled,
+      },
+      {
+        name: 'Underwriting Year Premiums',
+        code: 'portfolio-analysis.underwriting-year-premium',
+        userRole: UserRole.Member,
+        visibility: AuthorizationVisibility.Disabled,
+      },
+      { name: 'Triangular', code: 'portfolio-analysis.triangular', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
+      { name: 'Tableu de Bord', code: 'portfolio-analysis.tableu-de-bord', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
+      {
+        name: 'Series Comparisons',
+        code: 'portfolio-analysis.series-comparison',
+        userRole: UserRole.Member,
+        visibility: AuthorizationVisibility.Disabled,
+      },
+      { name: 'Ranking', code: 'portfolio-analysis.ranking', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
+      { name: 'Companies', code: 'portfolio-analysis.company', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
+      { name: 'Marketing', code: 'marketing', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
+      { name: 'Archive', code: 'archive', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
+      { name: 'Registry', code: 'archive.registry', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
+      { name: 'Personal data', code: 'archive.personal-data', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
+      { name: 'Contacts', code: 'archive.contacts', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
+      {
+        name: 'Personal Data Import',
+        code: 'archive.personal-data-import',
+        userRole: UserRole.Member,
+        visibility: AuthorizationVisibility.Disabled,
+      },
+      { name: 'Municipality', code: 'archive.municipality', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
+      { name: 'Claim Office', code: 'claim-office', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
+      { name: 'Documents Sign', code: 'document-sign', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
+      { name: 'Power BI', code: 'power-bi', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
+      { name: 'User', code: 'user', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
+      { name: 'System', code: 'system', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
+      { name: 'Parameters', code: 'system.parameter', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
+    ];
+    return { authorizations: DbUtility.removeNullFieldsList(systemParameters) };
+  }
+); // authorizationList
