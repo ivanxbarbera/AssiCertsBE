@@ -212,7 +212,7 @@ export const userPasswordResetConfirm = api(
       throw APIError.permissionDenied(locz().USER_RESET_REQ_USED());
     }
     // check password history
-    const passwordHistoryCheck: UserPasswordHistoryCheckResponse = await userPasswordHistoryCheck({
+    const passwordHistoryCheck: UserPasswordHistoryCheckResponse = await isUserPasswordHistoryAlreadyUsed({
       userId: userPasswordReset.userId,
       password: request.password,
     });
@@ -348,26 +348,36 @@ export const userPasswordHistoryCheck = api(
       // user not allowed to change password
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
-    // load password constraints
-    const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();
-    // load user history password
-    const userPasswordHistoriesQry = () => orm<UserPasswordHistory>('UserPasswordHistory');
-    const userPasswordHistories: UserPasswordHistory[] = await userPasswordHistoriesQry()
-      .select()
-      .where('userId', request.userId)
-      .orderBy('date', 'DESC')
-      .limit(passwordCheckParams.historyUnusable);
-    const findedPasswords = userPasswordHistories.filter((userPasswordHistory) => {
-      return bcrypt.compareSync(request.password, userPasswordHistory.passwordHash);
-    });
-    if (findedPasswords.length > 0) {
-      // password already used
-      return { compliant: false };
-    }
-    // new password
-    return { compliant: true };
+    // check if password already used
+    return await isUserPasswordHistoryAlreadyUsed(request);
   }
 ); // userPasswordHistoryCheck
+
+/**
+ * Check if user password is already used in past.
+ * @param request user password check request
+ * @returns user password check response
+ */
+const isUserPasswordHistoryAlreadyUsed = async (request: UserPasswordHistoryCheckRequest): Promise<UserPasswordHistoryCheckResponse> => {
+  // load password constraints
+  const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();
+  // load user history password
+  const userPasswordHistoriesQry = () => orm<UserPasswordHistory>('UserPasswordHistory');
+  const userPasswordHistories: UserPasswordHistory[] = await userPasswordHistoriesQry()
+    .select()
+    .where('userId', request.userId)
+    .orderBy('date', 'DESC')
+    .limit(passwordCheckParams.historyUnusable);
+  const findedPasswords = userPasswordHistories.filter((userPasswordHistory) => {
+    return bcrypt.compareSync(request.password, userPasswordHistory.passwordHash);
+  });
+  if (findedPasswords.length > 0) {
+    // password already used
+    return { compliant: false };
+  }
+  // new password
+  return { compliant: true };
+}; // isUserPasswordHistoryAlreadyUsed
 
 /**
  * User password compliance check.

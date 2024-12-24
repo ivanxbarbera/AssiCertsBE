@@ -184,7 +184,7 @@ export const authorizationList = api(
         userRole: UserRole.Member,
         visibility: AuthorizationVisibility.Disabled,
       },
-      { name: 'Municipality', code: 'archive.municipality', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
+      { name: 'Municipality', code: 'archive.municipality', userRole: UserRole.Administrator, visibility: AuthorizationVisibility.Visible },
       { name: 'Claim Office', code: 'claim-office', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
       { name: 'Documents Sign', code: 'document-sign', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
       { name: 'Power BI', code: 'power-bi', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
