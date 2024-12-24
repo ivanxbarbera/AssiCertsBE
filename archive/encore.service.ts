@@ -1,4 +1,4 @@
 import { Service } from 'encore.dev/service';
 
 // registry service
-export default new Service('registry');
+export default new Service('archive');
