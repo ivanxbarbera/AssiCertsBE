@@ -168,8 +168,8 @@ export const userPasswordReset = api({ expose: true, method: 'GET', path: '/user
       await GeneralUtility.emailSend({
         recipients: user.email,
         subject: locz().USER_PASSWORD_RESET_EMAIL_SUBJECT(),
-        bodyHtml: locz().USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
-        bodyText: locz().USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+        bodyHtml: locz().USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+        bodyText: locz().USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
       });
     } catch (error) {
       // error sending email
@@ -244,8 +244,8 @@ export const userPasswordResetConfirm = api(
       await GeneralUtility.emailSend({
         recipients: user.email,
         subject: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT(),
-        bodyHtml: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
-        bodyText: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+        bodyHtml: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+        bodyText: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
       });
     } catch (error) {
       // error sending email
