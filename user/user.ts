@@ -831,3 +831,23 @@ export const userStatusGet = api(
     return DbUtility.removeNullFields(userStatus);
   }
 ); // userStatusGet
+
+/**
+ * Calculate user role weight.
+ * Higher weight for higher access level.
+ * SuperAdministrator > Administrator > Member
+ * @param userRole user role
+ * @returns user role weight
+ */
+export const getUserRoleWeight = (userRole: UserRole): number => {
+  switch (userRole) {
+    case UserRole.Member:
+      return 100;
+    case UserRole.Administrator:
+      return 200;
+    case UserRole.SuperAdministrator:
+      return 300;
+    default:
+      return 0;
+  }
+}; // getUserRoleValue

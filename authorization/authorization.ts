@@ -15,6 +15,7 @@ import { orm } from '../common/db/db';
 import locz from '../common/i18n';
 import { getAuthData } from '~encore/auth';
 import { DbUtility } from '../common/utility/db.utility';
+import { getUserRoleWeight } from '../user/user';
 
 // TODO MIC !!this is a temporary solution!!
 
@@ -132,9 +133,10 @@ export const authorizationList = api(
   { expose: true, auth: true, method: 'GET', path: '/authorization' },
   async (): Promise<AuthorizationListResponse> => {
     // check authorization
+    const userRole: UserRole = getAuthData()?.userRole!;
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
       operationCode: 'authorizationList',
-      requestingUserRole: getAuthData()?.userRole,
+      requestingUserRole: userRole,
     });
     if (!authorizationCheck.canBePerformed) {
       // user not allowed to get details
@@ -143,7 +145,7 @@ export const authorizationList = api(
     // load authorizations
     // TODO MIC move checks to database
 
-    const systemParameters: AuthorizationList[] = [
+    const authorizations: AuthorizationList[] = [
       { name: 'Dashboard', code: 'dashboard', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
       { name: 'Notifications', code: 'notification', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
       { name: 'Production', code: 'production', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
@@ -190,6 +192,21 @@ export const authorizationList = api(
       { name: 'System', code: 'system', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
       { name: 'Parameters', code: 'system.parameter', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
     ];
-    return { authorizations: DbUtility.removeNullFieldsList(systemParameters) };
+    // load user
+    // filter by user role
+    const authorized = authorizations.filter((authorization: AuthorizationList) => {
+      return isAuthorizationAccessible(authorization, userRole);
+    });
+    return { authorizations: DbUtility.removeNullFieldsList(authorized) };
   }
 ); // authorizationList
+
+/**
+ * Check if the user givem user can access requested authorization.
+ * @param authorization authorization requested
+ * @param userRole role of the requesting user
+ * @returns true if user can accesso authorization, false otherwise
+ */
+const isAuthorizationAccessible = (authorization: AuthorizationList, userRole: UserRole) => {
+  return getUserRoleWeight(userRole) >= getUserRoleWeight(authorization.userRole);
+}; // isAuthorizationAccessible
