@@ -30,8 +30,7 @@ const APPLICATION_VERSION_DATE: Date = new Date(2024, 11 - 1, 14);
  */
 export const systemVersion = api({ expose: true, method: 'GET', path: '/system/version' }, async (): Promise<SystemVersionResponse> => {
   // load data model version
-  const systemVersionQry = () => orm<SystemVersion>('SystemVersion');
-  const systemVersion = await systemVersionQry().first().orderBy('id', 'desc');
+  const systemVersion = await orm<SystemVersion>('SystemVersion').first().orderBy('id', 'desc');
   if (!systemVersion) {
     throw APIError.internal('Error getting datamodel version');
   }
@@ -51,14 +50,16 @@ export const systemParameter = api(
   { expose: false, method: 'GET', path: '/internal/system/parameter' },
   async (request: SystemParameterRequest): Promise<SystemParameterResponse> => {
     // load system parametes
-    let systemParameterQry = () => orm<SystemParameter>('SystemParameter');
-    if (request.group) {
-      systemParameterQry().where('group', request.group);
-    }
-    if (request.code) {
-      systemParameterQry().where('code', request.code);
-    }
-    const systemParameters = await systemParameterQry().select();
+    const systemParameters = await orm<SystemParameter>('SystemParameter')
+      .select()
+      .where((whereBuilder) => {
+        if (request.group) {
+          whereBuilder.where('group', request.group);
+        }
+        if (request.code) {
+          whereBuilder.where('code', request.code);
+        }
+      });
     return { systemParameters: DbUtility.removeNullFieldsList(systemParameters) };
   }
 ); // systemParameter
@@ -206,8 +207,13 @@ export const systemParameterList = api(
       throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
     }
     // load system parameters
-    let systemParameterQry = () => orm<SystemParameterList>('SystemParameter');
-    const systemParameters: SystemParameterList[] = await systemParameterQry().select('id', 'name', 'type', 'value', 'description');
+    const systemParameters: SystemParameterList[] = await orm<SystemParameterList>('SystemParameter').select(
+      'id',
+      'name',
+      'type',
+      'value',
+      'description'
+    );
     return { systemParameters: DbUtility.removeNullFieldsList(systemParameters) };
   }
 ); // systemParameterList
@@ -228,15 +234,13 @@ export const systemParameterUpdate = api(
       throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
     }
     // load system parameter
-    const systemParameterQry = () => orm<SystemParameterListResponse>('SystemParameter');
-    const systemParameter = await systemParameterQry().first().where('id', request.id);
+    const systemParameter = await orm<SystemParameterListResponse>('SystemParameter').first().where('id', request.id);
     if (!systemParameter) {
       // system parameter not found
       throw APIError.notFound(locz().SYSTEM_PARAMETER_NOT_FOUND());
     }
     // update system paramter
-    const systemParameterUpdateQry = () => orm('SystemParameter');
-    const resutlQry = await systemParameterUpdateQry().where('id', request.id).update(request, ['id']);
+    const resutlQry = await orm('SystemParameter').where('id', request.id).update(request, ['id']);
     // return updated user
     return systemParameterList();
   }

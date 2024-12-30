@@ -110,8 +110,7 @@ export const authorizationDestinationUserCheck = async (
   if (request.operationCode == 'userRegisterActivate') {
     // load users authorized to activate new registered users
     // only superadmin can activate users
-    const usersQry = () => orm<{ id: number }>('User');
-    const users = await usersQry().select('id').where('role', UserRole.SuperAdministrator).andWhere('disabled', false);
+    const users = await orm<{ id: number }>('User').select('id').where('role', UserRole.SuperAdministrator).andWhere('disabled', false);
     const userIds: number[] = users.map((user) => {
       return user.id;
     });

@@ -133,8 +133,7 @@ export const notificationMessageList = api(
     const orderBy = request.sortDesdending ? 'DESC' : 'ASC';
     // TODO add search filters
     // load noitification messages
-    let notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
-    let notificationMessageQryPrep = notificationMessageQry()
+    let notificationMessageQryPrep = orm<NotificationMessage>('NotificationMessage')
       .select()
       .where((whereBuilder) => {
         whereBuilder.where('userId', request.userId);
@@ -173,8 +172,7 @@ export const notificationMessageAllRead = api(
       throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
     }
     // update all notification ad readed
-    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
-    await notificationMessageQry().update('readed', true).where('userId', request.userId);
+    await orm<NotificationMessage>('NotificationMessage').update('readed', true).where('userId', request.userId);
   }
 ); // notificationMessageAllRead
 
@@ -198,8 +196,10 @@ export const notificationMessageRead = api(
       throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
     }
     // update specified notification ad readed
-    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
-    await notificationMessageQry().update('readed', true).where('userId', request.userId).andWhere('id', request.notificationMessageId);
+    await orm<NotificationMessage>('NotificationMessage')
+      .update('readed', true)
+      .where('userId', request.userId)
+      .andWhere('id', request.notificationMessageId);
     // load notification message
     return notificationMessageDetails({ id: request.notificationMessageId });
   }
@@ -225,8 +225,10 @@ export const notificationMessageUnread = api(
       throw APIError.permissionDenied(locz().NOTIFICATION_USER_NOT_ALLOWED());
     }
     // update specified notification ad unreaded
-    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
-    await notificationMessageQry().update('readed', false).where('userId', request.userId).andWhere('id', request.notificationMessageId);
+    await orm<NotificationMessage>('NotificationMessage')
+      .update('readed', false)
+      .where('userId', request.userId)
+      .andWhere('id', request.notificationMessageId);
     // load notification message
     return notificationMessageDetails({ id: request.notificationMessageId });
   }
@@ -255,8 +257,7 @@ export const sendNotificationMessage = api(
       newNotificationMessage.entityId = request.entityId;
     }
     // save notification message
-    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
-    const notificationMessageRst = await notificationMessageQry().insert(newNotificationMessage, ['id']);
+    const notificationMessageRst = await orm<NotificationMessage>('NotificationMessage').insert(newNotificationMessage, ['id']);
     newNotificationMessage.id = notificationMessageRst[0].id;
     // notify message
     await notify.publish(newNotificationMessage);
@@ -270,8 +271,7 @@ export const notificationMessageDetails = api(
   { expose: true, auth: true, method: 'GET', path: '/notification/:id' },
   async (request: NotificationMessageRequest): Promise<NotificationMessage> => {
     // load notification message
-    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
-    const notificationMessage = await notificationMessageQry().first().where('id', request.id);
+    const notificationMessage = await orm<NotificationMessage>('NotificationMessage').first().where('id', request.id);
     if (!notificationMessage) {
       // notification message not found
       throw APIError.notFound(locz().NOTIFICATION_NOTIFICATION_NOT_FOUND());
@@ -301,8 +301,7 @@ export const notificationMessageDetailsFull = api(
   { expose: true, auth: true, method: 'GET', path: '/notification/full/:id' },
   async (request: NotificationMessageRequest): Promise<NotificationMessageFull> => {
     // load notification message
-    const notificationMessageQry = () => orm<NotificationMessage>('NotificationMessage');
-    const notificationMessage = await notificationMessageQry().first().where('id', request.id);
+    const notificationMessage = await orm<NotificationMessage>('NotificationMessage').first().where('id', request.id);
     if (!notificationMessage) {
       // notification message not found
       throw APIError.notFound(locz().NOTIFICATION_NOTIFICATION_NOT_FOUND());

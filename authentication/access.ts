@@ -48,8 +48,7 @@ export const loginBearer = api({ expose: true, method: 'POST', path: '/login' },
     }
   }
   // load user profile data
-  const authenticationQry = () => orm<AuthenticationUser>('User');
-  const authentication = await authenticationQry()
+  const authentication = await orm<AuthenticationUser>('User')
     .first('User.id as id', 'UserPasswordHistory.passwordHash as passwordHash')
     .join('UserPasswordHistory', 'User.id', '=', 'UserPasswordHistory.userId')
     .where('User.email', request.email)
@@ -96,8 +95,7 @@ export const loginCookie = api.raw(
     if (email && password) {
       // user authentication data founded
       // load user profile data
-      const authenticationQry = () => orm<AuthenticationUser>('User');
-      const authentication = await authenticationQry()
+      const authentication = await orm<AuthenticationUser>('User')
         .first('User.id as id', 'UserPasswordHistory.passwordHash as passwordHash')
         .join('UserPasswordHistory', 'User.id', 'UserPasswordHistory.userId')
         .where('User.email', email)

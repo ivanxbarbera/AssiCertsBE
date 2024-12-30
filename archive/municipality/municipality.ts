@@ -258,8 +258,7 @@ export const municipalityList = api(
       throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
     }
     // load municipalities
-    let municipalityQry = () => orm<MunicipalityList>('Municipality');
-    const municipalities: MunicipalityList[] = await municipalityQry()
+    const municipalities: MunicipalityList[] = await orm<MunicipalityList>('Municipality')
       .join('Province', 'Province.id', 'Municipality.provinceId')
       .join('Region', 'Region.id', 'Province.regionId')
       .join('Nation', 'Nation.id', 'Region.nationId')

@@ -44,8 +44,7 @@ export const authenticationHandler = authHandler<AuthenticationParams, Authentic
     // extract payload from token
     const { payload } = await jwtVerify<AuthenticationData>(token, new TextEncoder().encode(jwtSercretKey()));
     // load user
-    const userQry = () => orm<User>('User');
-    const user = await userQry().first().where('id', payload.userID).andWhere('disabled', false);
+    const user = await orm<User>('User').first().where('id', payload.userID).andWhere('disabled', false);
     if (!user) {
       // user not founded
       throw APIError.permissionDenied(locz().AUTHENTICATION_USER_NOT_FOUND());

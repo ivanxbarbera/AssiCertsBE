@@ -108,8 +108,7 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
     date: new Date(),
     passwordHash,
   };
-  const userPasswordHistoryQry = () => orm('UserPasswordHistory');
-  const userPasswordHistoryRst = await userPasswordHistoryQry().insert(newUserPasswordHistory, ['id']);
+  const userPasswordHistoryRst = await orm('UserPasswordHistory').insert(newUserPasswordHistory, ['id']);
   // send email to user
   try {
     await GeneralUtility.emailSend({
@@ -234,8 +233,7 @@ export const userPasswordResetConfirm = api(
       date: new Date(),
       passwordHash,
     };
-    const userPasswordHistoryQry = () => orm('UserPasswordHistory');
-    const userPasswordHistoryRst = await userPasswordHistoryQry().insert(newUserPasswordHistory, ['id']);
+    const userPasswordHistoryRst = await orm('UserPasswordHistory').insert(newUserPasswordHistory, ['id']);
     // update password reset request
     await orm('UserPasswordReset').where('id', userPasswordReset.id).update('used', true);
     // send email to user
@@ -323,8 +321,7 @@ export const userPasswordChange = api(
       passwordHash,
     };
     // add new password to history
-    const userPasswordHistoryQry = () => orm('UserPasswordHistory');
-    const userPasswordHistoryRst = await userPasswordHistoryQry().insert(newUserPasswordHistory, ['id']);
+    const userPasswordHistoryRst = await orm('UserPasswordHistory').insert(newUserPasswordHistory, ['id']);
   }
 ); // userPasswordChange
 
@@ -362,8 +359,7 @@ const isUserPasswordHistoryAlreadyUsed = async (request: UserPasswordHistoryChec
   // load password constraints
   const passwordCheckParams: PasswordCheckParameters = await systemParametersPasswordCheck();
   // load user history password
-  const userPasswordHistoriesQry = () => orm<UserPasswordHistory>('UserPasswordHistory');
-  const userPasswordHistories: UserPasswordHistory[] = await userPasswordHistoriesQry()
+  const userPasswordHistories: UserPasswordHistory[] = await orm<UserPasswordHistory>('UserPasswordHistory')
     .select()
     .where('userId', request.userId)
     .orderBy('date', 'DESC')
@@ -510,8 +506,7 @@ export const userSiteUnlock = api(
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load user profile data
-    const authenticationQry = () => orm<AuthenticationUser>('User');
-    const authentication = await authenticationQry()
+    const authentication = await orm<AuthenticationUser>('User')
       .first('User.id as id', 'UserPasswordHistory.passwordHash as passwordHash')
       .join('UserPasswordHistory', 'User.id', 'UserPasswordHistory.userId')
       .where('User.id', request.id);
@@ -545,8 +540,7 @@ export const userStatusUnlock = async (id: number) => {
 export const userList = api({ expose: true, auth: true, method: 'GET', path: '/user' }, async (): Promise<UserListResponse> => {
   // TODO add search filters
   // load users
-  const usersQry = () => orm<UserList>('User');
-  const users = await usersQry().select('id', 'role', 'email', 'name', 'surname', 'disabled').orderBy('surname').orderBy('name');
+  const users = await orm<UserList>('User').select('id', 'role', 'email', 'name', 'surname', 'disabled').orderBy('surname').orderBy('name');
   // check authorization
   const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
     operationCode: 'userList',
@@ -571,8 +565,7 @@ export const userList = api({ expose: true, auth: true, method: 'GET', path: '/u
  */
 export const userDetail = api({ expose: true, auth: true, method: 'GET', path: '/user/:id' }, async (request: UserRequest): Promise<UserResponse> => {
   // load user
-  const userQry = () => orm<UserResponse>('User');
-  const user = await userQry().first().where('id', request.id);
+  const user = await orm<UserResponse>('User').first().where('id', request.id);
   if (!user) {
     // user not found
     throw APIError.notFound(locz().USER_USER_NOT_FOUND());
@@ -635,8 +628,7 @@ export const userInsert = api(
       siteLocked: false,
     };
     // insert user
-    const userQry = () => orm('User');
-    const userRst = await userQry().insert(newUser, ['id']);
+    const userRst = await orm('User').insert(newUser, ['id']);
     const id = userRst[0].id;
     // insert user password history
     const newUserPasswordHistory: UserPasswordHistory = {
@@ -644,8 +636,7 @@ export const userInsert = api(
       date: new Date(),
       passwordHash,
     };
-    const userPasswordHistoryQry = () => orm('UserPasswordHistory');
-    const userPasswordHistoryRst = await userPasswordHistoryQry().insert(newUserPasswordHistory, ['id']);
+    const userPasswordHistoryRst = await orm('UserPasswordHistory').insert(newUserPasswordHistory, ['id']);
     // request for password regeneration
     userPasswordReset({ email: request.email });
     // return created user
@@ -670,8 +661,7 @@ export const userUpdate = api(
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load user
-    const userQry = () => orm<UserResponse>('User');
-    const user = await userQry().first().where('id', request.id);
+    const user = await orm<UserResponse>('User').first().where('id', request.id);
     if (!user) {
       // user not found
       throw APIError.notFound(locz().USER_USER_NOT_FOUND());
@@ -695,8 +685,7 @@ export const userUpdate = api(
       }
     }
     // update user
-    const userUpdateQry = () => orm('User');
-    const resutlQry = await userUpdateQry().where('id', request.id).update(request, ['id']);
+    const resutlQry = await orm('User').where('id', request.id).update(request, ['id']);
     // check user reactivation
     if (user.disabled && !request.disabled) {
       // user reactivated
@@ -790,8 +779,7 @@ export const userPasswordExpirationCheck = api(
  */
 export const getUserPasswordExpiration = async (userId: number): Promise<UserPasswordExpirationResponse> => {
   // load last user history password
-  const userPasswordHistoryQry = () => orm<UserPasswordHistory>('UserPasswordHistory');
-  const userPasswordHistory = await userPasswordHistoryQry().first().where('userId', userId).orderBy('date', 'DESC');
+  const userPasswordHistory = await orm<UserPasswordHistory>('UserPasswordHistory').first().where('userId', userId).orderBy('date', 'DESC');
   if (!userPasswordHistory) {
     // last password history not found
     throw APIError.notFound(locz().USER_PASSWORD_HISTORY_NOT_FOUND());
@@ -832,8 +820,7 @@ export const userStatusGet = api(
       throw APIError.permissionDenied(locz().USER_STATUS_USER_NOT_ALLOWED());
     }
     // return user profile data
-    const userStatusQry = () => orm<UserStatusResponse>('User');
-    const userStatus = await userStatusQry().first('name', 'surname', 'siteLocked').where('id', request.id);
+    const userStatus = await orm<UserStatusResponse>('User').first('name', 'surname', 'siteLocked').where('id', request.id);
     if (!userStatus) {
       // user not founded
       throw APIError.notFound(locz().USER_STATUS_USER_NOT_FOUND());

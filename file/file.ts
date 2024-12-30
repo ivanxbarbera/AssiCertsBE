@@ -60,15 +60,17 @@ export const fileEntryList = api(
   async (request: FileEntryListRequest): Promise<FileEntryListResponse> => {
     // TODO MIC check for authorization
     // load files
-    const fileEntriesQry = () => orm<FileEntry>('FileEntry');
-    // add search filters
-    if (request.userId) {
-      fileEntriesQry().where('userId', request.userId);
-    }
-    if (request.type) {
-      fileEntriesQry().where('type', request.type);
-    }
-    const fileEntriesRst = await fileEntriesQry().select('id', 'userId', 'type', 'mimeType', 'filename');
+    const fileEntriesRst = await orm<FileEntry>('FileEntry')
+      .select('id', 'userId', 'type', 'mimeType', 'filename')
+      .where((whereBuilder) => {
+        // add search filters
+        if (request.userId) {
+          whereBuilder.where('userId', request.userId);
+        }
+        if (request.type) {
+          whereBuilder.where('type', request.type);
+        }
+      });
     // prepare files for response
     const fileEntries: FileEntryResponse[] = await Promise.all(
       fileEntriesRst.map(async (fileEntryRst) => {
@@ -90,8 +92,7 @@ export const fileEntryDetails = api(
   async (request: FileEntryRequest): Promise<FileEntryResponse> => {
     // TODO MIC check for authorization
     // load file
-    const fileEntryQry = () => orm<FileEntryResponse>('FileEntry');
-    const fileEntry = await fileEntryQry().first('id', 'userId', 'type', 'mimeType', 'filename').where('id', request.id);
+    const fileEntry = await orm<FileEntryResponse>('FileEntry').first('id', 'userId', 'type', 'mimeType', 'filename').where('id', request.id);
     if (!fileEntry) {
       // file not found
       throw APIError.notFound(locz().FILE_FILE_NOT_FOUND());
@@ -153,8 +154,7 @@ export const fileEntryUpload = api.raw(
         if (fileEntry.id) {
           // file already exixts, update existing one
           id = fileEntry.id;
-          const fileEntryQry = () => orm('FileEntry');
-          await fileEntryQry()
+          await orm('FileEntry')
             .update({
               userId: fileEntry.userId,
               type: fileEntry.type,
@@ -165,8 +165,7 @@ export const fileEntryUpload = api.raw(
             .where('id', id);
         } else {
           // new file, insert new one
-          const fileEntryQry = () => orm('FileEntry');
-          const fileEntryRst = await fileEntryQry().insert(
+          const fileEntryRst = await orm('FileEntry').insert(
             {
               ...fileEntry,
               data: buf,
@@ -208,8 +207,7 @@ export const fileEntryDownloadBlob = api.raw({ expose: true, method: 'GET', path
     // extract payload from token
     const { payload } = await jwtVerify<AuthenticationData>(token, new TextEncoder().encode(jwtSercretKey()));
     // load file entry
-    let fileEntryQry = () => orm<FileEntry>('FileEntry');
-    const fileEntry = await fileEntryQry().first().where('id', id);
+    const fileEntry = await orm<FileEntry>('FileEntry').first().where('id', id);
     if (!fileEntry) {
       // file not found
       response.writeHead(404);

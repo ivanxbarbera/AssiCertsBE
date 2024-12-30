@@ -31,8 +31,7 @@ export const userProfileGet = api(
       throw APIError.permissionDenied(locz().USER_PROFILE_USER_NOT_ALLOWED());
     }
     // return user profile data
-    const userProfileQry = () => orm<UserProfileResponse>('User');
-    const userProfile = await userProfileQry().first().where('id', request.id);
+    const userProfile = await orm<UserProfileResponse>('User').first().where('id', request.id);
     if (!userProfile) {
       // user not founded
       throw APIError.notFound(locz().USER_PROFILE_USER_NOT_FOUND());
@@ -61,8 +60,7 @@ export const userProfileUpdate = api(
       throw APIError.permissionDenied(locz().USER_PROFILE_USER_NOT_ALLOWED());
     }
     // load user profile
-    const userProfileQry = () => orm<UserProfileResponse>('User');
-    const userProfile = await userProfileQry().first().where('id', request.id);
+    const userProfile = await orm<UserProfileResponse>('User').first().where('id', request.id);
     if (!userProfile) {
       // user not found
       throw APIError.notFound(locz().USER_PROFILE_USER_NOT_FOUND());
@@ -77,8 +75,7 @@ export const userProfileUpdate = api(
       }
     }
     // update user profile
-    const userProfileUpdateQry = () => orm('User');
-    const resutlQry = await userProfileUpdateQry().where('id', request.id).update(request, ['id']);
+    const resutlQry = await orm('User').where('id', request.id).update(request, ['id']);
     // return updated user profile
     return userProfileGet({ id: resutlQry[0].id });
   }
