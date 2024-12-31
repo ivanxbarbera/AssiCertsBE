@@ -774,7 +774,7 @@ export const userPasswordExpirationCheck = api(
 
 /**
  * Get data about user password expiration.
- * @param userId user unique identificator
+ * @param userId user unique identifier
  * @returns user password expiration data
  */
 export const getUserPasswordExpiration = async (userId: number): Promise<UserPasswordExpirationResponse> => {

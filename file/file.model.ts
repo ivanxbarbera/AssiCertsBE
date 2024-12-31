@@ -10,9 +10,9 @@ export enum FileEntryType {
  * File uploaded.
  */
 export interface FileEntry {
-  // file identificator
+  // file identifier
   id?: number;
-  // user identificator
+  // user identifier
   userId: number;
   // file type
   type: FileEntryType;
@@ -28,9 +28,9 @@ export interface FileEntry {
  * File uploaded.
  */
 export interface FileEntryResponse {
-  // file identificator
+  // file identifier
   id: number;
-  // user identificator
+  // user identifier
   userId: number;
   // file type
   type: FileEntryType;
@@ -48,7 +48,7 @@ export interface FileEntryResponse {
  * File details request.
  */
 export interface FileEntryRequest {
-  // file identificator
+  // file identifier
   id: number;
 } // FileEntryUploadResponse
 
@@ -56,7 +56,7 @@ export interface FileEntryRequest {
  * File upload response.
  */
 export interface FileEntryUploadResponse {
-  // file identificator
+  // file identifier
   id: number;
 } // FileEntryUploadResponse
 

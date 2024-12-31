@@ -142,7 +142,7 @@ export const loginCookie = api.raw(
 /**
  * Check user password expiration.
  * If password expired throws an exception, if password near to expiration sends a notification to the user.
- * @param userId user identificator
+ * @param userId user identifier
  */
 const checkUserPasswordExpiration = async (userId: number) => {
   // check password expiration

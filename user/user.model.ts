@@ -14,7 +14,7 @@ export enum UserRole {
  * User data.
  */
 export interface User {
-  // user unique identificator
+  // user unique identifier
   id?: number;
   // user role
   role: UserRole;
@@ -47,7 +47,7 @@ export interface UserRequest {
  * User data.
  */
 export interface UserResponse {
-  // user unique identificator
+  // user unique identifier
   id?: number;
   // user role
   role: UserRole;
@@ -71,7 +71,7 @@ export interface UserResponse {
  * User create and update data.
  */
 export interface UserEditRequest {
-  // user unique identificator
+  // user unique identifier
   id?: number;
   // user role
   role: UserRole;
@@ -94,7 +94,7 @@ export interface UserEditRequest {
  * This is a single element of the UserListResponse.
  */
 export interface UserList {
-  // user unique identificator
+  // user unique identifier
   id: number;
   // user role
   role: UserRole;
@@ -254,7 +254,7 @@ export interface UserPasswordHistory {
  * Check if password has been already used by user before.
  */
 export interface UserPasswordHistoryCheckRequest {
-  // user identificator
+  // user identifier
   userId: number;
   // user password
   password: string;
@@ -273,7 +273,7 @@ export interface UserPasswordHistoryCheckResponse {
  * Check the number of remaining days before password expiration.
  */
 export interface UserPasswordExpirationRequest {
-  // user identificator
+  // user identifier
   userId: number;
 } // UserPasswordExpirationRequest
 
