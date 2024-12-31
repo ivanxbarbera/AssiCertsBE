@@ -238,6 +238,9 @@ export interface UserPasswordCheckResponse {
   hasSpecialChar: boolean;
 } // UserPasswordCheckResponse
 
+/**
+ * User Password History
+ */
 export interface UserPasswordHistory {
   // password history indentificator
   id?: number;
