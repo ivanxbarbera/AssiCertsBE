@@ -1,14 +1,18 @@
-import { DbUtility } from './../../common/utility/db.utility';
 // libraries
 import { api, APIError } from 'encore.dev/api';
 import { getAuthData } from '~encore/auth';
 // application modules
+import { DbUtility } from './../../common/utility/db.utility';
 import { UserProfileEditRequest, UserProfileRequest, UserProfileResponse } from './profile.model';
 import { AuthenticationData } from '../../authentication/authentication.model';
 import { orm } from '../../common/db/db';
 import locz from '../../common/i18n';
 import { authorizationOperationUserCheck } from '../../authorization/authorization';
 import { AuthorizationOperationResponse } from '../../authorization/authorization.model';
+import { EmailListResponse } from '../address/address.model';
+import { emailUserCheck, emailListByUser, emailUserUpdate } from '../address/address';
+import { User } from '../user.model';
+import { GeneralUtility } from '../../common/utility/general.utility';
 
 /**
  * User profile details.
@@ -36,6 +40,10 @@ export const userProfileGet = api(
       // user not founded
       throw APIError.notFound(locz().USER_PROFILE_USER_NOT_FOUND());
     }
+    // load user profile emails
+    const emailList: EmailListResponse = await emailListByUser({ userId: userProfile.id });
+    userProfile.emails = emailList.emails;
+    // return user profile
     return DbUtility.removeNullFields(userProfile);
   }
 ); // userProfileGet
@@ -60,23 +68,21 @@ export const userProfileUpdate = api(
       throw APIError.permissionDenied(locz().USER_PROFILE_USER_NOT_ALLOWED());
     }
     // load user profile
-    const userProfile = await orm<UserProfileResponse>('User').first().where('id', request.id);
+    const userProfile = await orm<User>('User').first().where('id', request.id);
     if (!userProfile) {
       // user not found
       throw APIError.notFound(locz().USER_PROFILE_USER_NOT_FOUND());
     }
-    if (userProfile.email !== request.email) {
-      // user changed his email
-      // check for mail existance
-      const emailCount = (await orm('User').count('id').where('email', request.email))[0]['count'] as number;
-      if (emailCount > 0) {
-        // email already exists
-        throw APIError.alreadyExists(locz().USER_PROFILE_EMAIL_ALREADY_EXIST());
-      }
-    }
+    // check email
+    const userEmails = request.emails;
+    await emailUserCheck({ emails: userEmails });
     // update user profile
-    const resutlQry = await orm('User').where('id', request.id).update(request, ['id']);
+    let updateUserProfile: User = GeneralUtility.filterObjectByInterface(request, userProfile, ['id']);
+    const resutlQry = await orm('User').where('id', request.id).update(updateUserProfile).returning('id');
+    const userEditId = resutlQry[0].id;
+    // update emails
+    await emailUserUpdate({ userId: userEditId, emails: userEmails });
     // return updated user profile
-    return userProfileGet({ id: resutlQry[0].id });
+    return userProfileGet({ id: userEditId });
   }
 ); // userProfileUpdate

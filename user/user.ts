@@ -34,6 +34,7 @@ import {
   UserStatusRequest,
   UserStatusResponse,
   UserRole,
+  UserEmail,
 } from './user.model';
 import { orm } from '../common/db/db';
 import { ValidatorsUtility } from '../common/utility/validators.utility';
@@ -46,6 +47,8 @@ import { sendNotificationMessage } from '../notification/notification';
 import { NotificationMessageType } from '../notification/notification.model';
 import { DbUtility } from '../common/utility/db.utility';
 import { GeneralUtility } from '../common/utility/general.utility';
+import { Email, EmailType, EmailListResponse, EmailEditRequest } from './address/address.model';
+import { emailUserCheck, emailListByUser, emailUserUpdate } from './address/address';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const frontendBaseURL = secret('FrontendBaseURL');
@@ -68,40 +71,34 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
     // password not compliant
     throw APIError.invalidArgument(locz().USER_PASSWORD_NOT_COMPLIANT());
   }
-  // check email compliace
-  if (!ValidatorsUtility.isValidEmail(request.email)) {
-    // email is not well formed
-    throw APIError.invalidArgument(locz().USER_EMAIL_MALFORMED());
-  }
-  // check user parameters
-  const userCheckParameters: UserCheckParameters = await systemParametersUserCheck();
-  // check for email existence in allowed domains
-  if (userCheckParameters.allowedDomains.length > 0) {
-    const emailDomain = request.email.split('@')[1];
-    if (!userCheckParameters.allowedDomains.includes(emailDomain)) {
-      throw APIError.invalidArgument(locz().USER_DOMAIN_NOT_ALLOWED());
-    }
-  }
-  // check for mail existance
-  const emailCount = (await orm('User').count('id').where('email', request.email))[0]['count'] as number;
-  if (emailCount > 0) {
-    // email already exists
-    throw APIError.alreadyExists(locz().USER_EMAIL_ALREADY_EXIST());
-  }
+  // load email type
+  // TODO MIC add flag default to EmailType for getting default new user type
+  const emailType = await orm<EmailType>('EmailType').first().where('code', 'PER');
+  // check email
+  const newEmail: EmailEditRequest = {
+    email: request.email,
+    type: emailType!,
+    default: true,
+    authentication: true,
+  };
+  let { defaultEmail } = await emailUserCheck({ emails: [newEmail] });
   // encrypt password
   const passwordHash = bcrypt.hashSync(request.password);
   // prepare user to be saved
   const newUser: User = {
     role: UserRole.Member,
-    email: request.email,
     name: request.name,
     surname: request.surname,
+    fiscalCode: '',
+    language: '',
     siteLocked: false,
     disabled: true,
   };
   // save new user
-  const userRst = await orm('User').insert(newUser, ['id']);
+  const userRst = await orm('User').insert(newUser).returning('id');
   const id = userRst[0].id;
+  // insert user email
+  await emailUserUpdate({ userId: id, emails: [newEmail] });
   // insert user password history
   const newUserPasswordHistory: UserPasswordHistory = {
     userId: id,
@@ -112,7 +109,7 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   // send email to user
   try {
     await GeneralUtility.emailSend({
-      recipients: newUser.email,
+      recipients: defaultEmail,
       subject: locz().USER_PASSWORD_REGISTER_EMAIL_SUBJECT(),
       bodyHtml: locz().USER_PASSWORD_REGISTER_EMAIL_BODY_HTML({ name: newUser.name }),
       bodyText: locz().USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT({ name: newUser.name }),
@@ -143,8 +140,14 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
  * Receive user email, generate a new token for password regeneration and send it via email to requesting user.
  */
 export const userPasswordReset = api({ expose: true, method: 'GET', path: '/user/password-reset' }, async (request: UserPasswordResetRequest) => {
-  // load user data
-  const user = await orm<User>('User').first().where('email', request.email).where('disabled', false);
+  // load user email data
+  const user = await orm<{ id: string; name: string; email: string }>('User')
+    .first('User.id as id', 'User.name as name', 'Email.email as email')
+    .join('UserEmail', 'UserEmail.userId', 'User.id')
+    .join('Email', 'Email.id', 'UserEmail.emailId')
+    .where('Email.email', request.email)
+    .where('UserEmail.authentication', true)
+    .where('User.disabled', false);
   if (user) {
     // prepare password reset
     // generate new token
@@ -154,7 +157,7 @@ export const userPasswordReset = api({ expose: true, method: 'GET', path: '/user
       .setExpirationTime('60minute')
       .sign(new TextEncoder().encode(jwtSercretKey()));
     const userPasswordReset: UserPasswordReset = {
-      userId: user.id!,
+      userId: user.id,
       token,
       expiresAt: new Date(Date.now() + 60 * 60 * 1000),
       used: false,
@@ -163,6 +166,7 @@ export const userPasswordReset = api({ expose: true, method: 'GET', path: '/user
     await orm('UserPasswordReset').insert(userPasswordReset);
     // send email to user
     try {
+      // TODO MIC it shoulb be backendBaseURL not frontendBaseURL
       const resetUrl = frontendBaseURL() + '/authentication/reset-password;token=' + token;
       await GeneralUtility.emailSend({
         recipients: user.email,
@@ -220,7 +224,12 @@ export const userPasswordResetConfirm = api(
       throw APIError.invalidArgument(locz().USER_USED_PASSWORD());
     }
     // load user
-    const user = await orm<User>('User').first().where('id', userPasswordReset.userId);
+    const user = await orm<{ id: string; name: string; email: string }>('User')
+      .first('User.id as id', 'User.name as name', 'Email.email as email')
+      .join('UserEmail', 'UserEmail.userId', 'User.id')
+      .join('Email', 'Email.id', 'UserEmail.emailId')
+      .where('id', userPasswordReset.userId)
+      .where('UserEmail.authentication', true);
     if (!user) {
       // user not fouded
       throw APIError.notFound(locz().USER_USER_NOT_FOUND());
@@ -229,7 +238,7 @@ export const userPasswordResetConfirm = api(
     const passwordHash = bcrypt.hashSync(request.password);
     // insert user password history
     const newUserPasswordHistory: UserPasswordHistory = {
-      userId: user.id!,
+      userId: user.id,
       date: new Date(),
       passwordHash,
     };
@@ -540,7 +549,13 @@ export const userStatusUnlock = async (id: number) => {
 export const userList = api({ expose: true, auth: true, method: 'GET', path: '/user' }, async (): Promise<UserListResponse> => {
   // TODO add search filters
   // load users
-  const users = await orm<UserList>('User').select('id', 'role', 'email', 'name', 'surname', 'disabled').orderBy('surname').orderBy('name');
+  const users = await orm<UserList>('User')
+    .join('UserEmail', 'UserEmail.userId', 'User.id')
+    .join('Email', 'Email.id', 'UserEmail.emailId')
+    .select('User.id as id', 'User.role as role', 'Email.email as email', 'User.name as name', 'User.surname as surname', 'User.disabled as disabled')
+    .where('UserEmail.authentication', true)
+    .orderBy('User.surname')
+    .orderBy('User.name');
   // check authorization
   const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
     operationCode: 'userList',
@@ -585,6 +600,9 @@ export const userDetail = api({ expose: true, auth: true, method: 'GET', path: '
     // user not allowed to get details
     throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
   }
+  // load user emails
+  const emailList: EmailListResponse = await emailListByUser({ userId: user.id });
+  user.emails = emailList.emails;
   // return user
   return DbUtility.removeNullFields(user);
 }); // userDetail
@@ -605,32 +623,23 @@ export const userInsert = api(
       // user not allowed to get details
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
-    // check user parameters
-    const userCheckParameters: UserCheckParameters = await systemParametersUserCheck();
-    // check for email existence in allowed domains
-    if (userCheckParameters.allowedDomains.length > 0) {
-      const emailDomain = request.email.split('@')[1]; // Get the domain part of the email
-      if (!userCheckParameters.allowedDomains.includes(emailDomain)) {
-        throw APIError.invalidArgument(locz().USER_DOMAIN_NOT_ALLOWED());
-      }
-    }
-    // check user email
-    const emailCount = (await orm('User').count('id').where('email', request.email))[0]['count'] as number;
-    if (emailCount > 0) {
-      // email already exists
-      throw APIError.alreadyExists(locz().USER_EMAIL_ALREADY_EXIST());
-    }
+    // check email
+    const userEmails = request.emails;
+    let { defaultEmail } = await emailUserCheck({ emails: userEmails });
     // add internal fields
-    const password = await generateRandomPassword();
-    const passwordHash = bcrypt.hashSync(password);
+    // TODO MIC evaluate using filterObjectByInterface
     const newUser: User = {
       ...request,
       siteLocked: false,
     };
     // insert user
-    const userRst = await orm('User').insert(newUser, ['id']);
+    const userRst = await orm('User').insert(newUser).returning('id');
     const id = userRst[0].id;
+    // insert emails
+    await emailUserUpdate({ userId: id, emails: userEmails });
     // insert user password history
+    const password = await generateRandomPassword();
+    const passwordHash = bcrypt.hashSync(password);
     const newUserPasswordHistory: UserPasswordHistory = {
       userId: id,
       date: new Date(),
@@ -638,7 +647,7 @@ export const userInsert = api(
     };
     const userPasswordHistoryRst = await orm('UserPasswordHistory').insert(newUserPasswordHistory, ['id']);
     // request for password regeneration
-    userPasswordReset({ email: request.email });
+    userPasswordReset({ email: defaultEmail });
     // return created user
     return userDetail({ id });
   }
@@ -666,33 +675,21 @@ export const userUpdate = api(
       // user not found
       throw APIError.notFound(locz().USER_USER_NOT_FOUND());
     }
-    if (user.email !== request.email) {
-      // user changed his email
-      // check user parameters
-      const userCheckParameters: UserCheckParameters = await systemParametersUserCheck();
-      // check for email existence in allowed domains
-      if (userCheckParameters.allowedDomains.length > 0) {
-        const emailDomain = request.email.split('@')[1]; // Get the domain part of the email
-        if (!userCheckParameters.allowedDomains.includes(emailDomain)) {
-          throw APIError.invalidArgument(locz().USER_DOMAIN_NOT_ALLOWED());
-        }
-      }
-      // check for mail existance
-      const emailCount = (await orm('User').count('id').where('email', request.email))[0]['count'] as number;
-      if (emailCount > 0) {
-        // email already exists
-        throw APIError.alreadyExists(locz().USER_EMAIL_ALREADY_EXIST());
-      }
-    }
+    // check email
+    const userEmails = request.emails;
+    let { defaultEmail } = await emailUserCheck({ emails: userEmails });
     // update user
-    const resutlQry = await orm('User').where('id', request.id).update(request, ['id']);
+    let updateUser: User = GeneralUtility.filterObjectByInterface(request, user, ['id']);
+    const resutlQry = await orm('User').where('id', request.id).update(updateUser).returning('id');
+    // update emails
+    await emailUserUpdate({ userId: request.id, emails: userEmails });
     // check user reactivation
     if (user.disabled && !request.disabled) {
       // user reactivated
       // send email to user
       try {
         await GeneralUtility.emailSend({
-          recipients: request.email,
+          recipients: defaultEmail,
           subject: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT(),
           bodyHtml: locz().USER_ACTIVATED_EMAIL_BODY_HTML({ name: request.name, link: frontendBaseURL(), siteName: frontendBaseName() }),
           bodyText: locz().USER_ACTIVATED_EMAIL_BODY_TEXT({ name: request.name, link: frontendBaseURL() }),

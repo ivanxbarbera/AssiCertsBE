@@ -105,6 +105,10 @@ type RootTranslation = {
 	 */
 	SYSTEM_USER_NOT_ALLOWED: string
 	/**
+	 * T​i​p​o​ ​E​m​a​i​l​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	USER_ADDRESS_EMAILTYPE_NOT_FOUND: string
+	/**
 	 * U​t​e​n​t​e​ ​c​o​n​ ​l​a​ ​m​a​i​l​ ​i​n​d​i​c​a​t​a​ ​e​s​i​s​t​e​n​t​e
 	 */
 	USER_PROFILE_EMAIL_ALREADY_EXIST: string
@@ -133,9 +137,31 @@ type RootTranslation = {
 	 */
 	USER_EMAIL_MALFORMED: string
 	/**
-	 * U​t​e​n​t​e​ ​c​o​n​ ​l​a​ ​m​a​i​l​ ​i​n​d​i​c​a​t​a​ ​e​s​i​s​t​e​n​t​e
+	 * U​t​e​n​t​e​ ​c​o​n​ ​l​a​ ​m​a​i​l​ ​{​e​m​a​i​l​}​ ​e​s​i​s​t​e​n​t​e
+	 * @param {string} email
 	 */
-	USER_EMAIL_ALREADY_EXIST: string
+	USER_EMAIL_ALREADY_EXIST: RequiredParams<'email'>
+	/**
+	 * L​a​ ​m​a​i​l​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
+	 * @param {number} id
+	 */
+	USER_EMAIL_NOT_FOUND: RequiredParams<'id'>
+	/**
+	 * U​n​ ​u​t​e​n​t​e​ ​p​u​ò​ ​a​v​e​r​e​ ​s​o​l​o​ ​u​n​a​ ​e​m​a​i​l​ ​d​i​ ​d​e​f​a​u​l​t
+	 */
+	USER_EMAIL_DEFAULT_EXIST: string
+	/**
+	 * U​n​ ​u​t​e​n​t​e​ ​d​e​v​e​ ​a​v​e​r​e​ ​a​l​m​e​n​o​ ​u​n​a​ ​e​m​a​i​l​ ​d​i​ ​d​e​f​a​u​l​t
+	 */
+	USER_EMAIL_DEFAULT_UNDEFINED: string
+	/**
+	 * U​n​ ​u​t​e​n​t​e​ ​p​u​ò​ ​a​v​e​r​e​ ​s​o​l​o​ ​u​n​a​ ​e​m​a​i​l​ ​d​i​ ​a​u​t​e​n​t​i​c​a​z​i​o​n​e
+	 */
+	USER_EMAIL_AUTHENTICATION_EXIST: string
+	/**
+	 * U​n​ ​u​t​e​n​t​e​ ​d​e​v​e​ ​a​v​e​r​e​ ​a​l​m​e​n​o​ ​u​n​a​ ​e​m​a​i​l​ ​d​i​ ​a​u​t​e​n​t​i​c​a​z​i​o​n​e
+	 */
+	USER_EMAIL_AUTHENTICATION_UNDEFINED: string
 	/**
 	 * S​t​o​r​i​c​o​ ​p​a​s​s​w​o​r​d​ ​u​t​e​n​t​e​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
@@ -349,6 +375,10 @@ export type TranslationFunctions = {
 	 */
 	SYSTEM_USER_NOT_ALLOWED: () => LocalizedString
 	/**
+	 * Tipo Email non trovato
+	 */
+	USER_ADDRESS_EMAILTYPE_NOT_FOUND: () => LocalizedString
+	/**
 	 * Utente con la mail indicata esistente
 	 */
 	USER_PROFILE_EMAIL_ALREADY_EXIST: () => LocalizedString
@@ -377,9 +407,29 @@ export type TranslationFunctions = {
 	 */
 	USER_EMAIL_MALFORMED: () => LocalizedString
 	/**
-	 * Utente con la mail indicata esistente
+	 * Utente con la mail {email} esistente
 	 */
-	USER_EMAIL_ALREADY_EXIST: () => LocalizedString
+	USER_EMAIL_ALREADY_EXIST: (arg: { email: string }) => LocalizedString
+	/**
+	 * La mail con ID {id} non esiste
+	 */
+	USER_EMAIL_NOT_FOUND: (arg: { id: number }) => LocalizedString
+	/**
+	 * Un utente può avere solo una email di default
+	 */
+	USER_EMAIL_DEFAULT_EXIST: () => LocalizedString
+	/**
+	 * Un utente deve avere almeno una email di default
+	 */
+	USER_EMAIL_DEFAULT_UNDEFINED: () => LocalizedString
+	/**
+	 * Un utente può avere solo una email di autenticazione
+	 */
+	USER_EMAIL_AUTHENTICATION_EXIST: () => LocalizedString
+	/**
+	 * Un utente deve avere almeno una email di autenticazione
+	 */
+	USER_EMAIL_AUTHENTICATION_UNDEFINED: () => LocalizedString
 	/**
 	 * Storico password utente non trovato
 	 */

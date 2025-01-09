@@ -11,7 +11,6 @@ const en = {
   AUTHENTICATION_ACCESS_CAPTCHA_INTERNAL: 'Error during captcha validation',
   AUTHENTICATION_ACCESS_CAPTCHA_UNKNOWN: 'Error in captcha management',
   AUTHENTICATION_ACCESS_CAPTCHA_VALIDATION: 'Captcha validation refused',
-
   AUTHENTICATION_MALFORMED_REQUEST: 'Malformed request',
   AUTHENTICATION_NOT_AUTHENTICATED: 'Not authenticated',
   AUTHENTICATION_PASSWORD_EXPIRED: 'User password expired',
@@ -24,6 +23,7 @@ const en = {
   NOTIFICATION_USER_NOT_ALLOWED: 'User not allowed to access requested data',
   SYSTEM_PARAMETER_NOT_FOUND: 'System parameter not founded',
   SYSTEM_USER_NOT_ALLOWED: 'User not allowed to access requested data',
+  USER_ADDRESS_EMAILTYPE_NOT_FOUND: 'Email Type not founded',
   USER_PROFILE_EMAIL_ALREADY_EXIST: 'User with specified email already exists',
   USER_PROFILE_USER_NOT_ALLOWED: 'User not allowed to access requested data',
   USER_PROFILE_USER_NOT_FOUND: 'Requested user profile not found',
@@ -31,7 +31,12 @@ const en = {
   USER_PASSWORD_MATCH: 'Password and confirm password must be the same',
   USER_PASSWORD_NOT_COMPLIANT: 'Password not compliant to required contraints',
   USER_EMAIL_MALFORMED: 'Email address is not well formed',
-  USER_EMAIL_ALREADY_EXIST: 'User with specified email already exists',
+  USER_EMAIL_ALREADY_EXIST: 'User with email {email} already exists',
+  USER_EMAIL_NOT_FOUND: 'User email with ID {id} not exists',
+  USER_EMAIL_DEFAULT_EXIST: 'User can only have one default email',
+  USER_EMAIL_DEFAULT_UNDEFINED: 'User must have at least one default email',
+  USER_EMAIL_AUTHENTICATION_EXIST: 'User can only have one authentication email',
+  USER_EMAIL_AUTHENTICATION_UNDEFINED: 'User must have at least one authetication email',
   USER_PASSWORD_HISTORY_NOT_FOUND: 'User password history not founded',
   USER_RESET_REQ_NOT_FOUND: 'Password reset request not fouded',
   USER_RESET_REQ_EXPIRED: 'Password reset request expired',
@@ -51,11 +56,13 @@ const en = {
     'Hello {name},<br>you password has been resetted. To login click on the link below.<br><a href="{link}">Login to Assihub</a>',
   USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_TEXT: 'Hello {name},\nyou password has been resetted. To login click on the link below.\n{link}',
   USER_PASSWORD_REGISTER_EMAIL_SUBJECT: 'Registration confirmed',
-  USER_PASSWORD_REGISTER_EMAIL_BODY_HTML: 'Hello {name},<br>you are successfully registered to Assihub. To login click on the link below.<br>',
-  USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT: 'Hello {name},\nyou are successfully registered to Assihub. To login click on the link below.\n',
+  USER_PASSWORD_REGISTER_EMAIL_BODY_HTML:
+    'Hello {name},<br>you are successfully registered to Assihub. Wait for you account activation by an administrator.<br>',
+  USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT:
+    'Hello {name},\nyou are successfully registered to Assihub. Wait for you account activation by an administrator.\n',
   USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE: 'The user {name} {surname} has just registered.',
   USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE_DETAIL:
-    'The user is not active. Through the link it is possible to modify it to configure the role and activate it to allow it to connect.',
+    'The user is not active. Through the link it is possible to modify it for configuring the role and activate it to allow it to connect.',
   USER_ACTIVATED_EMAIL_SUBJECT: 'Activation confirmed',
   USER_ACTIVATED_EMAIL_BODY_HTML:
     'Hello {name},<br>your accound has been activated by an administrator. To login click on the link below.<br><a href="{link}">Login to {siteName}</a>',

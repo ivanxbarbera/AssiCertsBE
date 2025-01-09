@@ -1,3 +1,5 @@
+import { EmailEditRequest, EmailResponse, EmailType } from './address/address.model';
+
 /**
  * User type.
  */
@@ -18,8 +20,6 @@ export interface User {
   id?: number;
   // user role
   role: UserRole;
-  // user email
-  email: string;
   // user name
   name: string;
   // user surname
@@ -48,11 +48,11 @@ export interface UserRequest {
  */
 export interface UserResponse {
   // user unique identifier
-  id?: number;
+  id: number;
   // user role
   role: UserRole;
-  // user email
-  email: string;
+  // user emails
+  emails: EmailResponse[];
   // user name
   name: string;
   // user surname
@@ -72,11 +72,11 @@ export interface UserResponse {
  */
 export interface UserEditRequest {
   // user unique identifier
-  id?: number;
+  id: number;
   // user role
   role: UserRole;
-  // user email
-  email: string;
+  // user emails
+  emails: EmailEditRequest[];
   // user name
   name: string;
   // user surname
@@ -104,6 +104,8 @@ export interface UserList {
   name: string;
   // user surname
   surname: string;
+  // user phone
+  phone: string;
   // user status, disabled or active
   disabled: boolean;
 } // UserList
@@ -313,3 +315,33 @@ export interface UserStatusResponse {
   // logged user site locking status. true is locked, false is unlocked
   siteLocked: boolean;
 } // UserStatusResponse
+
+/**
+ * User-Phone Association
+ */
+export interface UserPhone {
+  // user phone unique identifier
+  id: number;
+  // user identifier
+  userId: number;
+  // phone identifier
+  phoneId: number;
+  // default phone
+  default: boolean;
+} // UserPhone
+
+/**
+ * User-Email Association
+ */
+export interface UserEmail {
+  // user email unique identifier
+  id?: number;
+  // user identifier
+  userId: number;
+  // email identifier
+  emailId: number;
+  // default email
+  default: boolean;
+  // authentication email
+  authentication: boolean;
+} // UserEmail

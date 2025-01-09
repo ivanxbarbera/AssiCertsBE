@@ -42,6 +42,7 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       request.operationCode == 'notificationMessageDetails' ||
       request.operationCode == 'notificationMessageDetailsFull' ||
       request.operationCode == 'userDetail' ||
+      request.operationCode == 'emailListByUser' ||
       request.operationCode == 'userSiteLock' ||
       request.operationCode == 'userSiteUnlock' ||
       request.operationCode == 'userStatusGet' ||
@@ -60,6 +61,7 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
   }
   if (
     (request.operationCode == 'userList' ||
+      request.operationCode == 'emailListByUser' ||
       request.operationCode == 'userDetail' ||
       request.operationCode == 'userInsert' ||
       request.operationCode == 'userUpdate') &&
@@ -77,6 +79,8 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
   if (
     (request.operationCode == 'systemParameterList' ||
       request.operationCode == 'systemParameterUpdate' ||
+      request.operationCode == 'phoneTypeList' ||
+      request.operationCode == 'addressToponymList' ||
       request.operationCode == 'municipalityList') &&
     request.requestingUserRole &&
     request.requestingUserRole == UserRole.SuperAdministrator // superadmin can access system functionality
@@ -86,7 +90,10 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       canBePerformed: true,
     };
   }
-  if (request.operationCode == 'authorizationList' && request.requestingUserRole) {
+  if (
+    (request.operationCode == 'authorizationList' || request.operationCode == 'emailTypeList' || request.operationCode == 'emailTypeDetail') &&
+    request.requestingUserRole
+  ) {
     return {
       // authorized
       canBePerformed: true,
@@ -183,11 +190,12 @@ export const authorizationList = api(
         userRole: UserRole.Member,
         visibility: AuthorizationVisibility.Disabled,
       },
-      { name: 'Municipality', code: 'archive.municipality', userRole: UserRole.Administrator, visibility: AuthorizationVisibility.Visible },
+      { name: 'Address toponym', code: 'user.address-toponym', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
+      { name: 'Municipality', code: 'archive.municipality', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
       { name: 'Claim Office', code: 'claim-office', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
       { name: 'Documents Sign', code: 'document-sign', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
       { name: 'Power BI', code: 'power-bi', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      { name: 'User', code: 'user', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
+      { name: 'User', code: 'user', userRole: UserRole.Administrator, visibility: AuthorizationVisibility.Visible },
       { name: 'System', code: 'system', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
       { name: 'Parameters', code: 'system.parameter', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
     ];

@@ -51,7 +51,10 @@ export const loginBearer = api({ expose: true, method: 'POST', path: '/login' },
   const authentication = await orm<AuthenticationUser>('User')
     .first('User.id as id', 'UserPasswordHistory.passwordHash as passwordHash')
     .join('UserPasswordHistory', 'User.id', '=', 'UserPasswordHistory.userId')
-    .where('User.email', request.email)
+    .join('UserEmail', 'UserEmail.userId', 'User.id')
+    .join('Email', 'Email.id', 'UserEmail.emailId')
+    .where('Email.email', request.email)
+    .where('UserEmail.authentication', true)
     .where('User.disabled', false)
     .orderBy('UserPasswordHistory.date', 'desc');
   const userAllowed = authentication && bcrypt.compareSync(request.password, authentication.passwordHash);
@@ -98,7 +101,10 @@ export const loginCookie = api.raw(
       const authentication = await orm<AuthenticationUser>('User')
         .first('User.id as id', 'UserPasswordHistory.passwordHash as passwordHash')
         .join('UserPasswordHistory', 'User.id', 'UserPasswordHistory.userId')
-        .where('User.email', email)
+        .join('UserEmail', 'UserEmail.userId', 'User.id')
+        .join('Email', 'Email.id', 'UserEmail.emailId')
+        .where('Email.email', email)
+        .where('UserEmail.authentication', true)
         .where('User.disabled', false)
         .orderBy('UserPasswordHistory.date', 'desc');
       const userAllowed = authentication && bcrypt.compareSync(password!, authentication.passwordHash);

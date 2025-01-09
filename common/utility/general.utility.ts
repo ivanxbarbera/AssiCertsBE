@@ -59,4 +59,20 @@ export class GeneralUtility {
     const transporter: Transporter = createTransport(smtpTransport);
     await transporter.sendMail(mailMessage);
   }; // emailSend
+
+  /**
+   *
+   * @param obj
+   * @param interf
+   * @returns
+   */
+  static filterObjectByInterface = <T extends object>(obj: any, interf: T, exclusions: string[] = []): T => {
+    const result: Partial<T> = {};
+    for (const key in interf) {
+      if (obj.hasOwnProperty(key) && !exclusions.includes(key)) {
+        result[key] = obj[key];
+      }
+    }
+    return result as T;
+  };
 } // GeneralUtility

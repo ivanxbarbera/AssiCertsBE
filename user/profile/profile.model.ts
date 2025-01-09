@@ -1,4 +1,5 @@
 // application modules
+import { EmailEditRequest, EmailResponse } from '../address/address.model';
 import { UserRole } from '../user.model';
 
 /**
@@ -19,8 +20,8 @@ export interface UserProfileResponse {
   id: number;
   // user role
   role: UserRole;
-  // loggend user email
-  email: string;
+  // logged user emails
+  emails: EmailResponse[];
   // logged user name
   name: string;
   // logged user surname
@@ -39,8 +40,8 @@ export interface UserProfileResponse {
 export interface UserProfileEditRequest {
   // identifier of the user profile
   id: number;
-  // user email
-  email: string;
+  // user emails
+  emails: EmailEditRequest[];
   // user name
   name: string;
   // user surname
