@@ -266,6 +266,25 @@ export const emailUserCheck = api(
 export const emailUserUpdate = api(
   { expose: false, auth: true, method: 'PATCH', path: '/user/address/email/user' },
   async (request: { userId: number; emails: EmailEditRequest[] }): Promise<void> => {
+    // delete removed emails
+    const emailAddresses: string[] = request.emails.map((email: EmailEditRequest) => {
+      return email.email;
+    });
+    // load removed emails
+    const deletedEmailIdRst = await orm<{ id: number }>('Email')
+      .join('UserEmail', 'Email.id', 'UserEmail.emailId')
+      .where('UserEmail.userId', request.userId)
+      .whereNotIn('Email.email', emailAddresses)
+      .select('Email.id as id');
+    const deletedEmailIds: number[] = deletedEmailIdRst.map((item) => {
+      return item.id;
+    });
+    if (deletedEmailIds.length > 0) {
+      // delete user emails
+      await orm('UserEmail').where('userId', request.userId).whereIn('emailId', deletedEmailIds).delete();
+      // delete emails
+      await orm('Email').whereIn('id', deletedEmailIds).delete();
+    }
     // update emails
     const userEmails = request.emails;
     await Promise.all(
