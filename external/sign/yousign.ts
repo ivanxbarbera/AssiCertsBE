@@ -52,7 +52,7 @@ export const youSignDocumentSign = async (request: YouSignDocumentSignRequest): 
     let apiResponse = await axios.post(signatureRequestUrl, signRequestData, signatureRequestConfig);
     if (apiResponse.status != 201) {
       // error creating sign request
-      throw APIError.internal(locz().FILE_SIGN_YOUSIGN_SIGN_REQUEST_ERROR());
+      throw APIError.internal(locz().EXTERNAL_YOUSIGN_SIGN_REQUEST_ERROR());
     }
     const signatureRequestResponse: YouSignSignatureRequestResponse = apiResponse.data;
     // upload document to be signed
@@ -71,7 +71,7 @@ export const youSignDocumentSign = async (request: YouSignDocumentSignRequest): 
     apiResponse = await axios.post(documentUploadUrl, documentUploadFormData, documentUploadConfig);
     if (apiResponse.status != 201) {
       // error uploading document
-      throw APIError.internal(locz().FILE_SIGN_YOUSIGN_DOCUMENT_UPLOAD_ERROR());
+      throw APIError.internal(locz().EXTERNAL_YOUSIGN_DOCUMENT_UPLOAD_ERROR());
     }
     const documentUploadResponse: YouSignDocumentUploadResponse = apiResponse.data;
     // add a signer
@@ -98,7 +98,7 @@ export const youSignDocumentSign = async (request: YouSignDocumentSignRequest): 
     apiResponse = await axios.post(signerUrl, signerData, signerConfig);
     if (apiResponse.status != 201) {
       // error adding signer to request
-      throw APIError.internal(locz().FILE_SIGN_YOUSIGN_SIGNER_ADD_ERROR());
+      throw APIError.internal(locz().EXTERNAL_YOUSIGN_SIGNER_ADD_ERROR());
     }
     const signerResponse: YouSignSignerResponse = apiResponse.data;
     // activate the signature request
@@ -114,7 +114,7 @@ export const youSignDocumentSign = async (request: YouSignDocumentSignRequest): 
     apiResponse = await axios.post(activateSignatureUrl, activateSignatureData, activateSignatureConfig);
     if (apiResponse.status != 201) {
       // error adding signer to request
-      throw APIError.internal(locz().FILE_SIGN_YOUSIGN_ACTIVATE_ERROR());
+      throw APIError.internal(locz().EXTERNAL_YOUSIGN_ACTIVATE_ERROR());
     }
     const activateSignatureResponse: YouSignRequestStatusResponse = apiResponse.data;
     // prepare response
@@ -130,7 +130,7 @@ export const youSignDocumentSign = async (request: YouSignDocumentSignRequest): 
       throw error;
     }
     // error processing request
-    throw APIError.internal(locz().FILE_SIGN_YOUSIGN_DOCUMENT_SIGN_ERROR());
+    throw APIError.internal(locz().EXTERNAL_YOUSIGN_DOCUMENT_SIGN_ERROR());
   }
 }; // youSignDocumentSign
 
@@ -151,7 +151,7 @@ export const youSignDocumentSignStatus = async (request: YouSignDocumentStatusRe
     let apiResponse = await axios.get(activateSignatureUrl, activateSignatureConfig);
     if (apiResponse.status != 200) {
       // error fetching signature request data
-      throw APIError.internal(locz().FILE_SIGN_YOUSIGN_REQUEST_FETCHING_ERROR());
+      throw APIError.internal(locz().EXTERNAL_YOUSIGN_REQUEST_FETCHING_ERROR());
     }
     const requestStatusResponse: YouSignRequestStatusResponse = apiResponse.data;
     // prepare response
@@ -167,6 +167,6 @@ export const youSignDocumentSignStatus = async (request: YouSignDocumentStatusRe
       throw error;
     }
     // error processing request
-    throw APIError.internal(locz().FILE_SIGN_YOUSIGN_REQUEST_FETCHING_ERROR());
+    throw APIError.internal(locz().EXTERNAL_YOUSIGN_REQUEST_FETCHING_ERROR());
   }
 }; // youSignDocumentSignStatus
