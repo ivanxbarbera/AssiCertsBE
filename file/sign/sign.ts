@@ -2,8 +2,13 @@
 import { api, APIError } from 'encore.dev/api';
 import fs from 'fs';
 // application modules
-import { youSignDocumentSignStatus, youSignDocumentSign } from './yousign';
-import { YouSignOtpNotificationType, YouSignDocumentSignRequest, YouSignDocumentStatusRequest, YouSignDocumentStatusResponse } from './yousign.model';
+import { youSignDocumentSignStatus, youSignDocumentSign } from '../../external/sign/yousign';
+import {
+  YouSignOtpNotificationType,
+  YouSignDocumentSignRequest,
+  YouSignDocumentStatusRequest,
+  YouSignDocumentStatusResponse,
+} from '../../external/sign/yousign.model';
 import { SignDocumentStatusRequest, SignDocumentStatusResponse } from './sign.model';
 import locz from '../../common/i18n';
 

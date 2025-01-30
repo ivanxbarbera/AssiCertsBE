@@ -1,4 +1,3 @@
-import { YouSignDocumentStatusRequest, YouSignDocumentStatusResponse } from './yousign.model';
 // libraries
 import { APIError } from 'encore.dev/api';
 import axios from 'axios';
@@ -10,6 +9,8 @@ import {
   YouSignSignatureRequestResponse,
   YouSignDocumentSignRequest,
   YouSignSignerResponse,
+  YouSignDocumentStatusResponse,
+  YouSignDocumentStatusRequest,
 } from './yousign.model';
 
 // TODO MIC convert into parameter
