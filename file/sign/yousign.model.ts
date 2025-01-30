@@ -11,7 +11,7 @@ export enum YouSignOtpNotificationType {
 /**
  * Request for document sign by YouSign.
  */
-export interface YouSignSignDocumentRequest {
+export interface YouSignDocumentSignRequest {
   // stream of the document to sign
   documentStream: Blob;
   // signer of the document
@@ -31,15 +31,25 @@ export interface YouSignSignDocumentRequest {
     // OTP notification type
     otpNotificationType: YouSignOtpNotificationType;
   };
-} // YouSignSignDocumentRequest
+} // YouSignDocumentSignRequest
 
 /**
- * Request for document sign by YouSign.
+ * Document sign status request by YouSign.
  */
-export interface YouSignSignDocumentResponse {
+export interface YouSignDocumentStatusRequest {
   // signature request identifier
-  signatureRequestId: string;
-} // YouSignSignDocumentResponse
+  id: string;
+} // YouSignDocumentStatusRequest
+
+/**
+ * Document sign request status by YouSign.
+ */
+export interface YouSignDocumentStatusResponse {
+  // signer unique identifier
+  id: string;
+  // request status
+  status: string;
+} // YouSignDocumentStatusResponse
 
 /**
  * YouSign response for new sign request.
@@ -66,3 +76,13 @@ export interface YouSignSignerResponse {
   // signer unique identifier
   id: string;
 } // YouSignSignerResponse
+
+/**
+ * YouSign response for sign request status.
+ */
+export interface YouSignRequestStatusResponse {
+  // signer unique identifier
+  id: string;
+  // request status
+  status: string;
+} // YouSignRequestStatusResponse

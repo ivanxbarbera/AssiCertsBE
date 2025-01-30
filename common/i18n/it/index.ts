@@ -21,6 +21,7 @@ const it = {
   FILE_SIGN_YOUSIGN_DOCUMENT_UPLOAD_ERROR: 'Errore nel caricamento del documento da firmare',
   FILE_SIGN_YOUSIGN_SIGNER_ADD_ERROR: "Errore nell'aggiunta del firmatario alla richiesta di firma del documento",
   FILE_SIGN_YOUSIGN_ACTIVATE_ERROR: "Errore nell'attivazione della richiesta di firma del documento",
+  FILE_SIGN_YOUSIGN_REQUEST_FETCHING_ERROR: 'Errore nel recupero dello stato della richiesta di firma del documento',
   FILE_SIGN_YOUSIGN_DOCUMENT_SIGN_ERROR: 'Errore generico nella firma del documento',
   MUNICIPALITY_FILE_GET_ERROR: 'Errore nel recupero del file dei comuni da elaborare',
   MUNICIPALITY_FILE_PROCESS_ERROR: "Errore nel nell'elaborazione del file dei comnuni",

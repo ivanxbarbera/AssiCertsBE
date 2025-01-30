@@ -21,6 +21,7 @@ const en = {
   FILE_SIGN_YOUSIGN_DOCUMENT_UPLOAD_ERROR: 'Error uploading document to be signed',
   FILE_SIGN_YOUSIGN_SIGNER_ADD_ERROR: 'Error adding signer to document sign request',
   FILE_SIGN_YOUSIGN_ACTIVATE_ERROR: 'Error activating sign request',
+  FILE_SIGN_YOUSIGN_REQUEST_FETCHING_ERROR: 'Error fetching document sign request status',
   FILE_SIGN_YOUSIGN_DOCUMENT_SIGN_ERROR: 'Errore generico nella firma del documento',
   MUNICIPALITY_FILE_GET_ERROR: 'Error getting municipality file to be processed',
   MUNICIPALITY_FILE_PROCESS_ERROR: 'Error processing municipality file',

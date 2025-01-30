@@ -1,3 +1,4 @@
+import { YouSignDocumentStatusRequest, YouSignDocumentStatusResponse } from './yousign.model';
 // libraries
 import { APIError } from 'encore.dev/api';
 import axios from 'axios';
@@ -5,13 +6,21 @@ import axios from 'axios';
 import locz from '../../common/i18n';
 import {
   YouSignDocumentUploadResponse,
+  YouSignRequestStatusResponse,
   YouSignSignatureRequestResponse,
-  YouSignSignDocumentRequest,
-  YouSignSignDocumentResponse,
+  YouSignDocumentSignRequest,
   YouSignSignerResponse,
 } from './yousign.model';
 
-export const youSignSignDocument = async (request: YouSignSignDocumentRequest): Promise<YouSignSignDocumentResponse> => {
+/**
+ * Create a new sign request in YouSign.
+ * There are many steps:
+ * - sign request initialization
+ * - document uoload
+ * - signer data creation
+ * - sign request activation
+ */
+export const youSignDocumentSign = async (request: YouSignDocumentSignRequest): Promise<YouSignDocumentStatusResponse> => {
   try {
     // TODO MIC convert into parameter
     const baseURL = 'https://api-sandbox.yousign.app/v3';
@@ -105,10 +114,11 @@ export const youSignSignDocument = async (request: YouSignSignDocumentRequest): 
       // error adding signer to request
       throw APIError.internal(locz().FILE_SIGN_YOUSIGN_ACTIVATE_ERROR());
     }
-    const activateSignatureResponse = apiResponse.data;
+    const activateSignatureResponse: YouSignRequestStatusResponse = apiResponse.data;
     // prepare response
-    const response: YouSignSignDocumentResponse = {
-      signatureRequestId: signatureRequestResponse.id,
+    const response: YouSignDocumentStatusResponse = {
+      id: activateSignatureResponse.id,
+      status: activateSignatureResponse.status,
     };
     // return response
     return response;
@@ -120,4 +130,44 @@ export const youSignSignDocument = async (request: YouSignSignDocumentRequest): 
     // error getting file
     throw APIError.internal(locz().FILE_SIGN_YOUSIGN_DOCUMENT_SIGN_ERROR());
   }
-}; // youSignSignDocument
+}; // youSignDocumentSign
+
+/**
+ * Get informations about a Sign Request in YouSign.
+ */
+export const youSignDocumentSignStatus = async (request: YouSignDocumentStatusRequest): Promise<YouSignDocumentStatusResponse> => {
+  try {
+    // TODO MIC convert into parameter
+    const baseURL = 'https://api-sandbox.yousign.app/v3';
+    const apiKey = 'r0Pbi4m8Ggqath8H8t8bkXWwK1U96v5Z';
+    // activate the signature request
+    const activateSignatureConfig = {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        accept: 'application/json',
+      },
+    };
+    const activateSignatureUrl = `${baseURL}/signature_requests/${request.id}`;
+    // call yousign api
+    let apiResponse = await axios.get(activateSignatureUrl, activateSignatureConfig);
+    if (apiResponse.status != 200) {
+      // error fetching signature request data
+      throw APIError.internal(locz().FILE_SIGN_YOUSIGN_REQUEST_FETCHING_ERROR());
+    }
+    const requestStatusResponse: YouSignRequestStatusResponse = apiResponse.data;
+    // prepare response
+    const response: YouSignDocumentStatusResponse = {
+      id: requestStatusResponse.id,
+      status: requestStatusResponse.status,
+    };
+    // return response
+    return response;
+  } catch (error) {
+    if (error instanceof APIError) {
+      // error processing file
+      throw error;
+    }
+    // error getting file
+    throw APIError.internal(locz().FILE_SIGN_YOUSIGN_REQUEST_FETCHING_ERROR());
+  }
+}; // youSignDocumentSignStatus

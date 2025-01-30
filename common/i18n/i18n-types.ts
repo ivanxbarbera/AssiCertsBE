@@ -97,6 +97,10 @@ type RootTranslation = {
 	 */
 	FILE_SIGN_YOUSIGN_ACTIVATE_ERROR: string
 	/**
+	 * E​r​r​o​r​e​ ​n​e​l​ ​r​e​c​u​p​e​r​o​ ​d​e​l​l​o​ ​s​t​a​t​o​ ​d​e​l​l​a​ ​r​i​c​h​i​e​s​t​a​ ​d​i​ ​f​i​r​m​a​ ​d​e​l​ ​d​o​c​u​m​e​n​t​o
+	 */
+	FILE_SIGN_YOUSIGN_REQUEST_FETCHING_ERROR: string
+	/**
 	 * E​r​r​o​r​e​ ​g​e​n​e​r​i​c​o​ ​n​e​l​l​a​ ​f​i​r​m​a​ ​d​e​l​ ​d​o​c​u​m​e​n​t​o
 	 */
 	FILE_SIGN_YOUSIGN_DOCUMENT_SIGN_ERROR: string
@@ -386,6 +390,10 @@ export type TranslationFunctions = {
 	 * Errore nell'attivazione della richiesta di firma del documento
 	 */
 	FILE_SIGN_YOUSIGN_ACTIVATE_ERROR: () => LocalizedString
+	/**
+	 * Errore nel recupero dello stato della richiesta di firma del documento
+	 */
+	FILE_SIGN_YOUSIGN_REQUEST_FETCHING_ERROR: () => LocalizedString
 	/**
 	 * Errore generico nella firma del documento
 	 */
