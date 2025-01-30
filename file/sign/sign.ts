@@ -55,7 +55,7 @@ export const signDocumentPrepare = api(
  * Compelte all the steps necessary for signing a document.
  */
 export const signDocumentStatus = api(
-  { expose: true, auth: false, method: 'GET', path: '/file/sign/:requestId' },
+  { expose: true, auth: false, method: 'GET', path: '/file/sign/:id' },
   async (request: SignDocumentStatusRequest): Promise<SignDocumentStatusResponse> => {
     try {
       // call yousign sign request status
