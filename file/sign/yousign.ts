@@ -12,6 +12,10 @@ import {
   YouSignSignerResponse,
 } from './yousign.model';
 
+// TODO MIC convert into parameter
+const baseURL = 'https://api-sandbox.yousign.app/v3';
+const apiKey = 'r0Pbi4m8Ggqath8H8t8bkXWwK1U96v5Z';
+
 /**
  * Create a new sign request in YouSign.
  * There are many steps:
@@ -22,9 +26,6 @@ import {
  */
 export const youSignDocumentSign = async (request: YouSignDocumentSignRequest): Promise<YouSignDocumentStatusResponse> => {
   try {
-    // TODO MIC convert into parameter
-    const baseURL = 'https://api-sandbox.yousign.app/v3';
-    const apiKey = 'r0Pbi4m8Ggqath8H8t8bkXWwK1U96v5Z';
     // create sign request
     // TODO MIC generate a random name using policy data ??
     const signatureRequestName = 'AssiDealer';
@@ -137,9 +138,6 @@ export const youSignDocumentSign = async (request: YouSignDocumentSignRequest): 
  */
 export const youSignDocumentSignStatus = async (request: YouSignDocumentStatusRequest): Promise<YouSignDocumentStatusResponse> => {
   try {
-    // TODO MIC convert into parameter
-    const baseURL = 'https://api-sandbox.yousign.app/v3';
-    const apiKey = 'r0Pbi4m8Ggqath8H8t8bkXWwK1U96v5Z';
     // activate the signature request
     const activateSignatureConfig = {
       headers: {

@@ -1,25 +1,22 @@
 /**
  * Document sign prepare request.
  */
-export interface SignDocumentPrepareRequest {
-  // request identifier
-  requestId: string;
-} // SignDocumentPrepareRequest
+export interface SignDocumentPrepareRequest {} // SignDocumentPrepareRequest
 
 /**
  * Document sign status request.
  */
 export interface SignDocumentStatusRequest {
-  // request identifier
-  requestId: string;
+  // sign identifier
+  id: string;
 } // SignDocumentStatusRequest
 
 /**
  * Document sign status response.
  */
 export interface SignDocumentStatusResponse {
-  // request identifier
-  requestId: string;
-  // reqeust status
+  // sign identifier
+  id: string;
+  // sign status
   status: string;
 } // SignDocumentStatusResponse

@@ -16,6 +16,7 @@ export const signDocumentPrepare = api(
   async (): Promise<SignDocumentStatusResponse> => {
     try {
       // call yousign document sign
+      // TODO MIC integrate retrieve of file and user data
       const stream = await new Response(fs.createReadStream('D:/Temp/00Svil/AssiDeal/test/SignTest.pdf')).blob();
       const signDocumentRequest: YouSignDocumentSignRequest = {
         documentStream: stream,
@@ -33,7 +34,7 @@ export const signDocumentPrepare = api(
       const signDocumentResponse: YouSignDocumentStatusResponse = await youSignDocumentSign(signDocumentRequest);
       // prepare response
       const response: SignDocumentStatusResponse = {
-        requestId: signDocumentResponse.id,
+        id: signDocumentResponse.id, // TODO MIC use internal identifier
         status: 'OK', // TODO MIC manage status code
       };
       // return response
@@ -59,13 +60,13 @@ export const signDocumentStatus = api(
     try {
       // call yousign sign request status
       const youDocumentSignStatusRequest: YouSignDocumentStatusRequest = {
-        id: request.requestId,
+        id: request.id,
       };
       // sign document using YouSign
       const signDocumentStatusResponse: YouSignDocumentStatusResponse = await youSignDocumentSignStatus(youDocumentSignStatusRequest);
       // prepare response
       const response: SignDocumentStatusResponse = {
-        requestId: signDocumentStatusResponse.id,
+        id: signDocumentStatusResponse.id, // TODO MIC use internal identifier
         status: 'OK', // TODO MIC manage status code
       };
       // return response
