@@ -18,6 +18,8 @@ export const signDocument = api({ expose: true, auth: false, method: 'POST', pat
       email: 'michele.bonacina@ledinformatica.com',
       phoneNumber: '+393283699924',
       otpNotificationType: YouSignOtpNotificationType.EMail,
+      locale: 'it',
+      timeZone: 'Europe/Rome',
     },
   };
   try {
