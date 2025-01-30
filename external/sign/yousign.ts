@@ -126,10 +126,10 @@ export const youSignDocumentSign = async (request: YouSignDocumentSignRequest): 
     return response;
   } catch (error) {
     if (error instanceof APIError) {
-      // error processing file
+      // error signing document
       throw error;
     }
-    // error getting file
+    // error processing request
     throw APIError.internal(locz().FILE_SIGN_YOUSIGN_DOCUMENT_SIGN_ERROR());
   }
 }; // youSignDocumentSign
@@ -163,10 +163,10 @@ export const youSignDocumentSignStatus = async (request: YouSignDocumentStatusRe
     return response;
   } catch (error) {
     if (error instanceof APIError) {
-      // error processing file
+      // error getting singing status
       throw error;
     }
-    // error getting file
+    // error processing request
     throw APIError.internal(locz().FILE_SIGN_YOUSIGN_REQUEST_FETCHING_ERROR());
   }
 }; // youSignDocumentSignStatus
