@@ -77,33 +77,45 @@ type RootTranslation = {
 	 */
 	EMAIL_SEND_ERROR: string
 	/**
+	 * E​r​r​o​r​e​ ​n​e​l​ ​r​e​c​u​p​e​r​o​ ​d​e​l​l​e​ ​m​a​r​c​h​e​ ​d​a​ ​I​n​f​o​ ​C​a​r
+	 */
+	EXTERNAL_INFOCAR_GET_MARCHE_ERROR: string
+	/**
+	 * E​r​r​o​r​e​ ​n​e​l​ ​r​e​c​u​p​e​r​o​ ​d​e​i​ ​m​o​d​e​l​l​i​ ​d​a​ ​I​n​f​o​ ​C​a​r
+	 */
+	EXTERNAL_INFOCAR_GET_MODELLI_ERROR: string
+	/**
+	 * E​r​r​o​r​e​ ​n​e​l​ ​r​e​c​u​p​e​r​o​ ​d​e​e​g​l​i​ ​a​l​l​e​s​t​i​m​e​n​t​i​ ​d​a​ ​I​n​f​o​ ​C​a​r
+	 */
+	EXTERNAL_INFOCAR_GET_ALLESTIMENTI_ERROR: string
+	/**
 	 * F​i​l​e​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	FILE_FILE_NOT_FOUND: string
 	/**
 	 * E​r​r​o​r​e​ ​n​e​l​l​a​ ​c​r​e​a​z​i​o​n​e​ ​d​e​l​l​e​ ​r​i​c​h​i​e​s​t​a​ ​d​i​ ​f​i​r​m​a
 	 */
-	FILE_SIGN_YOUSIGN_SIGN_REQUEST_ERROR: string
+	EXTERNAL_YOUSIGN_SIGN_REQUEST_ERROR: string
 	/**
 	 * E​r​r​o​r​e​ ​n​e​l​ ​c​a​r​i​c​a​m​e​n​t​o​ ​d​e​l​ ​d​o​c​u​m​e​n​t​o​ ​d​a​ ​f​i​r​m​a​r​e
 	 */
-	FILE_SIGN_YOUSIGN_DOCUMENT_UPLOAD_ERROR: string
+	EXTERNAL_YOUSIGN_DOCUMENT_UPLOAD_ERROR: string
 	/**
 	 * E​r​r​o​r​e​ ​n​e​l​l​'​a​g​g​i​u​n​t​a​ ​d​e​l​ ​f​i​r​m​a​t​a​r​i​o​ ​a​l​l​a​ ​r​i​c​h​i​e​s​t​a​ ​d​i​ ​f​i​r​m​a​ ​d​e​l​ ​d​o​c​u​m​e​n​t​o
 	 */
-	FILE_SIGN_YOUSIGN_SIGNER_ADD_ERROR: string
+	EXTERNAL_YOUSIGN_SIGNER_ADD_ERROR: string
 	/**
 	 * E​r​r​o​r​e​ ​n​e​l​l​'​a​t​t​i​v​a​z​i​o​n​e​ ​d​e​l​l​a​ ​r​i​c​h​i​e​s​t​a​ ​d​i​ ​f​i​r​m​a​ ​d​e​l​ ​d​o​c​u​m​e​n​t​o
 	 */
-	FILE_SIGN_YOUSIGN_ACTIVATE_ERROR: string
+	EXTERNAL_YOUSIGN_ACTIVATE_ERROR: string
 	/**
 	 * E​r​r​o​r​e​ ​n​e​l​ ​r​e​c​u​p​e​r​o​ ​d​e​l​l​o​ ​s​t​a​t​o​ ​d​e​l​l​a​ ​r​i​c​h​i​e​s​t​a​ ​d​i​ ​f​i​r​m​a​ ​d​e​l​ ​d​o​c​u​m​e​n​t​o
 	 */
-	FILE_SIGN_YOUSIGN_REQUEST_FETCHING_ERROR: string
+	EXTERNAL_YOUSIGN_REQUEST_FETCHING_ERROR: string
 	/**
 	 * E​r​r​o​r​e​ ​g​e​n​e​r​i​c​o​ ​n​e​l​l​a​ ​f​i​r​m​a​ ​d​e​l​ ​d​o​c​u​m​e​n​t​o
 	 */
-	FILE_SIGN_YOUSIGN_DOCUMENT_SIGN_ERROR: string
+	EXTERNAL_YOUSIGN_DOCUMENT_SIGN_ERROR: string
 	/**
 	 * E​r​r​o​r​e​ ​n​e​l​ ​r​e​c​u​p​e​r​o​ ​d​e​l​ ​f​i​l​e​ ​d​e​i​ ​c​o​m​u​n​i​ ​d​a​ ​e​l​a​b​o​r​a​r​e
 	 */
@@ -371,33 +383,45 @@ export type TranslationFunctions = {
 	 */
 	EMAIL_SEND_ERROR: () => LocalizedString
 	/**
+	 * Errore nel recupero delle marche da Info Car
+	 */
+	EXTERNAL_INFOCAR_GET_MARCHE_ERROR: () => LocalizedString
+	/**
+	 * Errore nel recupero dei modelli da Info Car
+	 */
+	EXTERNAL_INFOCAR_GET_MODELLI_ERROR: () => LocalizedString
+	/**
+	 * Errore nel recupero deegli allestimenti da Info Car
+	 */
+	EXTERNAL_INFOCAR_GET_ALLESTIMENTI_ERROR: () => LocalizedString
+	/**
 	 * File non trovato
 	 */
 	FILE_FILE_NOT_FOUND: () => LocalizedString
 	/**
 	 * Errore nella creazione delle richiesta di firma
 	 */
-	FILE_SIGN_YOUSIGN_SIGN_REQUEST_ERROR: () => LocalizedString
+	EXTERNAL_YOUSIGN_SIGN_REQUEST_ERROR: () => LocalizedString
 	/**
 	 * Errore nel caricamento del documento da firmare
 	 */
-	FILE_SIGN_YOUSIGN_DOCUMENT_UPLOAD_ERROR: () => LocalizedString
+	EXTERNAL_YOUSIGN_DOCUMENT_UPLOAD_ERROR: () => LocalizedString
 	/**
 	 * Errore nell'aggiunta del firmatario alla richiesta di firma del documento
 	 */
-	FILE_SIGN_YOUSIGN_SIGNER_ADD_ERROR: () => LocalizedString
+	EXTERNAL_YOUSIGN_SIGNER_ADD_ERROR: () => LocalizedString
 	/**
 	 * Errore nell'attivazione della richiesta di firma del documento
 	 */
-	FILE_SIGN_YOUSIGN_ACTIVATE_ERROR: () => LocalizedString
+	EXTERNAL_YOUSIGN_ACTIVATE_ERROR: () => LocalizedString
 	/**
 	 * Errore nel recupero dello stato della richiesta di firma del documento
 	 */
-	FILE_SIGN_YOUSIGN_REQUEST_FETCHING_ERROR: () => LocalizedString
+	EXTERNAL_YOUSIGN_REQUEST_FETCHING_ERROR: () => LocalizedString
 	/**
 	 * Errore generico nella firma del documento
 	 */
-	FILE_SIGN_YOUSIGN_DOCUMENT_SIGN_ERROR: () => LocalizedString
+	EXTERNAL_YOUSIGN_DOCUMENT_SIGN_ERROR: () => LocalizedString
 	/**
 	 * Errore nel recupero del file dei comuni da elaborare
 	 */
