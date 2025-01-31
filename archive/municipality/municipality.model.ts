@@ -59,14 +59,6 @@ export interface Municipality {
 } // Municipality
 
 /**
- * Municipality synchronization request.
- */
-export interface MunicipalitySync {
-  // url for getting source municipality data file
-  url: string;
-} // MunicipalitySync
-
-/**
  * Municipality synchronization response.
  */
 export interface MunicipalitySyncResponse {
@@ -107,3 +99,23 @@ export interface MunicipalityListResponse {
   // municipality list
   municipalities: MunicipalityList[];
 } // SystemMunicipalityListResponse
+
+/**
+ * Municipality info loaded from exzternal service.
+ */
+export interface MunicipalityData {
+  // nation name
+  nationName: string;
+  // nation code
+  nationCode: string;
+  // region name
+  regionName: string;
+  // province name
+  provinceName: string;
+  // province code
+  provinceCode: string;
+  // municipiality name
+  municipalityName: string;
+  // municipality code
+  municipalityCode: string;
+} // MunicipalityData
