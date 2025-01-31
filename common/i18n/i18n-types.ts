@@ -117,13 +117,17 @@ type RootTranslation = {
 	 */
 	EXTERNAL_YOUSIGN_DOCUMENT_SIGN_ERROR: string
 	/**
-	 * E​r​r​o​r​e​ ​n​e​l​ ​r​e​c​u​p​e​r​o​ ​d​e​l​ ​f​i​l​e​ ​d​e​i​ ​c​o​m​u​n​i​ ​d​a​ ​e​l​a​b​o​r​a​r​e
+	 * E​r​r​o​r​e​ ​n​e​l​ ​r​e​c​u​p​e​r​o​ ​d​e​l​ ​f​i​l​e​ ​I​S​T​A​T​ ​d​e​i​ ​c​o​m​u​n​i​ ​d​a​ ​e​l​a​b​o​r​a​r​e
 	 */
-	MUNICIPALITY_FILE_GET_ERROR: string
+	EXTERNAL_ISTAT_MUNICIPALITY_FILE_GET_ERROR: string
 	/**
-	 * E​r​r​o​r​e​ ​n​e​l​ ​n​e​l​l​'​e​l​a​b​o​r​a​z​i​o​n​e​ ​d​e​l​ ​f​i​l​e​ ​d​e​i​ ​c​o​m​n​u​n​i
+	 * E​r​r​o​r​e​ ​n​e​l​ ​n​e​l​l​'​e​l​a​b​o​r​a​z​i​o​n​e​ ​d​e​l​ ​f​i​l​e​ ​I​S​T​A​T​ ​d​e​i​ ​c​o​m​n​u​n​i
 	 */
-	MUNICIPALITY_FILE_PROCESS_ERROR: string
+	EXTERNAL_ISTAT_MUNICIPALITY_FILE_PROCESS_ERROR: string
+	/**
+	 * E​r​r​o​r​e​ ​n​e​l​l​'​e​l​a​b​o​r​a​z​i​o​n​e​ ​d​e​i​ ​d​a​t​i​ ​d​e​i​ ​c​o​m​u​n​i
+	 */
+	MUNICIPALITY_DATA_PROCESS_ERROR: string
 	/**
 	 * N​o​t​i​f​i​c​a​ ​n​o​n​ ​t​r​o​v​a​t​a
 	 */
@@ -423,13 +427,17 @@ export type TranslationFunctions = {
 	 */
 	EXTERNAL_YOUSIGN_DOCUMENT_SIGN_ERROR: () => LocalizedString
 	/**
-	 * Errore nel recupero del file dei comuni da elaborare
+	 * Errore nel recupero del file ISTAT dei comuni da elaborare
 	 */
-	MUNICIPALITY_FILE_GET_ERROR: () => LocalizedString
+	EXTERNAL_ISTAT_MUNICIPALITY_FILE_GET_ERROR: () => LocalizedString
 	/**
-	 * Errore nel nell'elaborazione del file dei comnuni
+	 * Errore nel nell'elaborazione del file ISTAT dei comnuni
 	 */
-	MUNICIPALITY_FILE_PROCESS_ERROR: () => LocalizedString
+	EXTERNAL_ISTAT_MUNICIPALITY_FILE_PROCESS_ERROR: () => LocalizedString
+	/**
+	 * Errore nell'elaborazione dei dati dei comuni
+	 */
+	MUNICIPALITY_DATA_PROCESS_ERROR: () => LocalizedString
 	/**
 	 * Notifica non trovata
 	 */
