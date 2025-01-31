@@ -21,6 +21,34 @@ export interface InfocarDatoModello {
 } // InfocarDatoModello
 
 /**
+ * Info Car equipment.
+ */
+export interface InfocarDatoAllestimento {
+  // infocar code
+  codiceInfocar: string;
+  // infocar code am
+  codiceInfocarAM: string;
+  // equipment release year
+  anno: string;
+  // equipment release month
+  mese: string;
+  // equipment description
+  descrizione: string;
+  // equipment category
+  categoria: string;
+  // equipment on market start
+  inizioVendita: string;
+  // equipment on market end
+  fineVendita: string;
+  // equipment registration start
+  inizioImmatricolazione: string;
+  // equipment registration end
+  fineImmatricolazione: string;
+  // equipment full description
+  descrizioneCompleta: string;
+} // InfocarDatoAllestimento
+
+/**
  * Info Car basic web service request.
  * Contains information for authentication
  */
@@ -83,3 +111,30 @@ export interface InfocarGetModelliResponse {
     };
   };
 } // InfocarGetModelliResponse
+
+/**
+ * Info Car model list request.
+ */
+export interface InfocarGetAllestimentiRequest extends InfocarRequest {
+  // Info Car manufacturer models request filters
+  filtro: {
+    immatricolazioneDa: string;
+    immatricolazioneA: string;
+    alimentazione: string;
+    carrozzeria: string;
+    categoria: string;
+    codiceModello: string;
+    casUsername: string;
+  };
+} // InfocarGetAllestimentiRequest
+
+/**
+ * Info Car model list response.
+ */
+export interface InfocarGetAllestimentiResponse {
+  GetAllestimentiResult: {
+    list: {
+      DatoAllestimento: [InfocarDatoAllestimento];
+    };
+  };
+} // InfocarGetAllestimentiResponse

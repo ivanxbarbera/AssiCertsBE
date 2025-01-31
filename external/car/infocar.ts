@@ -1,4 +1,12 @@
-import { InfocarDatoModello, InfocarGetMarcheResponse, InfocarGetModelliRequest, InfocarGetModelliResponse } from './infocar.model';
+import {
+  InfocarDatoAllestimento,
+  InfocarDatoModello,
+  InfocarGetAllestimentiRequest,
+  InfocarGetAllestimentiResponse,
+  InfocarGetMarcheResponse,
+  InfocarGetModelliRequest,
+  InfocarGetModelliResponse,
+} from './infocar.model';
 // libraries
 import soap from 'soap';
 // application modules
@@ -39,10 +47,10 @@ export const infocarGetMarche = async (): Promise<InfocarDatoMarca[]> => {
     return response;
   } catch (error) {
     if (error instanceof APIError) {
-      // error processing file
+      // error getting infocar data
       throw error;
     }
-    // error getting file
+    // error comunicating with infocar
     throw APIError.internal(locz().EXTERNAL_INFOCAR_GET_MARCHE_ERROR());
   }
 }; // infocarGetMarche
@@ -76,10 +84,47 @@ export const infocarGetModelli = async (): Promise<InfocarDatoModello[]> => {
     return response;
   } catch (error) {
     if (error instanceof APIError) {
-      // error processing file
+      // error getting infocar data
       throw error;
     }
-    // error getting file
+    // error comunicating with infocar
     throw APIError.internal(locz().EXTERNAL_INFOCAR_GET_MODELLI_ERROR());
   }
 }; // infocarGetModelli
+
+/**
+ * List Model Equipments from Info Car.
+ */
+export const infocarGetAllestimenti = async (): Promise<InfocarDatoAllestimento[]> => {
+  try {
+    // connect to Info Car web service
+    const client = await soap.createClientAsync(SOAP_URL);
+    // prepare Info Car equipment list request
+    const args: InfocarGetAllestimentiRequest = {
+      userName,
+      password,
+      filtro: {
+        immatricolazioneDa: '',
+        immatricolazioneA: '',
+        alimentazione: '',
+        carrozzeria: '',
+        categoria: '',
+        codiceModello: '',
+        casUsername: '',
+      },
+    };
+    // call Info Car
+    const [result]: [InfocarGetAllestimentiResponse] = await client.GetAllestimentiAsync(args);
+    // prepare response
+    const response: InfocarDatoAllestimento[] = result.GetAllestimentiResult.list.DatoAllestimento;
+    // return response
+    return response;
+  } catch (error) {
+    if (error instanceof APIError) {
+      // error getting infocar data
+      throw error;
+    }
+    // error comunicating with infocar
+    throw APIError.internal(locz().EXTERNAL_INFOCAR_GET_ALLESTIMENTI_ERROR());
+  }
+}; // infocarGetAllestimenti

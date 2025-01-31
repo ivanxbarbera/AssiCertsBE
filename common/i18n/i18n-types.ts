@@ -85,6 +85,10 @@ type RootTranslation = {
 	 */
 	EXTERNAL_INFOCAR_GET_MODELLI_ERROR: string
 	/**
+	 * E​r​r​o​r​e​ ​n​e​l​ ​r​e​c​u​p​e​r​o​ ​d​e​e​g​l​i​ ​a​l​l​e​s​t​i​m​e​n​t​i​ ​d​a​ ​I​n​f​o​ ​C​a​r
+	 */
+	EXTERNAL_INFOCAR_GET_ALLESTIMENTI_ERROR: string
+	/**
 	 * F​i​l​e​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	FILE_FILE_NOT_FOUND: string
@@ -386,6 +390,10 @@ export type TranslationFunctions = {
 	 * Errore nel recupero dei modelli da Info Car
 	 */
 	EXTERNAL_INFOCAR_GET_MODELLI_ERROR: () => LocalizedString
+	/**
+	 * Errore nel recupero deegli allestimenti da Info Car
+	 */
+	EXTERNAL_INFOCAR_GET_ALLESTIMENTI_ERROR: () => LocalizedString
 	/**
 	 * File non trovato
 	 */

@@ -18,6 +18,7 @@ const en = {
   EMAIL_SEND_ERROR: 'Error sending email. Contact technical support.',
   EXTERNAL_INFOCAR_GET_MARCHE_ERROR: 'Error fetching manufacturers from Info Car',
   EXTERNAL_INFOCAR_GET_MODELLI_ERROR: 'Error fetching models from Info Car',
+  EXTERNAL_INFOCAR_GET_ALLESTIMENTI_ERROR: 'Error fetching equiments from Infor Car',
   FILE_FILE_NOT_FOUND: 'File not founded',
   EXTERNAL_YOUSIGN_SIGN_REQUEST_ERROR: 'Error during sign request creation',
   EXTERNAL_YOUSIGN_DOCUMENT_UPLOAD_ERROR: 'Error uploading document to be signed',

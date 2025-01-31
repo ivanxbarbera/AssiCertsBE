@@ -18,6 +18,7 @@ const it = {
   EMAIL_SEND_ERROR: "Errore nell'invio della Mail. Contattare il supporto tecnico.",
   EXTERNAL_INFOCAR_GET_MARCHE_ERROR: 'Errore nel recupero delle marche da Info Car',
   EXTERNAL_INFOCAR_GET_MODELLI_ERROR: 'Errore nel recupero dei modelli da Info Car',
+  EXTERNAL_INFOCAR_GET_ALLESTIMENTI_ERROR: 'Errore nel recupero deegli allestimenti da Info Car',
   FILE_FILE_NOT_FOUND: 'File non trovato',
   EXTERNAL_YOUSIGN_SIGN_REQUEST_ERROR: 'Errore nella creazione delle richiesta di firma',
   EXTERNAL_YOUSIGN_DOCUMENT_UPLOAD_ERROR: 'Errore nel caricamento del documento da firmare',

@@ -1,9 +1,16 @@
 // libraries
 import { api } from 'encore.dev/api';
 // application modules
-import { CarManufacturerList, CarManufacturerListResponse, CarModelList, CarModelListResponse } from './car.model';
-import { infocarGetMarche, infocarGetModelli } from '../../external/car/infocar';
-import { InfocarDatoMarca, InfocarDatoModello } from '../../external/car/infocar.model';
+import {
+  CarEquipmentList,
+  CarEquipmentListResponse,
+  CarManufacturerList,
+  CarManufacturerListResponse,
+  CarModelList,
+  CarModelListResponse,
+} from './car.model';
+import { infocarGetAllestimenti, infocarGetMarche, infocarGetModelli } from '../../external/car/infocar';
+import { InfocarDatoAllestimento, InfocarDatoMarca, InfocarDatoModello } from '../../external/car/infocar.model';
 
 /**
  * Car manufacturer list.
@@ -52,3 +59,27 @@ export const carModelList = api(
     return response;
   }
 ); // carModelList
+
+/**
+ * Car equipment list.
+ */
+export const carEquipmentList = api(
+  { expose: true, auth: false, method: 'GET', path: '/registry/car/equipment' },
+  async (): Promise<CarEquipmentListResponse> => {
+    // list equipments from InfoCar
+    const infocarEquipments: InfocarDatoAllestimento[] = await infocarGetAllestimenti();
+    // prepare response
+    const carEquipments: CarEquipmentList[] = infocarEquipments.map((infocarEquipment: InfocarDatoAllestimento) => {
+      const carEquipment: CarManufacturerList = {
+        code: infocarEquipment.codiceInfocar,
+        name: infocarEquipment.descrizione,
+      };
+      return carEquipment;
+    });
+    const response: CarEquipmentListResponse = {
+      carEquipments: carEquipments,
+    };
+    // return response
+    return response;
+  }
+); // carEquipmentList
