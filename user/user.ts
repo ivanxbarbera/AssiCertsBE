@@ -47,8 +47,8 @@ import { sendNotificationMessage } from '../notification/notification';
 import { NotificationMessageType } from '../notification/notification.model';
 import { DbUtility } from '../common/utility/db.utility';
 import { GeneralUtility } from '../common/utility/general.utility';
-import { Email, EmailType, EmailListResponse, EmailEditRequest } from './address/address.model';
-import { emailUserCheck, emailListByUser, emailUserUpdate } from './address/address';
+import { Email, EmailType, EmailListResponse, EmailEditRequest, AddressListResponse } from './address/address.model';
+import { emailUserCheck, emailListByUser, emailUserUpdate, addressListByUser } from './address/address';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const frontendBaseURL = secret('FrontendBaseURL');
@@ -603,6 +603,9 @@ export const userDetail = api({ expose: true, auth: true, method: 'GET', path: '
   // load user emails
   const emailList: EmailListResponse = await emailListByUser({ userId: user.id });
   user.emails = emailList.emails;
+  // load user addresses
+  const addressList: AddressListResponse = await addressListByUser({ userId: user.id });
+  user.addresses = addressList.addresses;
   // return user
   return DbUtility.removeNullFields(user);
 }); // userDetail

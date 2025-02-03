@@ -129,6 +129,22 @@ type RootTranslation = {
 	 */
 	MUNICIPALITY_DATA_PROCESS_ERROR: string
 	/**
+	 * N​a​z​i​o​n​e​ ​n​o​n​ ​t​r​o​v​a​t​a
+	 */
+	NATION_NOT_FOUND: string
+	/**
+	 * R​e​g​i​o​n​e​ ​n​o​n​ ​t​r​o​v​a​t​a
+	 */
+	REGION_NOT_FOUND: string
+	/**
+	 * P​r​o​v​i​n​c​i​a​ ​n​o​n​ ​t​r​o​v​a​t​a
+	 */
+	PROVINCE_NOT_FOUND: string
+	/**
+	 * C​o​m​u​n​e​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	MUNICIPALITY_NOT_FOUND: string
+	/**
 	 * N​o​t​i​f​i​c​a​ ​n​o​n​ ​t​r​o​v​a​t​a
 	 */
 	NOTIFICATION_NOTIFICATION_NOT_FOUND: string
@@ -148,6 +164,10 @@ type RootTranslation = {
 	 * T​i​p​o​ ​E​m​a​i​l​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	USER_ADDRESS_EMAILTYPE_NOT_FOUND: string
+	/**
+	 * T​o​p​o​n​i​m​o​ ​d​e​l​l​'​i​n​d​i​r​i​z​z​o​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	USER_ADDRESS_TOPONYM_NOT_FOUND: string
 	/**
 	 * U​t​e​n​t​e​ ​c​o​n​ ​l​a​ ​m​a​i​l​ ​i​n​d​i​c​a​t​a​ ​e​s​i​s​t​e​n​t​e
 	 */
@@ -439,6 +459,22 @@ export type TranslationFunctions = {
 	 */
 	MUNICIPALITY_DATA_PROCESS_ERROR: () => LocalizedString
 	/**
+	 * Nazione non trovata
+	 */
+	NATION_NOT_FOUND: () => LocalizedString
+	/**
+	 * Regione non trovata
+	 */
+	REGION_NOT_FOUND: () => LocalizedString
+	/**
+	 * Provincia non trovata
+	 */
+	PROVINCE_NOT_FOUND: () => LocalizedString
+	/**
+	 * Comune non trovato
+	 */
+	MUNICIPALITY_NOT_FOUND: () => LocalizedString
+	/**
 	 * Notifica non trovata
 	 */
 	NOTIFICATION_NOTIFICATION_NOT_FOUND: () => LocalizedString
@@ -458,6 +494,10 @@ export type TranslationFunctions = {
 	 * Tipo Email non trovato
 	 */
 	USER_ADDRESS_EMAILTYPE_NOT_FOUND: () => LocalizedString
+	/**
+	 * Toponimo dell'indirizzo non trovato
+	 */
+	USER_ADDRESS_TOPONYM_NOT_FOUND: () => LocalizedString
 	/**
 	 * Utente con la mail indicata esistente
 	 */

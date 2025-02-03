@@ -1,5 +1,5 @@
 // application modules
-import { Municipality } from '../../archive/municipality/municipality.model';
+import { Municipality, MunicipalityResponse } from '../../archive/municipality/municipality.model';
 
 /**
  * Address toponym.
@@ -34,6 +34,26 @@ export interface AddressToponymListResponse {
 } // AddressToponymListResponse
 
 /**
+ * Request for address toponym details.
+ */
+export interface AddressToponymRequest {
+  // address toponym unique identifier
+  id: number;
+} // AddressToponymRequest
+
+/**
+ * Address toponym returned to caller.
+ */
+export interface AddressToponymResponse {
+  // address toponym unique identifier
+  id: number;
+  // address toponym code
+  code: string;
+  // address toponym name
+  name: string;
+} // AddressToponymResponse
+
+/**
  * Address.
  */
 export interface Address {
@@ -50,20 +70,36 @@ export interface Address {
 } // Address
 
 /**
- * Address list.
+ * Request for addresses associated to a user.
  */
-export interface AddressList {
+export interface AddressUserListRequest {
+  // user unique identifier
+  userId: number;
+} // AddressUserListRequest
+
+/**
+ * Response for addresses associated to a user.
+ */
+export interface AddressListResponse {
+  // address liset
+  addresses: AddressResponse[];
+} // EmailListResponse
+
+/**
+ * Address response.
+ */
+export interface AddressResponse {
   // address unique identifier
   id: number;
   // address toponym
-  toponym: AddressToponym;
+  toponym: AddressToponymResponse;
   // address, street
   address: string;
   // address house number
   houseNumber: string;
   // address municipality
-  municipality: Municipality;
-} // AddressList
+  municipality: MunicipalityResponse;
+} // AddressResponse
 
 /**
  * Phone type.

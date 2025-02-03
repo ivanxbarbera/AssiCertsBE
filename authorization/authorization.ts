@@ -43,6 +43,7 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       request.operationCode == 'notificationMessageDetailsFull' ||
       request.operationCode == 'userDetail' ||
       request.operationCode == 'emailListByUser' ||
+      request.operationCode == 'addressListByUser' ||
       request.operationCode == 'userSiteLock' ||
       request.operationCode == 'userSiteUnlock' ||
       request.operationCode == 'userStatusGet' ||
@@ -62,6 +63,7 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
   if (
     (request.operationCode == 'userList' ||
       request.operationCode == 'emailListByUser' ||
+      request.operationCode == 'addressListByUser' ||
       request.operationCode == 'userDetail' ||
       request.operationCode == 'userInsert' ||
       request.operationCode == 'userUpdate') &&
@@ -91,7 +93,14 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
     };
   }
   if (
-    (request.operationCode == 'authorizationList' || request.operationCode == 'emailTypeList' || request.operationCode == 'emailTypeDetail') &&
+    (request.operationCode == 'authorizationList' ||
+      request.operationCode == 'emailTypeList' ||
+      request.operationCode == 'emailTypeDetail' ||
+      request.operationCode == 'addressToponymDetail' ||
+      request.operationCode == 'nationDetail' ||
+      request.operationCode == 'regionDetail' ||
+      request.operationCode == 'provinceDetail' ||
+      request.operationCode == 'municipalityDetail') &&
     request.requestingUserRole
   ) {
     return {

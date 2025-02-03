@@ -74,7 +74,7 @@ export interface MunicipalitySyncResponse {
  * Municipality list item.
  */
 export interface MunicipalityList {
-  // parameter indentifier
+  // municipality indentifier
   id: number;
   // municipality name
   name: string;
@@ -119,3 +119,87 @@ export interface MunicipalityData {
   // municipality code
   municipalityCode: string;
 } // MunicipalityData
+
+/**
+ * Request for nation details.
+ */
+export interface NationRequest {
+  // nation unique identifier
+  id: number;
+} // NationRequest
+
+/**
+ * Request for region details.
+ */
+export interface RegionRequest {
+  // region unique identifier
+  id: number;
+} // RegionRequest
+
+/**
+ * Request for province details.
+ */
+export interface ProvinceRequest {
+  // province unique identifier
+  id: number;
+} // ProvinceRequest
+
+/**
+ * Request for municipality details.
+ */
+export interface MunicipalityRequest {
+  // monicipality unique identifier
+  id: number;
+} // MunicipalityRequest
+
+/**
+ * Nation returned to caller
+ */
+export interface NationResponse {
+  // nation indentifier
+  id: number;
+  // nation name
+  name: string;
+  // nation code
+  code?: string;
+} // NationResponse
+
+/**
+ * Region returned to caller
+ */
+export interface RegionResponse {
+  // region indentifier
+  id: number;
+  // region name
+  name: string;
+  // region nation
+  nation: NationResponse;
+} // RegionResponse
+
+/**
+ * Province returned to caller
+ */
+export interface ProvinceResponse {
+  // province indentifier
+  id: number;
+  // province name
+  name: string;
+  // province code
+  code?: string;
+  // province region
+  region: RegionResponse;
+} // ProvinceResponse
+
+/**
+ * Municipality returned to caller.
+ */
+export interface MunicipalityResponse {
+  // muinicipality indentifier
+  id: number;
+  // municipality name
+  name: string;
+  // municipality code
+  code?: string;
+  // province
+  province: ProvinceResponse;
+} // MunicipalityResponse

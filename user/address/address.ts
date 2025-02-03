@@ -19,6 +19,11 @@ import {
   PhoneTypeListResponse,
   EmailEditRequest,
   Email,
+  AddressUserListRequest,
+  AddressListResponse,
+  AddressResponse,
+  AddressToponymRequest,
+  AddressToponymResponse,
 } from './address.model';
 import { AuthorizationOperationResponse } from '../../authorization/authorization.model';
 import { authorizationOperationUserCheck } from '../../authorization/authorization';
@@ -29,6 +34,7 @@ import { AuthenticationData } from '../../authentication/authentication.model';
 import { UserEmail, UserResponse } from '../user.model';
 import { UserCheckParameters } from '../../system/system.model';
 import { systemParametersUserCheck } from '../../system/system';
+import { municipalityDetail } from '../../archive/municipality/municipality';
 
 /**
  * Address toponym list.
@@ -51,6 +57,32 @@ export const addressToponymList = api(
     return { addressToponyms: DbUtility.removeNullFieldsList(addressToponyms) };
   }
 ); // addressToponymList
+
+/**
+ * Load address toponym details.
+ */
+export const addressToponymDetail = api(
+  { expose: true, auth: true, method: 'GET', path: '/user/address/addressToponym/:id' },
+  async (request: AddressToponymRequest): Promise<AddressToponymResponse> => {
+    // load address toponym
+    const addressToponym = await orm<AddressToponymResponse>('AddressToponym').first().where('id', request.id);
+    if (!addressToponym) {
+      // address toponym not found
+      throw APIError.notFound(locz().USER_ADDRESS_TOPONYM_NOT_FOUND());
+    }
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'addressToponymDetail',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+    }
+    // return email type
+    return DbUtility.removeNullFields(addressToponym);
+  }
+); // addressToponymDetail
 
 /**
  * Phone type list.
@@ -327,3 +359,58 @@ export const emailUserUpdate = api(
     );
   }
 ); // emailUserUpdate
+
+/**
+ * List address associated to a given user.
+ */
+export const addressListByUser = api(
+  { expose: true, auth: true, method: 'GET', path: '/user/address/address/user/:userId' },
+  async (request: AddressUserListRequest): Promise<AddressListResponse> => {
+    // load requested user
+    const requestedUser = await orm<UserResponse>('User').first().where('id', request.userId);
+    if (!requestedUser) {
+      // user not found
+      throw APIError.notFound(locz().USER_USER_NOT_FOUND());
+    }
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'addressListByUser',
+      requestingUserId: userId,
+      destinationUserIds: [request.userId],
+      requestingUserRole: authenticationData.userRole,
+      destinationUserRoles: [requestedUser.role],
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get data
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
+    // load user addresses
+    const addressRst = await orm('Address')
+      .join('UserAddress', 'UserAddress.addressId', 'Address.id')
+      .where('UserAddress.userId', request.userId)
+      .select(
+        'Address.id as id',
+        'Address.toponymId as toponymId',
+        'Address.address as address',
+        'Address.houseNumber as houseNumber',
+        'Address.municipalityId as municipalityId'
+      );
+    const addresses: AddressResponse[] = await Promise.all(
+      addressRst.map(async (address: any) => {
+        const addressList: AddressResponse = {
+          id: address.id,
+          toponym: await addressToponymDetail({ id: address.toponymId }),
+          address: address.address,
+          houseNumber: address.houseNumber,
+          municipality: await municipalityDetail({ id: address.municipalityId }),
+        };
+        return addressList;
+      })
+    );
+    // return user email
+    return { addresses: DbUtility.removeNullFieldsList(addresses) };
+  }
+); // emailListByUser

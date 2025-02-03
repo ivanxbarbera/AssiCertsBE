@@ -1,4 +1,4 @@
-import { EmailEditRequest, EmailResponse, EmailType } from './address/address.model';
+import { EmailEditRequest, EmailResponse, EmailType, AddressResponse } from './address/address.model';
 
 /**
  * User type.
@@ -59,6 +59,8 @@ export interface UserResponse {
   surname: string;
   // user fiscal code
   fiscalCode?: string;
+  // user addresses
+  addresses: AddressResponse[];
   // user site locking status. true is locked, false is unlocked
   siteLocked: boolean;
   // user status, disabled or active
