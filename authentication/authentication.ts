@@ -22,7 +22,10 @@ const jwtSercretKey = secret('JWTSecretKey');
 export const authenticationHandler = authHandler<AuthenticationParams, AuthenticationData>(async (params) => {
   // extract token from request
   let token = '';
-  if (params.authorizationBearer) {
+  if (params.authorizationSecFetchMode === 'websocket' || params.authorizationUpgrade === 'websocket') {
+    // get the token query string
+    token = params.token ? params.token : '';
+  } else if (params.authorizationBearer) {
     // check if token is valid
     // get the token from the header
     // this should be in the format "Bearer <token>"
@@ -33,9 +36,6 @@ export const authenticationHandler = authHandler<AuthenticationParams, Authentic
     // get the token from cookie
     const cookies = cookie.parse(params.authorizationCookie);
     token = cookies.auth ? cookies.auth! : '';
-  } else if (params.authorizationMode === 'websocket') {
-    // get the token query string
-    token = params.token ? params.token : '';
   } else {
     // token cannot be renewed
     throw APIError.unauthenticated(locz().AUTHENTICATION_MALFORMED_REQUEST());

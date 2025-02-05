@@ -10,7 +10,8 @@ export interface AuthenticationParams {
   // Bearer ahtorization header field
   authorizationBearer?: Header<'Authorization'>;
   authorizationCookie?: Header<'Cookie'>;
-  authorizationMode?: Header<'Sec-Fetch-Mode'>;
+  authorizationSecFetchMode?: Header<'Sec-Fetch-Mode'>;
+  authorizationUpgrade?: Header<'Upgrade'>;
   token?: Query<string>;
 } // AuthenticationParams
 
