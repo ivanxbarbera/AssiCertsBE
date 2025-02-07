@@ -97,6 +97,8 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       request.operationCode == 'emailTypeList' ||
       request.operationCode == 'emailTypeDetail' ||
       request.operationCode == 'addressToponymDetail' ||
+      request.operationCode == 'addressTypeList' ||
+      request.operationCode == 'addressTypeDetail' ||
       request.operationCode == 'nationDetail' ||
       request.operationCode == 'regionDetail' ||
       request.operationCode == 'provinceDetail' ||

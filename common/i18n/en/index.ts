@@ -37,6 +37,7 @@ const en = {
   NOTIFICATION_USER_NOT_ALLOWED: 'User not allowed to access requested data',
   SYSTEM_PARAMETER_NOT_FOUND: 'System parameter not founded',
   SYSTEM_USER_NOT_ALLOWED: 'User not allowed to access requested data',
+  USER_ADDRESS_ADDRESSTYPE_NOT_FOUND: 'Address Type not founded',
   USER_ADDRESS_EMAILTYPE_NOT_FOUND: 'Email Type not founded',
   USER_ADDRESS_TOPONYM_NOT_FOUND: 'Address toponym not founded',
   USER_PROFILE_EMAIL_ALREADY_EXIST: 'User with specified email already exists',

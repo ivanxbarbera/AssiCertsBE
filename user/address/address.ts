@@ -24,6 +24,11 @@ import {
   AddressResponse,
   AddressToponymRequest,
   AddressToponymResponse,
+  AddressTypeListResponse,
+  AddressTypeList,
+  AddressType,
+  AddressTypeRequest,
+  AddressTypeResponse,
 } from './address.model';
 import { AuthorizationOperationResponse } from '../../authorization/authorization.model';
 import { authorizationOperationUserCheck } from '../../authorization/authorization';
@@ -393,18 +398,22 @@ export const addressListByUser = api(
       .where('UserAddress.userId', request.userId)
       .select(
         'Address.id as id',
+        'Address.typeId as typeId',
         'Address.toponymId as toponymId',
         'Address.address as address',
         'Address.houseNumber as houseNumber',
+        'Address.postalCode as postalCode',
         'Address.municipalityId as municipalityId'
       );
     const addresses: AddressResponse[] = await Promise.all(
       addressRst.map(async (address: any) => {
         const addressList: AddressResponse = {
           id: address.id,
+          type: await addressTypeDetail({ id: address.typeId }),
           toponym: await addressToponymDetail({ id: address.toponymId }),
           address: address.address,
           houseNumber: address.houseNumber,
+          postalCode: address.postalCode,
           municipality: await municipalityDetail({ id: address.municipalityId }),
         };
         return addressList;
@@ -414,3 +423,51 @@ export const addressListByUser = api(
     return { addresses: DbUtility.removeNullFieldsList(addresses) };
   }
 ); // emailListByUser
+
+/**
+ * Address type list.
+ * Load address type list.
+ */
+export const addressTypeList = api(
+  { expose: true, auth: true, method: 'GET', path: '/user/address/addressType' },
+  async (): Promise<AddressTypeListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'addressTypeList',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get data
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
+    // load address types
+    const addressTypes: AddressTypeList[] = await orm<AddressType>('AddressType').select().orderBy('name', 'asc');
+    return { addressTypes: DbUtility.removeNullFieldsList(addressTypes) };
+  }
+); // addressTypeList
+
+/**
+ * Load address type details.
+ */
+export const addressTypeDetail = api(
+  { expose: true, auth: true, method: 'GET', path: '/user/address/addressType/:id' },
+  async (request: AddressTypeRequest): Promise<AddressTypeResponse> => {
+    // load address type
+    const addressType = await orm<AddressTypeResponse>('AddressType').first().where('id', request.id);
+    if (!addressType) {
+      // address type not found
+      throw APIError.notFound(locz().USER_ADDRESS_ADDRESSTYPE_NOT_FOUND());
+    }
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'addressTypeDetail',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+    }
+    // return address type
+    return DbUtility.removeNullFields(addressType);
+  }
+); // addressTypeDetail

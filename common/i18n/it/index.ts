@@ -37,6 +37,7 @@ const it = {
   NOTIFICATION_USER_NOT_ALLOWED: 'Utente non autorizzato ad accedere ai dati richiesti',
   SYSTEM_PARAMETER_NOT_FOUND: 'Parametro di sistema non trovato',
   SYSTEM_USER_NOT_ALLOWED: 'Utente non autorizzato ad accedere ai dati richiesti',
+  USER_ADDRESS_ADDRESSTYPE_NOT_FOUND: 'Tipo Indirizzo non trovato',
   USER_ADDRESS_EMAILTYPE_NOT_FOUND: 'Tipo Email non trovato',
   USER_ADDRESS_TOPONYM_NOT_FOUND: "Toponimo dell'indirizzo non trovato",
   USER_PROFILE_EMAIL_ALREADY_EXIST: 'Utente con la mail indicata esistente',

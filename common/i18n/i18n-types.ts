@@ -161,6 +161,10 @@ type RootTranslation = {
 	 */
 	SYSTEM_USER_NOT_ALLOWED: string
 	/**
+	 * T​i​p​o​ ​I​n​d​i​r​i​z​z​o​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	USER_ADDRESS_ADDRESSTYPE_NOT_FOUND: string
+	/**
 	 * T​i​p​o​ ​E​m​a​i​l​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	USER_ADDRESS_EMAILTYPE_NOT_FOUND: string
@@ -490,6 +494,10 @@ export type TranslationFunctions = {
 	 * Utente non autorizzato ad accedere ai dati richiesti
 	 */
 	SYSTEM_USER_NOT_ALLOWED: () => LocalizedString
+	/**
+	 * Tipo Indirizzo non trovato
+	 */
+	USER_ADDRESS_ADDRESSTYPE_NOT_FOUND: () => LocalizedString
 	/**
 	 * Tipo Email non trovato
 	 */

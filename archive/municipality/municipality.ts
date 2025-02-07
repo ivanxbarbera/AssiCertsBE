@@ -212,11 +212,11 @@ export const municipalitySync = api(
 ); // municipalitySync
 
 /**
- * Municipality list.
- * Load municipality list.
+ * Municipality complete list.
+ * Load municipality list with complete data.
  */
-export const municipalityList = api(
-  { expose: true, auth: true, method: 'GET', path: '/registry/municipality' },
+export const municipalityCompleteList = api(
+  { expose: true, auth: true, method: 'GET', path: '/registry/municipality/complete' },
   async (): Promise<MunicipalityListResponse> => {
     // check authorization
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
@@ -236,16 +236,19 @@ export const municipalityList = api(
         'Municipality.id as id',
         'Municipality.name as name',
         'Municipality.code as code',
+        'Province.id as provinceId',
         'Province.name as provinceName',
         'Province.code as provinceCode',
+        'Region.id as regionId',
         'Region.name as regionName',
+        'Nation.id as nationId',
         'Nation.name as nationName',
         'Nation.code as nationCode'
       )
       .orderBy('Municipality.name', 'asc');
     return { municipalities: DbUtility.removeNullFieldsList(municipalities) };
   }
-); // municipalityList
+); // municipalityCompleteList
 
 /**
  * Load nation details.

@@ -80,12 +80,18 @@ export interface MunicipalityList {
   name: string;
   // municipality code
   code: string;
+  // province identifier
+  provinceId: number;
   // province name
   provinceName: string;
   // province code
   provinceCode: string;
+  // region identifier
+  regionId: number;
   // region name
   regionName: string;
+  // nation identifier
+  nationId: number;
   // nation name
   nationName: string;
   // nation code
@@ -101,7 +107,7 @@ export interface MunicipalityListResponse {
 } // SystemMunicipalityListResponse
 
 /**
- * Municipality info loaded from exzternal service.
+ * Municipality info loaded from external service.
  */
 export interface MunicipalityData {
   // nation name
