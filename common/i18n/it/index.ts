@@ -46,6 +46,7 @@ const it = {
   USER_DOMAIN_NOT_ALLOWED: 'Il dominio della email non è tra quelli consentiti',
   USER_PASSWORD_MATCH: 'Password e conferma password devono coincidere',
   USER_PASSWORD_NOT_COMPLIANT: 'Password non conforme ai requisiti richiesti',
+  USER_ADDRESS_NOT_FOUND: "L'indirizzo con ID {id:number} non esiste",
   USER_EMAIL_MALFORMED: 'Indirizzo email non valido',
   USER_EMAIL_ALREADY_EXIST: 'Utente con la mail {email: string} esistente',
   USER_EMAIL_NOT_FOUND: 'La mail con ID {id:number} non esiste',

@@ -83,7 +83,11 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       request.operationCode == 'systemParameterUpdate' ||
       request.operationCode == 'phoneTypeList' ||
       request.operationCode == 'addressToponymList' ||
-      request.operationCode == 'municipalityList') &&
+      request.operationCode == 'nationList' ||
+      request.operationCode == 'regionList' ||
+      request.operationCode == 'provinceList' ||
+      request.operationCode == 'municipalityList' ||
+      request.operationCode == 'municipalityCompleteList') &&
     request.requestingUserRole &&
     request.requestingUserRole == UserRole.SuperAdministrator // superadmin can access system functionality
   ) {

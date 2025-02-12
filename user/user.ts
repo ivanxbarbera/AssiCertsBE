@@ -48,7 +48,7 @@ import { NotificationMessageType } from '../notification/notification.model';
 import { DbUtility } from '../common/utility/db.utility';
 import { GeneralUtility } from '../common/utility/general.utility';
 import { Email, EmailType, EmailListResponse, EmailEditRequest, AddressListResponse } from './address/address.model';
-import { emailUserCheck, emailListByUser, emailUserUpdate, addressListByUser } from './address/address';
+import { emailUserCheck, emailListByUser, emailUserUpdate, addressListByUser, addressUserUpdate } from './address/address';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const frontendBaseURL = secret('FrontendBaseURL');
@@ -686,6 +686,9 @@ export const userUpdate = api(
     const resutlQry = await orm('User').where('id', request.id).update(updateUser).returning('id');
     // update emails
     await emailUserUpdate({ userId: request.id, emails: userEmails });
+    // update addresses
+    const userAddresses = request.addresses;
+    await addressUserUpdate({ userId: request.id, addresses: userAddresses });
     // check user reactivation
     if (user.disabled && !request.disabled) {
       // user reactivated

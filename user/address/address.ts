@@ -29,6 +29,8 @@ import {
   AddressType,
   AddressTypeRequest,
   AddressTypeResponse,
+  AddressEditRequest,
+  Address,
 } from './address.model';
 import { AuthorizationOperationResponse } from '../../authorization/authorization.model';
 import { authorizationOperationUserCheck } from '../../authorization/authorization';
@@ -36,7 +38,7 @@ import locz from '../../common/i18n';
 import { orm } from '../../common/db/db';
 import { DbUtility } from '../../common/utility/db.utility';
 import { AuthenticationData } from '../../authentication/authentication.model';
-import { UserEmail, UserResponse } from '../user.model';
+import { UserAddress, UserEmail, UserResponse } from '../user.model';
 import { UserCheckParameters } from '../../system/system.model';
 import { systemParametersUserCheck } from '../../system/system';
 import { municipalityDetail } from '../../archive/municipality/municipality';
@@ -364,6 +366,89 @@ export const emailUserUpdate = api(
     );
   }
 ); // emailUserUpdate
+
+/**
+ * Update email of the given user
+ * @param userId user unique identifies
+ * @param email user email to update
+ */
+export const addressUserUpdate = api(
+  { expose: false, auth: true, method: 'PATCH', path: '/user/address/address/user' },
+  async (request: { userId: number; addresses: AddressEditRequest[] }): Promise<void> => {
+    // delete removed addresses
+    const addressIds: number[] = request.addresses
+      .map((address: AddressEditRequest) => {
+        return address.id ?? 0;
+      })
+      .filter((id: number) => {
+        return id !== 0;
+      });
+    // load removed addresses
+    const deletedAddressIdRst = await orm<{ id: number }>('Address')
+      .join('UserAddress', 'Address.id', 'UserAddress.addressId')
+      .where('UserAddress.userId', request.userId)
+      .whereNotIn('Address.id', addressIds)
+      .select('Address.id as id');
+    const deletedAddressIds: number[] = deletedAddressIdRst.map((item) => {
+      return item.id;
+    });
+    if (deletedAddressIds.length > 0) {
+      // delete user address
+      await orm('UserAddress').where('userId', request.userId).whereIn('addressId', deletedAddressIds).delete();
+      // delete addresses
+      await orm('Address').whereIn('id', deletedAddressIds).delete();
+    }
+    // update addresses
+    const userAddresses = request.addresses;
+    await Promise.all(
+      userAddresses.map(async (userAddress: AddressEditRequest) => {
+        if (userAddress.id) {
+          // address already exist
+          // load address
+          const addressRst = await orm('Address')
+            .join('UserAddress', 'Address.id', 'UserAddress.addressId')
+            .first('Address.id as addressId', 'UserAddress.id as userAddressId')
+            .where('Address.id', userAddress.id)
+            .andWhere('UserAddress.userId', request.userId);
+          if (!addressRst) {
+            // address does not exists
+            throw APIError.notFound(locz().USER_ADDRESS_NOT_FOUND({ id: userAddress.id }));
+          }
+          // update address
+          await orm('Address')
+            .update({
+              address: userAddress.address,
+              houseNumber: userAddress.houseNumber,
+              postalCode: userAddress.postalCode,
+              typeId: userAddress.type.id,
+              toponymId: userAddress.toponym.id,
+              municipalityId: userAddress.municipality.id,
+            })
+            .where('id', addressRst.addressId);
+        } else {
+          // address does not exists
+          // insert address
+          const newAddress: Address = {
+            address: userAddress.address,
+            houseNumber: userAddress.houseNumber,
+            postalCode: userAddress.postalCode,
+            typeId: userAddress.type.id,
+            toponymId: userAddress.toponym.id,
+            municipalityId: userAddress.municipality.id!,
+          };
+          const addressRst = await orm('Address').insert(newAddress).returning('id');
+          const addressId = addressRst[0].id;
+          // associate address to user
+          const newUserAddress: UserAddress = {
+            userId: request.userId,
+            addressId: addressId,
+          };
+          await orm('UserAddress').insert(newUserAddress);
+        }
+      })
+    );
+  }
+); // addressUserUpdate
 
 /**
  * List address associated to a given user.

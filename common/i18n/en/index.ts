@@ -46,6 +46,7 @@ const en = {
   USER_DOMAIN_NOT_ALLOWED: 'Email domain is not in allowed list',
   USER_PASSWORD_MATCH: 'Password and confirm password must be the same',
   USER_PASSWORD_NOT_COMPLIANT: 'Password not compliant to required contraints',
+  USER_ADDRESS_NOT_FOUND: 'User address with ID {id} not exists',
   USER_EMAIL_MALFORMED: 'Email address is not well formed',
   USER_EMAIL_ALREADY_EXIST: 'User with email {email} already exists',
   USER_EMAIL_NOT_FOUND: 'User email with ID {id} not exists',

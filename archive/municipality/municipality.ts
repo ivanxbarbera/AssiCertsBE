@@ -1,3 +1,4 @@
+import { MunicipalityListRequest, ProvinceListRequest, RegionListRequest } from './municipality.model';
 // libraries
 import { secret } from 'encore.dev/config';
 import { api, APIError } from 'encore.dev/api';
@@ -7,8 +8,8 @@ import { orm } from '../../common/db/db';
 import {
   Municipality,
   MunicipalityData,
-  MunicipalityList,
-  MunicipalityListResponse,
+  MunicipalityCompleteList,
+  MunicipalityCompleteListResponse,
   MunicipalityRequest,
   MunicipalityResponse,
   MunicipalitySyncResponse,
@@ -21,6 +22,14 @@ import {
   Region,
   RegionRequest,
   RegionResponse,
+  NationListResponse,
+  NationList,
+  RegionListResponse,
+  RegionList,
+  ProvinceListResponse,
+  ProvinceList,
+  MunicipalityListResponse,
+  MunicipalityList,
 } from './municipality.model';
 import locz from '../../common/i18n';
 import { AuthorizationOperationResponse } from '../../authorization/authorization.model';
@@ -188,7 +197,7 @@ export const municipalityProcessData = async (municipalityDatas: MunicipalityDat
  * @returns updating process results
  */
 export const municipalitySync = api(
-  { expose: true, auth: true, method: 'GET', path: '/registry/municipality/sync' },
+  { expose: true, auth: true, method: 'GET', path: '/archive/municipality/sync' },
   async (): Promise<MunicipalitySyncResponse> => {
     // prepare response
     const response: MunicipalitySyncResponse = {
@@ -216,11 +225,11 @@ export const municipalitySync = api(
  * Load municipality list with complete data.
  */
 export const municipalityCompleteList = api(
-  { expose: true, auth: true, method: 'GET', path: '/registry/municipality/complete' },
-  async (): Promise<MunicipalityListResponse> => {
+  { expose: true, auth: true, method: 'GET', path: '/archive/municipality/complete' },
+  async (): Promise<MunicipalityCompleteListResponse> => {
     // check authorization
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
-      operationCode: 'municipalityList',
+      operationCode: 'municipalityCompleteList',
       requestingUserRole: getAuthData()?.userRole,
     });
     if (!authorizationCheck.canBePerformed) {
@@ -228,7 +237,7 @@ export const municipalityCompleteList = api(
       throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
     }
     // load municipalities
-    const municipalities: MunicipalityList[] = await orm<MunicipalityList>('Municipality')
+    const municipalities: MunicipalityCompleteList[] = await orm<MunicipalityCompleteList>('Municipality')
       .join('Province', 'Province.id', 'Municipality.provinceId')
       .join('Region', 'Region.id', 'Province.regionId')
       .join('Nation', 'Nation.id', 'Region.nationId')
@@ -251,10 +260,32 @@ export const municipalityCompleteList = api(
 ); // municipalityCompleteList
 
 /**
+ * Nation list.
+ * Load nation list.
+ */
+export const nationList = api(
+  { expose: true, auth: true, method: 'GET', path: '/archive/municipality/nation' },
+  async (): Promise<NationListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'nationList',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
+    // load nations
+    const nations: NationList[] = await orm<NationList>('Nation').select('id', 'code', 'name', 'deprecated').orderBy('name', 'asc');
+    return { nations: DbUtility.removeNullFieldsList(nations) };
+  }
+); // nationList
+
+/**
  * Load nation details.
  */
 export const nationDetail = api(
-  { expose: true, auth: true, method: 'GET', path: '/registry/municipality/nation/:id' },
+  { expose: true, auth: true, method: 'GET', path: '/archive/municipality/nation/:id' },
   async (request: NationRequest): Promise<NationResponse> => {
     // load nation
     const nation = await orm<Nation>('Nation').first().where('id', request.id);
@@ -283,10 +314,39 @@ export const nationDetail = api(
 ); // nationDetail
 
 /**
+ * Region list.
+ * Load region list.
+ */
+export const regionList = api(
+  { expose: true, auth: true, method: 'GET', path: '/archive/municipality/region' },
+  async (request: RegionListRequest): Promise<RegionListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'regionList',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
+    // load regions
+    const regions: RegionList[] = await orm<RegionList>('Region')
+      .where((whereBuilder) => {
+        if (request.nationId) {
+          whereBuilder.where('nationId', request.nationId);
+        }
+      })
+      .select('id', 'name', 'deprecated')
+      .orderBy('name', 'asc');
+    return { regions: DbUtility.removeNullFieldsList(regions) };
+  }
+); // regionList
+
+/**
  * Load region details.
  */
 export const regionDetail = api(
-  { expose: true, auth: true, method: 'GET', path: '/registry/municipality/region/:id' },
+  { expose: true, auth: true, method: 'GET', path: '/archive/municipality/region/:id' },
   async (request: RegionRequest): Promise<RegionResponse> => {
     // load region
     const region = await orm<Region>('Region').first().where('id', request.id);
@@ -315,10 +375,43 @@ export const regionDetail = api(
 ); // regionDetail
 
 /**
+ * Province list.
+ * Load province list.
+ */
+export const provinceList = api(
+  { expose: true, auth: true, method: 'GET', path: '/archive/municipality/province' },
+  async (request: ProvinceListRequest): Promise<ProvinceListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'provinceList',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
+    // load provinces
+    const provinces: ProvinceList[] = await orm<ProvinceList>('Province')
+      .join('Region', 'Region.id', 'Province.regionId')
+      .where((whereBuilder) => {
+        if (request.regionId) {
+          whereBuilder.where('Province.regionId', request.regionId);
+        }
+        if (request.nationId) {
+          whereBuilder.where('Region.nationId', request.nationId);
+        }
+      })
+      .select('Province.id as id', 'Province.code as code', 'Province.name as name', 'Province.deprecated as deprecated')
+      .orderBy('name', 'asc');
+    return { provinces: DbUtility.removeNullFieldsList(provinces) };
+  }
+); // provinceList
+
+/**
  * Load province details.
  */
 export const provinceDetail = api(
-  { expose: true, auth: true, method: 'GET', path: '/registry/municipality/province/:id' },
+  { expose: true, auth: true, method: 'GET', path: '/archive/municipality/province/:id' },
   async (request: ProvinceRequest): Promise<ProvinceResponse> => {
     // load province
     const province = await orm<Province>('Province').first().where('id', request.id);
@@ -348,10 +441,39 @@ export const provinceDetail = api(
 ); // provinceDetail
 
 /**
+ * Municipality list.
+ * Load municipality list.
+ */
+export const municipalityList = api(
+  { expose: true, auth: true, method: 'GET', path: '/archive/municipality' },
+  async (request: MunicipalityListRequest): Promise<MunicipalityListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'municipalityList',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
+    // load municipalities
+    const municipalities: MunicipalityList[] = await orm<MunicipalityList>('Municipality')
+      .where((whereBuilder) => {
+        if (request.provinceId) {
+          whereBuilder.where('provinceId', request.provinceId);
+        }
+      })
+      .select('id', 'code', 'name', 'deprecated')
+      .orderBy('name', 'asc');
+    return { municipalities: DbUtility.removeNullFieldsList(municipalities) };
+  }
+); // municipalityList
+
+/**
  * Load municipality details.
  */
 export const municipalityDetail = api(
-  { expose: true, auth: true, method: 'GET', path: '/registry/municipality/:id' },
+  { expose: true, auth: true, method: 'GET', path: '/archive/municipality/:id' },
   async (request: MunicipalityRequest): Promise<MunicipalityResponse> => {
     // load municipality
     const municipality = await orm<Municipality>('Municipality').first().where('id', request.id);

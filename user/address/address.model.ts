@@ -1,5 +1,5 @@
 // application modules
-import { Municipality, MunicipalityResponse } from '../../archive/municipality/municipality.model';
+import { Municipality, MunicipalityEditRequest, MunicipalityResponse } from '../../archive/municipality/municipality.model';
 
 /**
  * Address type.
@@ -110,7 +110,7 @@ export interface AddressToponymResponse {
  */
 export interface Address {
   // address unique identifier
-  id: number;
+  id?: number;
   // address type identifier
   typeId: number;
   // address toponym identifier
@@ -160,6 +160,26 @@ export interface AddressResponse {
   // address municipality
   municipality: MunicipalityResponse;
 } // AddressResponse
+
+/**
+ * Address associated to user for updating.
+ */
+export interface AddressEditRequest {
+  // emil unique indentificator
+  id?: number;
+  // address type
+  type: AddressType;
+  // address toponym
+  toponym: AddressToponym;
+  // address, street
+  address: string;
+  // address house number
+  houseNumber: string;
+  // address postal code
+  postalCode: string;
+  // address municipality
+  municipality: MunicipalityEditRequest;
+} // AddressEditRequest
 
 /**
  * Phone type.

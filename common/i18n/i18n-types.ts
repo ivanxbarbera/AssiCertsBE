@@ -197,6 +197,11 @@ type RootTranslation = {
 	 */
 	USER_PASSWORD_NOT_COMPLIANT: string
 	/**
+	 * L​'​i​n​d​i​r​i​z​z​o​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
+	 * @param {number} id
+	 */
+	USER_ADDRESS_NOT_FOUND: RequiredParams<'id'>
+	/**
 	 * I​n​d​i​r​i​z​z​o​ ​e​m​a​i​l​ ​n​o​n​ ​v​a​l​i​d​o
 	 */
 	USER_EMAIL_MALFORMED: string
@@ -530,6 +535,10 @@ export type TranslationFunctions = {
 	 * Password non conforme ai requisiti richiesti
 	 */
 	USER_PASSWORD_NOT_COMPLIANT: () => LocalizedString
+	/**
+	 * L'indirizzo con ID {id} non esiste
+	 */
+	USER_ADDRESS_NOT_FOUND: (arg: { id: number }) => LocalizedString
 	/**
 	 * Indirizzo email non valido
 	 */
