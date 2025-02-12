@@ -1,4 +1,4 @@
-import { EmailEditRequest, EmailResponse, EmailType } from './address/address.model';
+import { EmailEditRequest, EmailResponse, EmailType, AddressResponse, AddressEditRequest } from './address/address.model';
 
 /**
  * User type.
@@ -59,6 +59,8 @@ export interface UserResponse {
   surname: string;
   // user fiscal code
   fiscalCode?: string;
+  // user addresses
+  addresses: AddressResponse[];
   // user site locking status. true is locked, false is unlocked
   siteLocked: boolean;
   // user status, disabled or active
@@ -83,6 +85,8 @@ export interface UserEditRequest {
   surname: string;
   // user fiscal code
   fiscalCode?: string;
+  // user addresses
+  addresses: AddressEditRequest[];
   // user status, disabled or active
   disabled: boolean;
   // user default language
@@ -317,18 +321,20 @@ export interface UserStatusResponse {
 } // UserStatusResponse
 
 /**
- * User-Phone Association
+ * User-Email Association
  */
-export interface UserPhone {
-  // user phone unique identifier
-  id: number;
+export interface UserEmail {
+  // user email unique identifier
+  id?: number;
   // user identifier
   userId: number;
-  // phone identifier
-  phoneId: number;
-  // default phone
+  // email identifier
+  emailId: number;
+  // default email
   default: boolean;
-} // UserPhone
+  // authentication email
+  authentication: boolean;
+} // UserEmail
 
 /**
  * User-Email Association
@@ -345,3 +351,15 @@ export interface UserEmail {
   // authentication email
   authentication: boolean;
 } // UserEmail
+
+/**
+ * User-Address Association
+ */
+export interface UserAddress {
+  // user address unique identifier
+  id?: number;
+  // user identifier
+  userId: number;
+  // address identifier
+  addressId: number;
+} // UserAddress

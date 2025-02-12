@@ -129,6 +129,22 @@ type RootTranslation = {
 	 */
 	MUNICIPALITY_DATA_PROCESS_ERROR: string
 	/**
+	 * N​a​z​i​o​n​e​ ​n​o​n​ ​t​r​o​v​a​t​a
+	 */
+	NATION_NOT_FOUND: string
+	/**
+	 * R​e​g​i​o​n​e​ ​n​o​n​ ​t​r​o​v​a​t​a
+	 */
+	REGION_NOT_FOUND: string
+	/**
+	 * P​r​o​v​i​n​c​i​a​ ​n​o​n​ ​t​r​o​v​a​t​a
+	 */
+	PROVINCE_NOT_FOUND: string
+	/**
+	 * C​o​m​u​n​e​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	MUNICIPALITY_NOT_FOUND: string
+	/**
 	 * N​o​t​i​f​i​c​a​ ​n​o​n​ ​t​r​o​v​a​t​a
 	 */
 	NOTIFICATION_NOTIFICATION_NOT_FOUND: string
@@ -145,9 +161,17 @@ type RootTranslation = {
 	 */
 	SYSTEM_USER_NOT_ALLOWED: string
 	/**
+	 * T​i​p​o​ ​I​n​d​i​r​i​z​z​o​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	USER_ADDRESS_ADDRESSTYPE_NOT_FOUND: string
+	/**
 	 * T​i​p​o​ ​E​m​a​i​l​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	USER_ADDRESS_EMAILTYPE_NOT_FOUND: string
+	/**
+	 * T​o​p​o​n​i​m​o​ ​d​e​l​l​'​i​n​d​i​r​i​z​z​o​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	USER_ADDRESS_TOPONYM_NOT_FOUND: string
 	/**
 	 * U​t​e​n​t​e​ ​c​o​n​ ​l​a​ ​m​a​i​l​ ​i​n​d​i​c​a​t​a​ ​e​s​i​s​t​e​n​t​e
 	 */
@@ -172,6 +196,11 @@ type RootTranslation = {
 	 * P​a​s​s​w​o​r​d​ ​n​o​n​ ​c​o​n​f​o​r​m​e​ ​a​i​ ​r​e​q​u​i​s​i​t​i​ ​r​i​c​h​i​e​s​t​i
 	 */
 	USER_PASSWORD_NOT_COMPLIANT: string
+	/**
+	 * L​'​i​n​d​i​r​i​z​z​o​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
+	 * @param {number} id
+	 */
+	USER_ADDRESS_NOT_FOUND: RequiredParams<'id'>
 	/**
 	 * I​n​d​i​r​i​z​z​o​ ​e​m​a​i​l​ ​n​o​n​ ​v​a​l​i​d​o
 	 */
@@ -439,6 +468,22 @@ export type TranslationFunctions = {
 	 */
 	MUNICIPALITY_DATA_PROCESS_ERROR: () => LocalizedString
 	/**
+	 * Nazione non trovata
+	 */
+	NATION_NOT_FOUND: () => LocalizedString
+	/**
+	 * Regione non trovata
+	 */
+	REGION_NOT_FOUND: () => LocalizedString
+	/**
+	 * Provincia non trovata
+	 */
+	PROVINCE_NOT_FOUND: () => LocalizedString
+	/**
+	 * Comune non trovato
+	 */
+	MUNICIPALITY_NOT_FOUND: () => LocalizedString
+	/**
 	 * Notifica non trovata
 	 */
 	NOTIFICATION_NOTIFICATION_NOT_FOUND: () => LocalizedString
@@ -455,9 +500,17 @@ export type TranslationFunctions = {
 	 */
 	SYSTEM_USER_NOT_ALLOWED: () => LocalizedString
 	/**
+	 * Tipo Indirizzo non trovato
+	 */
+	USER_ADDRESS_ADDRESSTYPE_NOT_FOUND: () => LocalizedString
+	/**
 	 * Tipo Email non trovato
 	 */
 	USER_ADDRESS_EMAILTYPE_NOT_FOUND: () => LocalizedString
+	/**
+	 * Toponimo dell'indirizzo non trovato
+	 */
+	USER_ADDRESS_TOPONYM_NOT_FOUND: () => LocalizedString
 	/**
 	 * Utente con la mail indicata esistente
 	 */
@@ -482,6 +535,10 @@ export type TranslationFunctions = {
 	 * Password non conforme ai requisiti richiesti
 	 */
 	USER_PASSWORD_NOT_COMPLIANT: () => LocalizedString
+	/**
+	 * L'indirizzo con ID {id} non esiste
+	 */
+	USER_ADDRESS_NOT_FOUND: (arg: { id: number }) => LocalizedString
 	/**
 	 * Indirizzo email non valido
 	 */

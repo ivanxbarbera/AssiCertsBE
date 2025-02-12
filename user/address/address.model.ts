@@ -1,5 +1,57 @@
 // application modules
-import { Municipality } from '../../archive/municipality/municipality.model';
+import { Municipality, MunicipalityEditRequest, MunicipalityResponse } from '../../archive/municipality/municipality.model';
+
+/**
+ * Address type.
+ */
+export interface AddressType {
+  // address type unique identifier
+  id: number;
+  // address type code
+  code: string;
+  // address type name
+  name: string;
+} // AddressType
+
+/**
+ * Address type list.
+ */
+export interface AddressTypeList {
+  // address type unique identifier
+  id: number;
+  // address type code
+  code: string;
+  // address type name
+  name: string;
+} // AddressTypeList
+
+/**
+ * Address type list response.
+ */
+export interface AddressTypeListResponse {
+  // address type list
+  addressTypes: AddressTypeList[];
+} // AddressTypeListResponse
+
+/**
+ * Request for address type details.
+ */
+export interface AddressTypeRequest {
+  // address type unique identifier
+  id: number;
+} // AddressTypeRequest
+
+/**
+ * Address type returned to caller.
+ */
+export interface AddressTypeResponse {
+  // address type unique identifier
+  id: number;
+  // address type code
+  code: string;
+  // address type name
+  name: string;
+} // AddressTypeResponse
 
 /**
  * Address toponym.
@@ -34,36 +86,100 @@ export interface AddressToponymListResponse {
 } // AddressToponymListResponse
 
 /**
+ * Request for address toponym details.
+ */
+export interface AddressToponymRequest {
+  // address toponym unique identifier
+  id: number;
+} // AddressToponymRequest
+
+/**
+ * Address toponym returned to caller.
+ */
+export interface AddressToponymResponse {
+  // address toponym unique identifier
+  id: number;
+  // address toponym code
+  code: string;
+  // address toponym name
+  name: string;
+} // AddressToponymResponse
+
+/**
  * Address.
  */
 export interface Address {
   // address unique identifier
-  id: number;
+  id?: number;
+  // address type identifier
+  typeId: number;
   // address toponym identifier
   toponymId: number;
   // address, street
   address: string;
   // address house number
   houseNumber: string;
+  // address postal codice
+  postalCode: string;
   // address municipality identifier
   municipalityId: number;
 } // Address
 
 /**
- * Address list.
+ * Request for addresses associated to a user.
  */
-export interface AddressList {
+export interface AddressUserListRequest {
+  // user unique identifier
+  userId: number;
+} // AddressUserListRequest
+
+/**
+ * Response for addresses associated to a user.
+ */
+export interface AddressListResponse {
+  // address liset
+  addresses: AddressResponse[];
+} // AddressListResponse
+
+/**
+ * Address response.
+ */
+export interface AddressResponse {
   // address unique identifier
   id: number;
+  // address type
+  type: AddressTypeResponse;
+  // address toponym
+  toponym: AddressToponymResponse;
+  // address, street
+  address: string;
+  // address house number
+  houseNumber: string;
+  // address postal code
+  postalCode: string;
+  // address municipality
+  municipality: MunicipalityResponse;
+} // AddressResponse
+
+/**
+ * Address associated to user for updating.
+ */
+export interface AddressEditRequest {
+  // emil unique indentificator
+  id?: number;
+  // address type
+  type: AddressType;
   // address toponym
   toponym: AddressToponym;
   // address, street
   address: string;
   // address house number
   houseNumber: string;
+  // address postal code
+  postalCode: string;
   // address municipality
-  municipality: Municipality;
-} // AddressList
+  municipality: MunicipalityEditRequest;
+} // AddressEditRequest
 
 /**
  * Phone type.
