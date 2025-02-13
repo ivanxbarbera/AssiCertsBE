@@ -73,6 +73,18 @@ type RootTranslation = {
 	 */
 	AUTHENTICATION_USER_NOT_FOUND: string
 	/**
+	 * I​l​ ​c​e​r​t​i​f​i​c​a​t​o​ ​d​e​v​e​ ​a​v​e​r​e​ ​u​n​ ​i​n​d​i​r​i​z​z​o
+	 */
+	CERTIFICATE_ADDRESS_WRONG__NUMBER: string
+	/**
+	 * C​e​r​t​i​f​i​c​a​t​o​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	CERTIFICATE_CERTIFICATE_NOT_FOUND: string
+	/**
+	 * I​D​ ​n​o​n​ ​c​o​n​s​e​n​t​i​t​o​ ​i​n​ ​i​n​s​e​r​i​m​e​n​t​o
+	 */
+	COMMON_ID_NOT_ALLOWED_INSERT: string
+	/**
 	 * E​r​r​o​r​e​ ​n​e​l​l​'​i​n​v​i​o​ ​d​e​l​l​a​ ​M​a​i​l​.​ ​C​o​n​t​a​t​t​a​r​e​ ​i​l​ ​s​u​p​p​o​r​t​o​ ​t​e​c​n​i​c​o​.
 	 */
 	EMAIL_SEND_ERROR: string
@@ -411,6 +423,18 @@ export type TranslationFunctions = {
 	 * Authenticated user not found
 	 */
 	AUTHENTICATION_USER_NOT_FOUND: () => LocalizedString
+	/**
+	 * Il certificato deve avere un indirizzo
+	 */
+	CERTIFICATE_ADDRESS_WRONG__NUMBER: () => LocalizedString
+	/**
+	 * Certificato non trovato
+	 */
+	CERTIFICATE_CERTIFICATE_NOT_FOUND: () => LocalizedString
+	/**
+	 * ID non consentito in inserimento
+	 */
+	COMMON_ID_NOT_ALLOWED_INSERT: () => LocalizedString
 	/**
 	 * Errore nell'invio della Mail. Contattare il supporto tecnico.
 	 */
