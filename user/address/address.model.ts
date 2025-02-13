@@ -167,18 +167,18 @@ export interface AddressResponse {
 export interface AddressEditRequest {
   // emil unique indentificator
   id?: number;
-  // address type
-  type: AddressType;
-  // address toponym
-  toponym: AddressToponym;
+  // address type indentifier
+  typeId: number;
+  // address toponym identifier
+  toponymId: number;
   // address, street
   address: string;
   // address house number
   houseNumber: string;
   // address postal code
   postalCode: string;
-  // address municipality
-  municipality: MunicipalityEditRequest;
+  // address municipality identifier
+  municipalityId: number;
 } // AddressEditRequest
 
 /**
@@ -342,8 +342,8 @@ export interface EmailEditRequest {
   id?: number;
   // email address
   email: string;
-  // email type
-  type: EmailType;
+  // email type identificator
+  typeId: number;
   // default email
   default: boolean;
   // authentication email
