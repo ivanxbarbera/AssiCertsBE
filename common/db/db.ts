@@ -5,7 +5,7 @@ import pg from 'pg';
 const { types } = pg;
 
 // connect to database
-const db = new SQLDatabase('assihub', { migrations: './migrations' });
+const db = new SQLDatabase('assicerts', { migrations: './migrations' });
 // define PostgreSQL types mapping
 types.setTypeParser(types.builtins.INT8, (value) => parseInt(value, 10));
 types.setTypeParser(types.builtins.TIMESTAMP, (value) => new Date(value));
