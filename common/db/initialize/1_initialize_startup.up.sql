@@ -11,8 +11,6 @@ ALTER SEQUENCE public."Email_id_seq" RESTART WITH 2;
 INSERT INTO public."UserEmail" ("id", "userId", "emailId", "default", "authentication") VALUES (1, 1, 1, 'true', 'true');
 ALTER SEQUENCE public."UserEmail_id_seq" RESTART WITH 2;
 
--- password: M1ch3l3B0n@
+-- password: l3D&1nF0rMat!ca$
 INSERT INTO public."UserPasswordHistory" ("id", "userId", "date", "passwordHash") VALUES (1, 1, '2025-02-01', '$2a$10$41ogwRNwE0ZFN6qkdUAyIOx/zTaF/VgbbyoiaeKLkyYZeOwt.CLTS');
 ALTER SEQUENCE public."UserPasswordHistory_id_seq" RESTART WITH 2;
-
-l3D&1nF0rMat!ca$
