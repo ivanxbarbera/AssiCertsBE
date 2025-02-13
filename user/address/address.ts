@@ -341,7 +341,7 @@ export const emailUserUpdate = api(
             throw APIError.notFound(locz().USER_EMAIL_NOT_FOUND({ id: userEmail.id }));
           }
           // update email
-          await orm('Email').update({ email: userEmail.email, typeId: userEmail.type.id }).where('id', emailRst.emailId);
+          await orm('Email').update({ email: userEmail.email, typeId: userEmail.typeId }).where('id', emailRst.emailId);
           // update user email association
           await orm('UserEmail').update({ default: userEmail.default, authentication: userEmail.authentication }).where('id', emailRst.userEmailId);
         } else {
@@ -349,7 +349,7 @@ export const emailUserUpdate = api(
           // insert email
           const newEmail: Email = {
             email: userEmail.email,
-            typeId: userEmail.type.id,
+            typeId: userEmail.typeId,
           };
           const emailRst = await orm('Email').insert(newEmail).returning('id');
           const emailId = emailRst[0].id;
@@ -420,9 +420,9 @@ export const addressUserUpdate = api(
               address: userAddress.address,
               houseNumber: userAddress.houseNumber,
               postalCode: userAddress.postalCode,
-              typeId: userAddress.type.id,
-              toponymId: userAddress.toponym.id,
-              municipalityId: userAddress.municipality.id,
+              typeId: userAddress.typeId,
+              toponymId: userAddress.toponymId,
+              municipalityId: userAddress.municipalityId,
             })
             .where('id', addressRst.addressId);
         } else {
@@ -432,9 +432,9 @@ export const addressUserUpdate = api(
             address: userAddress.address,
             houseNumber: userAddress.houseNumber,
             postalCode: userAddress.postalCode,
-            typeId: userAddress.type.id,
-            toponymId: userAddress.toponym.id,
-            municipalityId: userAddress.municipality.id!,
+            typeId: userAddress.typeId,
+            toponymId: userAddress.toponymId,
+            municipalityId: userAddress.municipalityId,
           };
           const addressRst = await orm('Address').insert(newAddress).returning('id');
           const addressId = addressRst[0].id;

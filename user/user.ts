@@ -77,7 +77,7 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   // check email
   const newEmail: EmailEditRequest = {
     email: request.email,
-    type: emailType!,
+    typeId: emailType!.id,
     default: true,
     authentication: true,
   };
@@ -166,7 +166,6 @@ export const userPasswordReset = api({ expose: true, method: 'GET', path: '/user
     await orm('UserPasswordReset').insert(userPasswordReset);
     // send email to user
     try {
-      // TODO MIC it shoulb be backendBaseURL not frontendBaseURL
       const resetUrl = frontendBaseURL() + '/authentication/reset-password;token=' + token;
       await GeneralUtility.emailSend({
         recipients: user.email,
