@@ -316,7 +316,7 @@ export const userPasswordChange = api(
       throw APIError.notFound(locz().USER_USER_NOT_FOUND());
     }
     // check current password
-    if (!bcrypt.compareSync(request.password, user.passwordHash)) {
+    if (!bcrypt.compareSync(request.oldPassword, user.passwordHash)) {
       // wrong previous password
       throw APIError.invalidArgument(locz().USER_OLD_PASSWORD());
     }
