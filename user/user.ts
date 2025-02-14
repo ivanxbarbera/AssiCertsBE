@@ -688,7 +688,7 @@ export const userUpdate = api(
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load user
-    const user = await orm<UserResponse>('User').first().where('id', request.id);
+    const user = await orm<User>('User').first().where('id', request.id);
     if (!user) {
       // user not found
       throw APIError.notFound(locz().USER_USER_NOT_FOUND());
