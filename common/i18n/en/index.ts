@@ -18,6 +18,7 @@ const en = {
   CERTIFICATE_ADDRESS_WRONG__NUMBER: 'Certificate must have one address',
   CERTIFICATE_CERTIFICATE_NOT_FOUND: 'Certificate not founded',
   COMMON_ID_NOT_ALLOWED_INSERT: 'ID not allowed in insert',
+  COMMON_ID_REQUIRED_UPDATE: 'ID required in update',
   EMAIL_SEND_ERROR: 'Error sending email. Contact technical support.',
   EXTERNAL_INFOCAR_GET_MARCHE_ERROR: 'Error fetching manufacturers from Info Car',
   EXTERNAL_INFOCAR_GET_MODELLI_ERROR: 'Error fetching models from Info Car',

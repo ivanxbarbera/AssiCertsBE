@@ -85,6 +85,10 @@ type RootTranslation = {
 	 */
 	COMMON_ID_NOT_ALLOWED_INSERT: string
 	/**
+	 * I​D​ ​o​b​b​l​i​g​a​t​o​r​i​o​ ​i​n​ ​m​o​d​i​f​i​c​a
+	 */
+	COMMON_ID_REQUIRED_UPDATE: string
+	/**
 	 * E​r​r​o​r​e​ ​n​e​l​l​'​i​n​v​i​o​ ​d​e​l​l​a​ ​M​a​i​l​.​ ​C​o​n​t​a​t​t​a​r​e​ ​i​l​ ​s​u​p​p​o​r​t​o​ ​t​e​c​n​i​c​o​.
 	 */
 	EMAIL_SEND_ERROR: string
@@ -435,6 +439,10 @@ export type TranslationFunctions = {
 	 * ID non consentito in inserimento
 	 */
 	COMMON_ID_NOT_ALLOWED_INSERT: () => LocalizedString
+	/**
+	 * ID obbligatorio in modifica
+	 */
+	COMMON_ID_REQUIRED_UPDATE: () => LocalizedString
 	/**
 	 * Errore nell'invio della Mail. Contattare il supporto tecnico.
 	 */

@@ -74,7 +74,7 @@ export interface UserResponse {
  */
 export interface UserEditRequest {
   // user unique identifier
-  id: number;
+  id?: number;
   // user role
   role: UserRole;
   // user emails

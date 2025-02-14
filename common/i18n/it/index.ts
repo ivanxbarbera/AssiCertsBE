@@ -18,6 +18,7 @@ const it = {
   CERTIFICATE_ADDRESS_WRONG__NUMBER: 'Il certificato deve avere un indirizzo',
   CERTIFICATE_CERTIFICATE_NOT_FOUND: 'Certificato non trovato',
   COMMON_ID_NOT_ALLOWED_INSERT: 'ID non consentito in inserimento',
+  COMMON_ID_REQUIRED_UPDATE: 'ID obbligatorio in modifica',
   EMAIL_SEND_ERROR: "Errore nell'invio della Mail. Contattare il supporto tecnico.",
   EXTERNAL_INFOCAR_GET_MARCHE_ERROR: 'Errore nel recupero delle marche da Info Car',
   EXTERNAL_INFOCAR_GET_MODELLI_ERROR: 'Errore nel recupero dei modelli da Info Car',
