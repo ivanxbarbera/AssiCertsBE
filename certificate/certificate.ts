@@ -7,6 +7,8 @@ import { AuthorizationOperationResponse } from './../authorization/authorization
 import {
   Certificate,
   CertificateEditRequest,
+  CertificateList,
+  CertificateListResponse,
   CertificateRequest,
   CertificateResponse,
   FulfillmentType,
@@ -20,6 +22,39 @@ import { addressCertificateUpdate, addressListByCertificate } from './../user/ad
 import { AuthenticationData } from './../authentication/authentication.model';
 import { AddressListResponse } from './../user/address/address.model';
 import { DbUtility } from '../common/utility/db.utility';
+import { UserRole } from '../user/user.model';
+
+/**
+ * Search for certificates.
+ * Apply filters and return a list of certificates.
+ */
+export const certificateList = api({ expose: true, auth: true, method: 'GET', path: '/certificate' }, async (): Promise<CertificateListResponse> => {
+  // TODO add search filters
+  // load certificates
+  // TODO MIC check visibility
+  const certificates = await orm<CertificateList>('Certificate')
+    .select(
+      'Certificate.id as id',
+      'Certificate.clientNumber as clientNumber',
+      'Certificate.effectiveDate as effectiveDate',
+      'Certificate.customerFirstName as customerFirstName',
+      'Certificate.customerLastName as customerLastName'
+    )
+    .orderBy('clientNumber');
+  // check authorization
+  const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+    operationCode: 'certificateList',
+    requestingUserRole: getAuthData()?.userRole,
+  });
+  if (!authorizationCheck.canBePerformed) {
+    // user not allowed to get details
+    throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+  }
+  // return certificates
+  return {
+    certificates: DbUtility.removeNullFieldsList(certificates),
+  };
+}); // certificateList
 
 /**
  * Load certificate details.

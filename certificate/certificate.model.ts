@@ -188,3 +188,28 @@ export interface CertificateResponse {
   // main insured product A option
   mainInsuredProductOptionA: string;
 } // CertificateResponse
+
+/**
+ * Single certificate data returned in certificate search.
+ * This is a single element of the CertificateListResponse.
+ */
+export interface CertificateList {
+  // certificate unique identifier
+  id: number;
+  // contract code
+  clientNumber: string;
+  // effective date
+  effectiveDate: Date;
+  // customer first name
+  customerFirstName: string;
+  // customer last name
+  custonerLastName: string;
+} // CertificateList
+
+/**
+ * Certificate search list response.
+ */
+export interface CertificateListResponse {
+  // certificate list
+  certificates: CertificateList[];
+} // CertificateListResponse
