@@ -95,6 +95,18 @@ export interface Certificate {
 } // Certificate
 
 /**
+ * Certificate-Address Association
+ */
+export interface CertificateAddress {
+  // certificate address unique identifier
+  id?: number;
+  // certificate identifier
+  certificateId: number;
+  // address identifier
+  addressId: number;
+} // CertificateAddress
+
+/**
  * Emitted certificate data.
  */
 export interface CertificateEditRequest {

@@ -43,7 +43,7 @@ import { UserAddress, UserEmail, UserResponse } from '../user.model';
 import { UserCheckParameters } from '../../system/system.model';
 import { systemParametersUserCheck } from '../../system/system';
 import { municipalityDetail } from '../../archive/municipality/municipality';
-import { CertificateResponse } from '../../certificate/certificate.model';
+import { CertificateAddress, CertificateResponse } from '../../certificate/certificate.model';
 
 /**
  * Address toponym list.
@@ -486,49 +486,49 @@ export const addressCertificateUpdate = api(
     // update addresses
     const userAddresses = request.addresses;
     await Promise.all(
-      userAddresses.map(async (userAddress: AddressEditRequest) => {
-        if (userAddress.id) {
+      userAddresses.map(async (certificateAddress: AddressEditRequest) => {
+        if (certificateAddress.id) {
           // address already exist
           // load address
           const addressRst = await orm('Address')
-            .join('UserAddress', 'Address.id', 'UserAddress.addressId')
-            .first('Address.id as addressId', 'UserAddress.id as userAddressId')
-            .where('Address.id', userAddress.id)
-            .andWhere('UserAddress.userId', request.certificateId);
+            .join('CertificateAddress', 'Address.id', 'CertificateAddress.addressId')
+            .first('Address.id as addressId', 'CertificateAddress.id as certificateAddressId')
+            .where('Address.id', certificateAddress.id)
+            .andWhere('CertificateAddress.addressId', request.certificateId);
           if (!addressRst) {
             // address does not exists
-            throw APIError.notFound(locz().USER_ADDRESS_NOT_FOUND({ id: userAddress.id }));
+            throw APIError.notFound(locz().CERTIFICATE_ADDRESS_NOT_FOUND({ id: certificateAddress.id }));
           }
           // update address
           await orm('Address')
             .update({
-              address: userAddress.address,
-              houseNumber: userAddress.houseNumber,
-              postalCode: userAddress.postalCode,
-              typeId: userAddress.typeId,
-              toponymId: userAddress.toponymId,
-              municipalityId: userAddress.municipalityId,
+              address: certificateAddress.address,
+              houseNumber: certificateAddress.houseNumber,
+              postalCode: certificateAddress.postalCode,
+              typeId: certificateAddress.typeId,
+              toponymId: certificateAddress.toponymId,
+              municipalityId: certificateAddress.municipalityId,
             })
             .where('id', addressRst.addressId);
         } else {
           // address does not exists
           // insert address
           const newAddress: Address = {
-            address: userAddress.address,
-            houseNumber: userAddress.houseNumber,
-            postalCode: userAddress.postalCode,
-            typeId: userAddress.typeId,
-            toponymId: userAddress.toponymId,
-            municipalityId: userAddress.municipalityId,
+            address: certificateAddress.address,
+            houseNumber: certificateAddress.houseNumber,
+            postalCode: certificateAddress.postalCode,
+            typeId: certificateAddress.typeId,
+            toponymId: certificateAddress.toponymId,
+            municipalityId: certificateAddress.municipalityId,
           };
           const addressRst = await orm('Address').insert(newAddress).returning('id');
           const addressId = addressRst[0].id;
-          // associate address to user
-          const newUserAddress: UserAddress = {
-            userId: request.certificateId,
+          // associate address to certificate
+          const newCertificateAddress: CertificateAddress = {
+            certificateId: request.certificateId,
             addressId: addressId,
           };
-          await orm('UserAddress').insert(newUserAddress);
+          await orm('CertificateAddress').insert(newCertificateAddress);
         }
       })
     );

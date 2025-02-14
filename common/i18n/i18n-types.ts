@@ -77,6 +77,11 @@ type RootTranslation = {
 	 */
 	CERTIFICATE_ADDRESS_WRONG__NUMBER: string
 	/**
+	 * L​'​i​n​d​i​r​i​z​z​o​ ​d​e​l​ ​c​e​r​t​i​f​i​c​a​t​o​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
+	 * @param {number} id
+	 */
+	CERTIFICATE_ADDRESS_NOT_FOUND: RequiredParams<'id'>
+	/**
 	 * C​e​r​t​i​f​i​c​a​t​o​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	CERTIFICATE_CERTIFICATE_NOT_FOUND: string
@@ -185,6 +190,11 @@ type RootTranslation = {
 	 */
 	USER_ADDRESS_EMAILTYPE_NOT_FOUND: string
 	/**
+	 * L​'​i​n​d​i​r​i​z​z​o​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
+	 * @param {number} id
+	 */
+	USER_ADDRESS_NOT_FOUND: RequiredParams<'id'>
+	/**
 	 * T​o​p​o​n​i​m​o​ ​d​e​l​l​'​i​n​d​i​r​i​z​z​o​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	USER_ADDRESS_TOPONYM_NOT_FOUND: string
@@ -212,11 +222,6 @@ type RootTranslation = {
 	 * P​a​s​s​w​o​r​d​ ​n​o​n​ ​c​o​n​f​o​r​m​e​ ​a​i​ ​r​e​q​u​i​s​i​t​i​ ​r​i​c​h​i​e​s​t​i
 	 */
 	USER_PASSWORD_NOT_COMPLIANT: string
-	/**
-	 * L​'​i​n​d​i​r​i​z​z​o​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
-	 * @param {number} id
-	 */
-	USER_ADDRESS_NOT_FOUND: RequiredParams<'id'>
 	/**
 	 * I​n​d​i​r​i​z​z​o​ ​e​m​a​i​l​ ​n​o​n​ ​v​a​l​i​d​o
 	 */
@@ -432,6 +437,10 @@ export type TranslationFunctions = {
 	 */
 	CERTIFICATE_ADDRESS_WRONG__NUMBER: () => LocalizedString
 	/**
+	 * L'indirizzo del certificato con ID {id} non esiste
+	 */
+	CERTIFICATE_ADDRESS_NOT_FOUND: (arg: { id: number }) => LocalizedString
+	/**
 	 * Certificato non trovato
 	 */
 	CERTIFICATE_CERTIFICATE_NOT_FOUND: () => LocalizedString
@@ -540,6 +549,10 @@ export type TranslationFunctions = {
 	 */
 	USER_ADDRESS_EMAILTYPE_NOT_FOUND: () => LocalizedString
 	/**
+	 * L'indirizzo con ID {id} non esiste
+	 */
+	USER_ADDRESS_NOT_FOUND: (arg: { id: number }) => LocalizedString
+	/**
 	 * Toponimo dell'indirizzo non trovato
 	 */
 	USER_ADDRESS_TOPONYM_NOT_FOUND: () => LocalizedString
@@ -567,10 +580,6 @@ export type TranslationFunctions = {
 	 * Password non conforme ai requisiti richiesti
 	 */
 	USER_PASSWORD_NOT_COMPLIANT: () => LocalizedString
-	/**
-	 * L'indirizzo con ID {id} non esiste
-	 */
-	USER_ADDRESS_NOT_FOUND: (arg: { id: number }) => LocalizedString
 	/**
 	 * Indirizzo email non valido
 	 */

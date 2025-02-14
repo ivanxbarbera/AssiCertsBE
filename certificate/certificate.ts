@@ -40,7 +40,6 @@ export const certificateDetail = api(
     // check authorization
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
       operationCode: 'certificateDetail',
-      requestingUserId: userId,
       requestingUserRole: authenticationData.userRole,
     });
     if (!authorizationCheck.canBePerformed) {
@@ -83,20 +82,23 @@ export const certificateInsert = api(
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // add internal fields
+    // TODO MIC evaluate using filterObjectByInterface
     const newCertificate: Certificate = {
       ...request,
       userId,
       transactionType: TransactionType.NewEmission,
-      clientNumber: 'TODO',
+      clientNumber: 'TODO' + Date.now(),
       callerCode: 'TODO',
       dateOfCall: new Date(),
-      policyNumber: 'TODO',
+      policyNumber: 'TODO' + Date.now(),
       fulfillmentType: FulfillmentType.Email,
       paymentType: PaymentType.Borderaux,
       paymentFrequency: PaymentFrequency.OneTimeAdvance,
       mainInsuredProductCodeA: 'TODO',
       mainInsuredProductOptionA: 'TODO',
     };
+    // remove unnecessary fields
+    delete (newCertificate as any)['customerAddress'];
     // insert user
     const userRst = await orm('Certificate').insert(newCertificate).returning('id');
     const id = userRst[0].id;
