@@ -147,16 +147,12 @@ export interface CertificateRequest {
 export interface CertificateResponse {
   // certificate unique identifier
   id: number;
-  // type of transaction
-  transactionType: TransactionType;
   // type of cancellation
   cancellationType?: CancellationType;
   // contract code
   clientNumber: string;
   // caller code
   callerCode: string;
-  // date of call
-  dateOfCall: Date;
   // transation effective date
   effectiveDate: Date;
   // policy number
@@ -177,12 +173,6 @@ export interface CertificateResponse {
   customerFiscalCode: string;
   // customer dat of birth
   customerDateOfBirth: Date;
-  // fulfillment type
-  fulfillmentType: FulfillmentType;
-  // payment type
-  paymentType: PaymentType;
-  // payment frequency
-  paymentFrequency: PaymentFrequency;
   // main insured product A code
   mainInsuredProductCodeA: string;
   // main insured product A option

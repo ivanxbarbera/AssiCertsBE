@@ -22,7 +22,8 @@ import { addressCertificateUpdate, addressListByCertificate } from './../user/ad
 import { AuthenticationData } from './../authentication/authentication.model';
 import { AddressListResponse } from './../user/address/address.model';
 import { DbUtility } from '../common/utility/db.utility';
-import { UserRole } from '../user/user.model';
+import { GeneralUtility } from '../common/utility/general.utility';
+import { user } from '~encore/clients';
 
 /**
  * Search for certificates.
@@ -134,9 +135,9 @@ export const certificateInsert = api(
     };
     // remove unnecessary fields
     delete (newCertificate as any)['customerAddress'];
-    // insert user
-    const userRst = await orm('Certificate').insert(newCertificate).returning('id');
-    const id = userRst[0].id;
+    // insert certificate
+    const certificateRst = await orm('Certificate').insert(newCertificate).returning('id');
+    const id = certificateRst[0].id;
     // insert addresses
     const certificateAddresses = request.customerAddress;
     await addressCertificateUpdate({ certificateId: id, addresses: [certificateAddresses] });
@@ -144,3 +145,45 @@ export const certificateInsert = api(
     return certificateDetail({ id });
   }
 ); // certificateInsert
+
+/**
+ * Update existing certificate.
+ */
+export const certificateUpdate = api(
+  { expose: true, auth: true, method: 'PATCH', path: '/certificate/:id' },
+  async (request: CertificateEditRequest): Promise<CertificateResponse> => {
+    if (!request.id) {
+      // entity id required in edit mode
+      // TODO MIC extends to other edit
+      throw APIError.permissionDenied(locz().COMMON_ID_REQUIRED_UPDATE());
+    }
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'certificateUpdate',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+    }
+    // load certificate
+    const certificate = await orm<Certificate>('Certificate').first().where('id', request.id);
+    if (!certificate) {
+      // certificate not found
+      throw APIError.notFound(locz().CERTIFICATE_CERTIFICATE_NOT_FOUND());
+    }
+    // prepare certificate data
+    certificate.userId = userId;
+    // update certificate
+    let updateCertificate: Certificate = GeneralUtility.filterObjectByInterface(request, certificate, ['id']);
+    const resutlQry = await orm('Certificate').where('id', request.id).update(updateCertificate).returning('id');
+    // update address
+    const certificateAddress = request.customerAddress;
+    await addressCertificateUpdate({ certificateId: request.id, addresses: [certificateAddress] });
+    // return updated certificate
+    return certificateDetail({ id: resutlQry[0].id });
+  }
+); // certificateUpdate

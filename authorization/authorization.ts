@@ -107,8 +107,10 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       request.operationCode == 'regionDetail' ||
       request.operationCode == 'provinceDetail' ||
       request.operationCode == 'municipalityDetail' ||
+      request.operationCode == 'addressListByCertificate' ||
       request.operationCode == 'certificateList' ||
       request.operationCode == 'certificateDetail' ||
+      request.operationCode == 'certificateUpdate' ||
       request.operationCode == 'certificateInsert') &&
     request.requestingUserRole
   ) {
