@@ -106,7 +106,12 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       request.operationCode == 'nationDetail' ||
       request.operationCode == 'regionDetail' ||
       request.operationCode == 'provinceDetail' ||
-      request.operationCode == 'municipalityDetail') &&
+      request.operationCode == 'municipalityDetail' ||
+      request.operationCode == 'addressListByCertificate' ||
+      request.operationCode == 'certificateList' ||
+      request.operationCode == 'certificateDetail' ||
+      request.operationCode == 'certificateUpdate' ||
+      request.operationCode == 'certificateInsert') &&
     request.requestingUserRole
   ) {
     return {
@@ -167,50 +172,22 @@ export const authorizationList = api(
     // TODO MIC move checks to database
 
     const authorizations: AuthorizationList[] = [
-      { name: 'Dashboard', code: 'dashboard', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
-      { name: 'Notifications', code: 'notification', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
-      { name: 'Production', code: 'production', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      { name: 'Administration', code: 'administration', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      { name: 'Portfolio Analisys', code: 'portfolio-analysis', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
+      { name: 'Main Area', code: 'main', userRole: UserRole.Member, visibility: AuthorizationVisibility.Hidden },
+      { name: 'Dashboard', code: 'dashboard', userRole: UserRole.Member, visibility: AuthorizationVisibility.Hidden },
+      { name: 'Notifications', code: 'notification', userRole: UserRole.Member, visibility: AuthorizationVisibility.Hidden },
+      { name: 'Cerificate Area', code: 'certificate', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
+      { name: 'New certificate', code: 'certificate.new', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
+      { name: 'Certificate list', code: 'certificate.list', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
+      { name: 'Archive Area', code: 'archive', userRole: UserRole.Administrator, visibility: AuthorizationVisibility.Visible },
       {
-        name: 'Fiscal Year Premiums',
-        code: 'portfolio-analysis.fiscal-year-premium',
-        userRole: UserRole.Member,
-        visibility: AuthorizationVisibility.Disabled,
+        name: 'Address toponym',
+        code: 'archive.address-toponym',
+        userRole: UserRole.SuperAdministrator,
+        visibility: AuthorizationVisibility.Visible,
       },
-      {
-        name: 'Underwriting Year Premiums',
-        code: 'portfolio-analysis.underwriting-year-premium',
-        userRole: UserRole.Member,
-        visibility: AuthorizationVisibility.Disabled,
-      },
-      { name: 'Triangular', code: 'portfolio-analysis.triangular', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      { name: 'Tableu de Bord', code: 'portfolio-analysis.tableu-de-bord', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      {
-        name: 'Series Comparisons',
-        code: 'portfolio-analysis.series-comparison',
-        userRole: UserRole.Member,
-        visibility: AuthorizationVisibility.Disabled,
-      },
-      { name: 'Ranking', code: 'portfolio-analysis.ranking', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      { name: 'Companies', code: 'portfolio-analysis.company', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      { name: 'Marketing', code: 'marketing', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      { name: 'Archive', code: 'archive', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
-      { name: 'Registry', code: 'archive.registry', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      { name: 'Personal data', code: 'archive.personal-data', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      { name: 'Contacts', code: 'archive.contacts', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      {
-        name: 'Personal Data Import',
-        code: 'archive.personal-data-import',
-        userRole: UserRole.Member,
-        visibility: AuthorizationVisibility.Disabled,
-      },
-      { name: 'Address toponym', code: 'user.address-toponym', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
       { name: 'Municipality', code: 'archive.municipality', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
-      { name: 'Claim Office', code: 'claim-office', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      { name: 'Documents Sign', code: 'document-sign', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      { name: 'Power BI', code: 'power-bi', userRole: UserRole.Member, visibility: AuthorizationVisibility.Disabled },
-      { name: 'User', code: 'user', userRole: UserRole.Administrator, visibility: AuthorizationVisibility.Visible },
+      { name: 'User', code: 'archive.user', userRole: UserRole.Administrator, visibility: AuthorizationVisibility.Visible },
+      { name: 'Administration Area', code: 'administration', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
       { name: 'System', code: 'system', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
       { name: 'Parameters', code: 'system.parameter', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
     ];

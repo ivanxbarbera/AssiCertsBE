@@ -615,6 +615,11 @@ export const userDetail = api({ expose: true, auth: true, method: 'GET', path: '
 export const userInsert = api(
   { expose: true, auth: true, method: 'POST', path: '/user' },
   async (request: UserEditRequest): Promise<UserResponse> => {
+    if (request.id) {
+      // entity id not allowed in insert mode
+      // TODO MIC extends to other insert
+      throw APIError.permissionDenied(locz().COMMON_ID_NOT_ALLOWED_INSERT());
+    }
     // check authorization
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
       operationCode: 'userInsert',
@@ -634,11 +639,17 @@ export const userInsert = api(
       ...request,
       siteLocked: false,
     };
+    // remove unnecessary fields
+    delete (newUser as any)['addresses'];
+    delete (newUser as any)['emails'];
     // insert user
     const userRst = await orm('User').insert(newUser).returning('id');
     const id = userRst[0].id;
     // insert emails
     await emailUserUpdate({ userId: id, emails: userEmails });
+    // insert addresses
+    const userAddresses = request.addresses;
+    await addressUserUpdate({ userId: id, addresses: userAddresses });
     // insert user password history
     const password = await generateRandomPassword();
     const passwordHash = bcrypt.hashSync(password);
@@ -661,6 +672,11 @@ export const userInsert = api(
 export const userUpdate = api(
   { expose: true, auth: true, method: 'PATCH', path: '/user/:id' },
   async (request: UserEditRequest): Promise<UserResponse> => {
+    if (!request.id) {
+      // entity id required in edit mode
+      // TODO MIC extends to other edit
+      throw APIError.permissionDenied(locz().COMMON_ID_REQUIRED_UPDATE());
+    }
     // check authorization
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
       operationCode: 'userUpdate',
@@ -672,7 +688,7 @@ export const userUpdate = api(
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load user
-    const user = await orm<UserResponse>('User').first().where('id', request.id);
+    const user = await orm<User>('User').first().where('id', request.id);
     if (!user) {
       // user not found
       throw APIError.notFound(locz().USER_USER_NOT_FOUND());

@@ -134,6 +134,14 @@ export interface AddressUserListRequest {
 } // AddressUserListRequest
 
 /**
+ * Request for addresses associated to a certificate.
+ */
+export interface AddressCertificateListRequest {
+  // user unique identifier
+  certificateId: number;
+} // AddressCertificateListRequest
+
+/**
  * Response for addresses associated to a user.
  */
 export interface AddressListResponse {

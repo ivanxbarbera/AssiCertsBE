@@ -31,6 +31,7 @@ import {
   AddressTypeResponse,
   AddressEditRequest,
   Address,
+  AddressCertificateListRequest,
 } from './address.model';
 import { AuthorizationOperationResponse } from '../../authorization/authorization.model';
 import { authorizationOperationUserCheck } from '../../authorization/authorization';
@@ -42,6 +43,7 @@ import { UserAddress, UserEmail, UserResponse } from '../user.model';
 import { UserCheckParameters } from '../../system/system.model';
 import { systemParametersUserCheck } from '../../system/system';
 import { municipalityDetail } from '../../archive/municipality/municipality';
+import { CertificateAddress, CertificateResponse } from '../../certificate/certificate.model';
 
 /**
  * Address toponym list.
@@ -368,9 +370,9 @@ export const emailUserUpdate = api(
 ); // emailUserUpdate
 
 /**
- * Update email of the given user
+ * Update addresses of the given user.
  * @param userId user unique identifies
- * @param email user email to update
+ * @param addresses user address list to update
  */
 export const addressUserUpdate = api(
   { expose: false, auth: true, method: 'PATCH', path: '/user/address/address/user' },
@@ -451,6 +453,89 @@ export const addressUserUpdate = api(
 ); // addressUserUpdate
 
 /**
+ * Update addresses of the given certificate.
+ * @param certificateId certificate unique identifies
+ * @param addresses certificate address list to update
+ */
+export const addressCertificateUpdate = api(
+  { expose: false, auth: true, method: 'PATCH', path: '/user/address/address/certificate' },
+  async (request: { certificateId: number; addresses: AddressEditRequest[] }): Promise<void> => {
+    // delete removed addresses
+    const addressIds: number[] = request.addresses
+      .map((address: AddressEditRequest) => {
+        return address.id ?? 0;
+      })
+      .filter((id: number) => {
+        return id !== 0;
+      });
+    // load removed addresses
+    const deletedAddressIdRst = await orm<{ id: number }>('Address')
+      .join('CertificateAddress', 'Address.id', 'CertificateAddress.addressId')
+      .where('CertificateAddress.certificateId', request.certificateId)
+      .whereNotIn('Address.id', addressIds)
+      .select('Address.id as id');
+    const deletedAddressIds: number[] = deletedAddressIdRst.map((item) => {
+      return item.id;
+    });
+    if (deletedAddressIds.length > 0) {
+      // delete certificate address
+      await orm('CertificateAddress').where('certificateId', request.certificateId).whereIn('addressId', deletedAddressIds).delete();
+      // delete addresses
+      await orm('Address').whereIn('id', deletedAddressIds).delete();
+    }
+    // update addresses
+    const userAddresses = request.addresses;
+    await Promise.all(
+      userAddresses.map(async (certificateAddress: AddressEditRequest) => {
+        if (certificateAddress.id) {
+          // address already exist
+          // load address
+          const addressRst = await orm('Address')
+            .join('CertificateAddress', 'Address.id', 'CertificateAddress.addressId')
+            .first('Address.id as addressId', 'CertificateAddress.id as certificateAddressId')
+            .where('Address.id', certificateAddress.id)
+            .andWhere('CertificateAddress.addressId', request.certificateId);
+          if (!addressRst) {
+            // address does not exists
+            throw APIError.notFound(locz().CERTIFICATE_ADDRESS_NOT_FOUND({ id: certificateAddress.id }));
+          }
+          // update address
+          await orm('Address')
+            .update({
+              address: certificateAddress.address,
+              houseNumber: certificateAddress.houseNumber,
+              postalCode: certificateAddress.postalCode,
+              typeId: certificateAddress.typeId,
+              toponymId: certificateAddress.toponymId,
+              municipalityId: certificateAddress.municipalityId,
+            })
+            .where('id', addressRst.addressId);
+        } else {
+          // address does not exists
+          // insert address
+          const newAddress: Address = {
+            address: certificateAddress.address,
+            houseNumber: certificateAddress.houseNumber,
+            postalCode: certificateAddress.postalCode,
+            typeId: certificateAddress.typeId,
+            toponymId: certificateAddress.toponymId,
+            municipalityId: certificateAddress.municipalityId,
+          };
+          const addressRst = await orm('Address').insert(newAddress).returning('id');
+          const addressId = addressRst[0].id;
+          // associate address to certificate
+          const newCertificateAddress: CertificateAddress = {
+            certificateId: request.certificateId,
+            addressId: addressId,
+          };
+          await orm('CertificateAddress').insert(newCertificateAddress);
+        }
+      })
+    );
+  }
+); // addressCertificateUpdate
+
+/**
  * List address associated to a given user.
  */
 export const addressListByUser = api(
@@ -508,6 +593,64 @@ export const addressListByUser = api(
     return { addresses: DbUtility.removeNullFieldsList(addresses) };
   }
 ); // emailListByUser
+
+/**
+ * List address associated to a given certificate.
+ */
+export const addressListByCertificate = api(
+  { expose: true, auth: true, method: 'GET', path: '/user/address/address/certificate/:certificateId' },
+  async (request: AddressCertificateListRequest): Promise<AddressListResponse> => {
+    // load requested certificate
+    // TODO MIC check user visibility
+    const requestedCertificate = await orm<CertificateResponse>('Certificate').first().where('id', request.certificateId);
+    if (!requestedCertificate) {
+      // certificate not found
+      throw APIError.notFound(locz().CERTIFICATE_CERTIFICATE_NOT_FOUND());
+    }
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'addressListByCertificate',
+      requestingUserId: userId,
+      requestingUserRole: authenticationData.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get data
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+    }
+    // load certificate addresses
+    const addressRst = await orm('Address')
+      .join('CertificateAddress', 'CertificateAddress.addressId', 'Address.id')
+      .where('CertificateAddress.certificateId', request.certificateId)
+      .select(
+        'Address.id as id',
+        'Address.typeId as typeId',
+        'Address.toponymId as toponymId',
+        'Address.address as address',
+        'Address.houseNumber as houseNumber',
+        'Address.postalCode as postalCode',
+        'Address.municipalityId as municipalityId'
+      );
+    const addresses: AddressResponse[] = await Promise.all(
+      addressRst.map(async (address: any) => {
+        const addressList: AddressResponse = {
+          id: address.id,
+          type: await addressTypeDetail({ id: address.typeId }),
+          toponym: await addressToponymDetail({ id: address.toponymId }),
+          address: address.address,
+          houseNumber: address.houseNumber,
+          postalCode: address.postalCode,
+          municipality: await municipalityDetail({ id: address.municipalityId }),
+        };
+        return addressList;
+      })
+    );
+    // return certificate addresses
+    return { addresses: DbUtility.removeNullFieldsList(addresses) };
+  }
+); // addressListByCertificate
 
 /**
  * Address type list.
