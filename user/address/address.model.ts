@@ -126,20 +126,12 @@ export interface Address {
 } // Address
 
 /**
- * Request for addresses associated to a user.
+ * Request for addresses associated to an entity.
  */
-export interface AddressUserListRequest {
-  // user unique identifier
-  userId: number;
-} // AddressUserListRequest
-
-/**
- * Request for addresses associated to a certificate.
- */
-export interface AddressCertificateListRequest {
-  // user unique identifier
-  certificateId: number;
-} // AddressCertificateListRequest
+export interface AddressListRequest {
+  // related unique identifier
+  entityId: number;
+} // AddressListRequest
 
 /**
  * Response for addresses associated to a user.
@@ -148,6 +140,16 @@ export interface AddressListResponse {
   // address liset
   addresses: AddressResponse[];
 } // AddressListResponse
+
+/**
+ * Request for update addresses associated to an entity.
+ */
+export interface AddressUpdateRequest {
+  // related unique identifier
+  entityId: number;
+  // addresses
+  addresses: AddressEditRequest[];
+} // AddressUpdateRequest
 
 /**
  * Address response.
@@ -319,12 +321,12 @@ export interface Email {
 } // Email
 
 /**
- * Request for emails associated to a user.
+ * Request for emails associated to an enity.
  */
-export interface EmailUserListRequest {
-  // user unique identifier
-  userId: number;
-} // EmailUserListRequest
+export interface EmailListRequest {
+  // entity unique identifier
+  entityId: number;
+} // EmailListRequest
 
 /**
  * Email associated to user or address returned to client.
@@ -339,7 +341,7 @@ export interface EmailResponse {
   // default email
   default: boolean;
   // authentication email
-  authentication: boolean;
+  authentication?: boolean;
 } // EmailRespose
 
 /**
@@ -365,6 +367,16 @@ export interface EmailListResponse {
   // user unique identifier
   emails: EmailResponse[];
 } // EmailListResponse
+
+/**
+ * Request for update email associated to an entity.
+ */
+export interface EmailUpdateRequest {
+  // related unique identifier
+  entityId: number;
+  // emails
+  emails: EmailEditRequest[];
+} // EmailUpdateRequest
 
 /**
  * Email list associated to user or address.

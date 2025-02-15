@@ -28,6 +28,7 @@ import { getUserRoleWeight } from '../user/user';
 export const authorizationOperationUserCheck = (request: AuthorizationOperationUserCheck): AuthorizationOperationResponse => {
   // TODO MIC move checks to database
   // check cases
+  // operations on user allowed to only to user that made the request (requesting user == requested user)
   if (
     (request.operationCode == 'loginRenewBearer' ||
       request.operationCode == 'loginRenewCookie' ||
@@ -60,6 +61,7 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       canBePerformed: true,
     };
   }
+  // operations on user allowed to user hierarchy
   if (
     (request.operationCode == 'userList' ||
       request.operationCode == 'emailListByUser' ||
@@ -78,6 +80,7 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       canBePerformed: true,
     };
   }
+  // operation allowed only to superadmin
   if (
     (request.operationCode == 'systemParameterList' ||
       request.operationCode == 'systemParameterUpdate' ||
@@ -96,6 +99,23 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       canBePerformed: true,
     };
   }
+  // operation allowed to superadmin and admin
+  if (
+    (request.operationCode == 'dealerList' ||
+      request.operationCode == 'dealerDetail' ||
+      request.operationCode == 'dealerInsert' ||
+      request.operationCode == 'dealerUpdate' ||
+      request.operationCode == 'emailListByDealer' ||
+      request.operationCode == 'addressListByDealer') &&
+    request.requestingUserRole &&
+    (request.requestingUserRole == UserRole.SuperAdministrator || request.requestingUserRole == UserRole.Administrator) // superadmin and admin can access
+  ) {
+    return {
+      // authorized
+      canBePerformed: true,
+    };
+  }
+  // operation for all
   if (
     (request.operationCode == 'authorizationList' ||
       request.operationCode == 'emailTypeList' ||
@@ -186,6 +206,7 @@ export const authorizationList = api(
         visibility: AuthorizationVisibility.Visible,
       },
       { name: 'Municipality', code: 'archive.municipality', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
+      { name: 'Dealer', code: 'archive.dealer', userRole: UserRole.Administrator, visibility: AuthorizationVisibility.Visible },
       { name: 'User', code: 'archive.user', userRole: UserRole.Administrator, visibility: AuthorizationVisibility.Visible },
       { name: 'Administration Area', code: 'administration', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
       { name: 'System', code: 'system', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },

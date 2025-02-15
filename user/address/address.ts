@@ -12,14 +12,12 @@ import {
   EmailTypeListResponse,
   EmailTypeRequest,
   EmailTypeResponse,
-  EmailUserListRequest,
   EmailListResponse,
   PhoneType,
   PhoneTypeList,
   PhoneTypeListResponse,
   EmailEditRequest,
   Email,
-  AddressUserListRequest,
   AddressListResponse,
   AddressResponse,
   AddressToponymRequest,
@@ -31,7 +29,10 @@ import {
   AddressTypeResponse,
   AddressEditRequest,
   Address,
-  AddressCertificateListRequest,
+  EmailListRequest,
+  AddressListRequest,
+  AddressUpdateRequest,
+  EmailUpdateRequest,
 } from './address.model';
 import { AuthorizationOperationResponse } from '../../authorization/authorization.model';
 import { authorizationOperationUserCheck } from '../../authorization/authorization';
@@ -44,6 +45,7 @@ import { UserCheckParameters } from '../../system/system.model';
 import { systemParametersUserCheck } from '../../system/system';
 import { municipalityDetail } from '../../archive/municipality/municipality';
 import { CertificateAddress, CertificateResponse } from '../../certificate/certificate.model';
+import { DealerAddress, DealerEmail } from '../../dealer/dealer.model';
 
 /**
  * Address toponym list.
@@ -167,10 +169,10 @@ export const emailTypeDetail = api(
  * List email associated to a given user.
  */
 export const emailListByUser = api(
-  { expose: true, auth: true, method: 'GET', path: '/user/address/email/user/:userId' },
-  async (request: EmailUserListRequest): Promise<EmailListResponse> => {
+  { expose: true, auth: true, method: 'GET', path: '/user/address/email/user/:entityId' },
+  async (request: EmailListRequest): Promise<EmailListResponse> => {
     // load requested user
-    const requestedUser = await orm<UserResponse>('User').first().where('id', request.userId);
+    const requestedUser = await orm<UserResponse>('User').first().where('id', request.entityId);
     if (!requestedUser) {
       // user not found
       throw APIError.notFound(locz().USER_USER_NOT_FOUND());
@@ -182,7 +184,7 @@ export const emailListByUser = api(
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
       operationCode: 'emailListByUser',
       requestingUserId: userId,
-      destinationUserIds: [request.userId],
+      destinationUserIds: [request.entityId],
       requestingUserRole: authenticationData.userRole,
       destinationUserRoles: [requestedUser.role],
     });
@@ -193,7 +195,7 @@ export const emailListByUser = api(
     // load user emails
     const emailsRst = await orm('Email')
       .join('UserEmail', 'UserEmail.emailId', 'Email.id')
-      .where('UserEmail.userId', request.userId)
+      .where('UserEmail.userId', request.entityId)
       .select(
         'Email.id as id',
         'Email.typeId as typeId',
@@ -267,6 +269,7 @@ export const emailUserCheck = api(
           }
         }
         // check for mail existance
+        // TODO MIC check unique email only for authentication email
         const emailCount = (
           await orm('UserEmail')
             .join('Email', 'Email.id', 'UserEmail.emailId')
@@ -306,7 +309,7 @@ export const emailUserCheck = api(
  */
 export const emailUserUpdate = api(
   { expose: false, auth: true, method: 'PATCH', path: '/user/address/email/user' },
-  async (request: { userId: number; emails: EmailEditRequest[] }): Promise<void> => {
+  async (request: EmailUpdateRequest): Promise<void> => {
     // delete removed emails
     const emailAddresses: string[] = request.emails.map((email: EmailEditRequest) => {
       return email.email;
@@ -314,7 +317,7 @@ export const emailUserUpdate = api(
     // load removed emails
     const deletedEmailIdRst = await orm<{ id: number }>('Email')
       .join('UserEmail', 'Email.id', 'UserEmail.emailId')
-      .where('UserEmail.userId', request.userId)
+      .where('UserEmail.userId', request.entityId)
       .whereNotIn('Email.email', emailAddresses)
       .select('Email.id as id');
     const deletedEmailIds: number[] = deletedEmailIdRst.map((item) => {
@@ -322,7 +325,7 @@ export const emailUserUpdate = api(
     });
     if (deletedEmailIds.length > 0) {
       // delete user emails
-      await orm('UserEmail').where('userId', request.userId).whereIn('emailId', deletedEmailIds).delete();
+      await orm('UserEmail').where('userId', request.entityId).whereIn('emailId', deletedEmailIds).delete();
       // delete emails
       await orm('Email').whereIn('id', deletedEmailIds).delete();
     }
@@ -337,7 +340,7 @@ export const emailUserUpdate = api(
             .join('UserEmail', 'Email.id', 'UserEmail.emailId')
             .first('Email.id as emailId', 'UserEmail.id as userEmailId')
             .where('Email.id', userEmail.id)
-            .andWhere('UserEmail.userId', request.userId);
+            .andWhere('UserEmail.userId', request.entityId);
           if (!emailRst) {
             // email does not exists
             throw APIError.notFound(locz().USER_EMAIL_NOT_FOUND({ id: userEmail.id }));
@@ -357,7 +360,7 @@ export const emailUserUpdate = api(
           const emailId = emailRst[0].id;
           // associate email to user
           const newUserEmail: UserEmail = {
-            userId: request.userId,
+            userId: request.entityId,
             emailId: emailId,
             default: userEmail.default,
             authentication: userEmail.authentication,
@@ -376,7 +379,7 @@ export const emailUserUpdate = api(
  */
 export const addressUserUpdate = api(
   { expose: false, auth: true, method: 'PATCH', path: '/user/address/address/user' },
-  async (request: { userId: number; addresses: AddressEditRequest[] }): Promise<void> => {
+  async (request: AddressUpdateRequest): Promise<void> => {
     // delete removed addresses
     const addressIds: number[] = request.addresses
       .map((address: AddressEditRequest) => {
@@ -388,7 +391,7 @@ export const addressUserUpdate = api(
     // load removed addresses
     const deletedAddressIdRst = await orm<{ id: number }>('Address')
       .join('UserAddress', 'Address.id', 'UserAddress.addressId')
-      .where('UserAddress.userId', request.userId)
+      .where('UserAddress.userId', request.entityId)
       .whereNotIn('Address.id', addressIds)
       .select('Address.id as id');
     const deletedAddressIds: number[] = deletedAddressIdRst.map((item) => {
@@ -396,7 +399,7 @@ export const addressUserUpdate = api(
     });
     if (deletedAddressIds.length > 0) {
       // delete user address
-      await orm('UserAddress').where('userId', request.userId).whereIn('addressId', deletedAddressIds).delete();
+      await orm('UserAddress').where('userId', request.entityId).whereIn('addressId', deletedAddressIds).delete();
       // delete addresses
       await orm('Address').whereIn('id', deletedAddressIds).delete();
     }
@@ -411,7 +414,7 @@ export const addressUserUpdate = api(
             .join('UserAddress', 'Address.id', 'UserAddress.addressId')
             .first('Address.id as addressId', 'UserAddress.id as userAddressId')
             .where('Address.id', userAddress.id)
-            .andWhere('UserAddress.userId', request.userId);
+            .andWhere('UserAddress.userId', request.entityId);
           if (!addressRst) {
             // address does not exists
             throw APIError.notFound(locz().USER_ADDRESS_NOT_FOUND({ id: userAddress.id }));
@@ -442,7 +445,7 @@ export const addressUserUpdate = api(
           const addressId = addressRst[0].id;
           // associate address to user
           const newUserAddress: UserAddress = {
-            userId: request.userId,
+            userId: request.entityId,
             addressId: addressId,
           };
           await orm('UserAddress').insert(newUserAddress);
@@ -459,7 +462,7 @@ export const addressUserUpdate = api(
  */
 export const addressCertificateUpdate = api(
   { expose: false, auth: true, method: 'PATCH', path: '/user/address/address/certificate' },
-  async (request: { certificateId: number; addresses: AddressEditRequest[] }): Promise<void> => {
+  async (request: AddressUpdateRequest): Promise<void> => {
     // delete removed addresses
     const addressIds: number[] = request.addresses
       .map((address: AddressEditRequest) => {
@@ -471,7 +474,7 @@ export const addressCertificateUpdate = api(
     // load removed addresses
     const deletedAddressIdRst = await orm<{ id: number }>('Address')
       .join('CertificateAddress', 'Address.id', 'CertificateAddress.addressId')
-      .where('CertificateAddress.certificateId', request.certificateId)
+      .where('CertificateAddress.certificateId', request.entityId)
       .whereNotIn('Address.id', addressIds)
       .select('Address.id as id');
     const deletedAddressIds: number[] = deletedAddressIdRst.map((item) => {
@@ -479,7 +482,7 @@ export const addressCertificateUpdate = api(
     });
     if (deletedAddressIds.length > 0) {
       // delete certificate address
-      await orm('CertificateAddress').where('certificateId', request.certificateId).whereIn('addressId', deletedAddressIds).delete();
+      await orm('CertificateAddress').where('certificateId', request.entityId).whereIn('addressId', deletedAddressIds).delete();
       // delete addresses
       await orm('Address').whereIn('id', deletedAddressIds).delete();
     }
@@ -494,7 +497,7 @@ export const addressCertificateUpdate = api(
             .join('CertificateAddress', 'Address.id', 'CertificateAddress.addressId')
             .first('Address.id as addressId', 'CertificateAddress.id as certificateAddressId')
             .where('Address.id', certificateAddress.id)
-            .andWhere('CertificateAddress.addressId', request.certificateId);
+            .andWhere('CertificateAddress.addressId', request.entityId);
           if (!addressRst) {
             // address does not exists
             throw APIError.notFound(locz().CERTIFICATE_ADDRESS_NOT_FOUND({ id: certificateAddress.id }));
@@ -525,7 +528,7 @@ export const addressCertificateUpdate = api(
           const addressId = addressRst[0].id;
           // associate address to certificate
           const newCertificateAddress: CertificateAddress = {
-            certificateId: request.certificateId,
+            certificateId: request.entityId,
             addressId: addressId,
           };
           await orm('CertificateAddress').insert(newCertificateAddress);
@@ -539,10 +542,10 @@ export const addressCertificateUpdate = api(
  * List address associated to a given user.
  */
 export const addressListByUser = api(
-  { expose: true, auth: true, method: 'GET', path: '/user/address/address/user/:userId' },
-  async (request: AddressUserListRequest): Promise<AddressListResponse> => {
+  { expose: true, auth: true, method: 'GET', path: '/user/address/address/user/:entityId' },
+  async (request: AddressListRequest): Promise<AddressListResponse> => {
     // load requested user
-    const requestedUser = await orm<UserResponse>('User').first().where('id', request.userId);
+    const requestedUser = await orm<UserResponse>('User').first().where('id', request.entityId);
     if (!requestedUser) {
       // user not found
       throw APIError.notFound(locz().USER_USER_NOT_FOUND());
@@ -554,7 +557,7 @@ export const addressListByUser = api(
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
       operationCode: 'addressListByUser',
       requestingUserId: userId,
-      destinationUserIds: [request.userId],
+      destinationUserIds: [request.entityId],
       requestingUserRole: authenticationData.userRole,
       destinationUserRoles: [requestedUser.role],
     });
@@ -565,7 +568,7 @@ export const addressListByUser = api(
     // load user addresses
     const addressRst = await orm('Address')
       .join('UserAddress', 'UserAddress.addressId', 'Address.id')
-      .where('UserAddress.userId', request.userId)
+      .where('UserAddress.userId', request.entityId)
       .select(
         'Address.id as id',
         'Address.typeId as typeId',
@@ -589,41 +592,40 @@ export const addressListByUser = api(
         return addressList;
       })
     );
-    // return user email
+    // return user address
     return { addresses: DbUtility.removeNullFieldsList(addresses) };
   }
-); // emailListByUser
+); // addressListByUser
 
 /**
  * List address associated to a given certificate.
  */
 export const addressListByCertificate = api(
-  { expose: true, auth: true, method: 'GET', path: '/user/address/address/certificate/:certificateId' },
-  async (request: AddressCertificateListRequest): Promise<AddressListResponse> => {
-    // load requested certificate
-    // TODO MIC check user visibility
-    const requestedCertificate = await orm<CertificateResponse>('Certificate').first().where('id', request.certificateId);
-    if (!requestedCertificate) {
-      // certificate not found
-      throw APIError.notFound(locz().CERTIFICATE_CERTIFICATE_NOT_FOUND());
-    }
+  { expose: true, auth: true, method: 'GET', path: '/user/address/address/certificate/:entityId' },
+  async (request: AddressListRequest): Promise<AddressListResponse> => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
     const userId = parseInt(authenticationData.userID);
     // check authorization
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
       operationCode: 'addressListByCertificate',
-      requestingUserId: userId,
       requestingUserRole: authenticationData.userRole,
     });
     if (!authorizationCheck.canBePerformed) {
       // user not allowed to get data
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
+    // load requested certificate
+    // TODO MIC check user visibility
+    const requestedCertificate = await orm<CertificateResponse>('Certificate').first().where('id', request.entityId);
+    if (!requestedCertificate) {
+      // certificate not found
+      throw APIError.notFound(locz().CERTIFICATE_CERTIFICATE_NOT_FOUND());
+    }
     // load certificate addresses
     const addressRst = await orm('Address')
       .join('CertificateAddress', 'CertificateAddress.addressId', 'Address.id')
-      .where('CertificateAddress.certificateId', request.certificateId)
+      .where('CertificateAddress.certificateId', request.entityId)
       .select(
         'Address.id as id',
         'Address.typeId as typeId',
@@ -699,3 +701,239 @@ export const addressTypeDetail = api(
     return DbUtility.removeNullFields(addressType);
   }
 ); // addressTypeDetail
+
+/**
+ * List email associated to a given dealer.
+ */
+export const emailListByDealer = api(
+  { expose: true, auth: true, method: 'GET', path: '/user/address/email/dealer/:entityId' },
+  async (request: EmailListRequest): Promise<EmailListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'emailListByDealer',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get data
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
+    // load dealer emails
+    const emailsRst = await orm('Email')
+      .join('DealerEmail', 'DealerEmail.emailId', 'Email.id')
+      .where('DealerEmail.dealerId', request.entityId)
+      .select('Email.id as id', 'Email.typeId as typeId', 'Email.email as email', 'DealerEmail.default as default');
+    const emails: EmailResponse[] = await Promise.all(
+      emailsRst.map(async (email: any) => {
+        const emailResponse: EmailResponse = {
+          id: email.id,
+          email: email.email,
+          type: await emailTypeDetail({ id: email.typeId }),
+          default: email.default,
+          authentication: false,
+        };
+        return emailResponse;
+      })
+    );
+    // return dealer email
+    return { emails: DbUtility.removeNullFieldsList(emails) };
+  }
+); // emailListByDealer
+
+/**
+ * List address associated to a given dealer.
+ */
+export const addressListByDealer = api(
+  { expose: true, auth: true, method: 'GET', path: '/user/address/address/dealer/:entityId' },
+  async (request: AddressListRequest): Promise<AddressListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'addressListByDealer',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get data
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
+    // load dealer addresses
+    const addressRst = await orm('Address')
+      .join('DealerAddress', 'DealerAddress.addressId', 'Address.id')
+      .where('DealerAddress.dealerId', request.entityId)
+      .select(
+        'Address.id as id',
+        'Address.typeId as typeId',
+        'Address.toponymId as toponymId',
+        'Address.address as address',
+        'Address.houseNumber as houseNumber',
+        'Address.postalCode as postalCode',
+        'Address.municipalityId as municipalityId'
+      );
+    const addresses: AddressResponse[] = await Promise.all(
+      addressRst.map(async (address: any) => {
+        const addressList: AddressResponse = {
+          id: address.id,
+          type: await addressTypeDetail({ id: address.typeId }),
+          toponym: await addressToponymDetail({ id: address.toponymId }),
+          address: address.address,
+          houseNumber: address.houseNumber,
+          postalCode: address.postalCode,
+          municipality: await municipalityDetail({ id: address.municipalityId }),
+        };
+        return addressList;
+      })
+    );
+    // return dealer address
+    return { addresses: DbUtility.removeNullFieldsList(addresses) };
+  }
+); // addressListByDealer
+
+/**
+ * Update email of the given dealer
+ */
+export const emailDealerUpdate = api(
+  { expose: false, auth: true, method: 'PATCH', path: '/user/address/email/dealer' },
+  async (request: EmailUpdateRequest): Promise<void> => {
+    // delete removed email
+    const emailsIds: number[] = request.emails
+      .map((emails: EmailEditRequest) => {
+        return emails.id ?? 0;
+      })
+      .filter((id: number) => {
+        return id !== 0;
+      });
+    // load removed emails
+    const deletedEmailIdRst = await orm<{ id: number }>('Email')
+      .join('DealerEmail', 'Email.id', 'DealerEmail.emailId')
+      .where('DealerEmail.dealerId', request.entityId)
+      .whereNotIn('Email.id', emailsIds)
+      .select('Email.id as id');
+    const deletedEmailIds: number[] = deletedEmailIdRst.map((item) => {
+      return item.id;
+    });
+    if (deletedEmailIds.length > 0) {
+      // delete dealer emails
+      await orm('DealerEmail').where('dealerId', request.entityId).whereIn('emailId', deletedEmailIds).delete();
+      // delete emails
+      await orm('Email').whereIn('id', deletedEmailIds).delete();
+    }
+    // update emails
+    const dealerEmails = request.emails;
+    await Promise.all(
+      dealerEmails.map(async (dealerEmail: EmailEditRequest) => {
+        if (dealerEmail.id) {
+          // email already exist
+          // load email
+          const emailRst = await orm('Email')
+            .join('DealerEmail', 'Email.id', 'DealerEmail.emailId')
+            .first('Email.id as emailId', 'DealerEmail.id as dealerEmailId')
+            .where('Email.id', dealerEmail.id)
+            .andWhere('DealerEmail.dealerId', request.entityId);
+          if (!emailRst) {
+            // email does not exists
+            throw APIError.notFound(locz().DEALER_EMAIL_NOT_FOUND({ id: dealerEmail.id }));
+          }
+          // update email
+          await orm('Email').update({ email: dealerEmail.email, typeId: dealerEmail.typeId }).where('id', emailRst.emailId);
+          // update dealer email association
+          await orm('DealerEmail').update({ default: dealerEmail.default }).where('id', emailRst.userEmailId);
+        } else {
+          // email does not exists
+          // insert email
+          const newEmail: Email = {
+            email: dealerEmail.email,
+            typeId: dealerEmail.typeId,
+          };
+          const emailRst = await orm('Email').insert(newEmail).returning('id');
+          const emailId = emailRst[0].id;
+          // associate email to dealer
+          const newDealerEmail: DealerEmail = {
+            dealerId: request.entityId,
+            emailId: emailId,
+            default: dealerEmail.default,
+          };
+          await orm('DealerEmail').insert(newDealerEmail);
+        }
+      })
+    );
+  }
+); // emailDealerUpdate
+
+/**
+ * Update addresses of the given dealer.
+ */
+export const addressDealerUpdate = api(
+  { expose: false, auth: true, method: 'PATCH', path: '/user/address/address/dealer' },
+  async (request: AddressUpdateRequest): Promise<void> => {
+    // delete removed addresses
+    const addressIds: number[] = request.addresses
+      .map((address: AddressEditRequest) => {
+        return address.id ?? 0;
+      })
+      .filter((id: number) => {
+        return id !== 0;
+      });
+    // load removed addresses
+    const deletedAddressIdRst = await orm<{ id: number }>('Address')
+      .join('DealerAddress', 'Address.id', 'DealerAddress.addressId')
+      .where('DealerAddress.dealerId', request.entityId)
+      .whereNotIn('Address.id', addressIds)
+      .select('Address.id as id');
+    const deletedAddressIds: number[] = deletedAddressIdRst.map((item) => {
+      return item.id;
+    });
+    if (deletedAddressIds.length > 0) {
+      // delete dealer address
+      await orm('DealerAddress').where('dealerId', request.entityId).whereIn('addressId', deletedAddressIds).delete();
+      // delete addresses
+      await orm('Address').whereIn('id', deletedAddressIds).delete();
+    }
+    // update addresses
+    const dealerAddresses = request.addresses;
+    await Promise.all(
+      dealerAddresses.map(async (dealerAddress: AddressEditRequest) => {
+        if (dealerAddress.id) {
+          // address already exist
+          // load address
+          const addressRst = await orm('Address')
+            .join('DealerAddress', 'Address.id', 'DealerAddress.addressId')
+            .first('Address.id as addressId', 'DealerAddress.id as dealerAddressId')
+            .where('Address.id', dealerAddress.id)
+            .andWhere('DealerAddress.dealerId', request.entityId);
+          if (!addressRst) {
+            // address does not exists
+            throw APIError.notFound(locz().DEALER_ADDRESS_NOT_FOUND({ id: dealerAddress.id }));
+          }
+          // update address
+          await orm('Address')
+            .update({
+              address: dealerAddress.address,
+              houseNumber: dealerAddress.houseNumber,
+              postalCode: dealerAddress.postalCode,
+              typeId: dealerAddress.typeId,
+              toponymId: dealerAddress.toponymId,
+              municipalityId: dealerAddress.municipalityId,
+            })
+            .where('id', addressRst.addressId);
+        } else {
+          // address does not exists
+          // insert address
+          const newAddress: Address = {
+            address: dealerAddress.address,
+            houseNumber: dealerAddress.houseNumber,
+            postalCode: dealerAddress.postalCode,
+            typeId: dealerAddress.typeId,
+            toponymId: dealerAddress.toponymId,
+            municipalityId: dealerAddress.municipalityId,
+          };
+          const addressRst = await orm('Address').insert(newAddress).returning('id');
+          const addressId = addressRst[0].id;
+          // associate address to dealer
+          const newDealerAddress: DealerAddress = {
+            dealerId: request.entityId,
+            addressId: addressId,
+          };
+          await orm('DealerAddress').insert(newDealerAddress);
+        }
+      })
+    );
+  }
+); // addressDealerUpdate

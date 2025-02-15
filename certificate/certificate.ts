@@ -83,7 +83,7 @@ export const certificateDetail = api(
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load certificate address
-    const addressList: AddressListResponse = await addressListByCertificate({ certificateId: certificate.id });
+    const addressList: AddressListResponse = await addressListByCertificate({ entityId: certificate.id });
     if (addressList.addresses.length != 1) {
       // wrong number of addresses
       throw APIError.notFound(locz().CERTIFICATE_ADDRESS_WRONG__NUMBER());
@@ -140,7 +140,7 @@ export const certificateInsert = api(
     const id = certificateRst[0].id;
     // insert addresses
     const certificateAddresses = request.customerAddress;
-    await addressCertificateUpdate({ certificateId: id, addresses: [certificateAddresses] });
+    await addressCertificateUpdate({ entityId: id, addresses: [certificateAddresses] });
     // return created certificate
     return certificateDetail({ id });
   }
@@ -182,7 +182,7 @@ export const certificateUpdate = api(
     const resutlQry = await orm('Certificate').where('id', request.id).update(updateCertificate).returning('id');
     // update address
     const certificateAddress = request.customerAddress;
-    await addressCertificateUpdate({ certificateId: request.id, addresses: [certificateAddress] });
+    await addressCertificateUpdate({ entityId: request.id, addresses: [certificateAddress] });
     // return updated certificate
     return certificateDetail({ id: resutlQry[0].id });
   }
