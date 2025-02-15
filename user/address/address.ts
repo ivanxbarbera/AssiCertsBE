@@ -834,7 +834,7 @@ export const emailDealerUpdate = api(
           // update email
           await orm('Email').update({ email: dealerEmail.email, typeId: dealerEmail.typeId }).where('id', emailRst.emailId);
           // update dealer email association
-          await orm('DealerEmail').update({ default: dealerEmail.default }).where('id', emailRst.userEmailId);
+          await orm('DealerEmail').update({ default: dealerEmail.default }).where('id', emailRst.dealerEmailId);
         } else {
           // email does not exists
           // insert email
