@@ -337,22 +337,6 @@ export interface UserEmail {
 } // UserEmail
 
 /**
- * User-Email Association
- */
-export interface UserEmail {
-  // user email unique identifier
-  id?: number;
-  // user identifier
-  userId: number;
-  // email identifier
-  emailId: number;
-  // default email
-  default: boolean;
-  // authentication email
-  authentication: boolean;
-} // UserEmail
-
-/**
  * User-Address Association
  */
 export interface UserAddress {

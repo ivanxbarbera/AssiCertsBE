@@ -41,7 +41,7 @@ export const userProfileGet = api(
       throw APIError.notFound(locz().USER_PROFILE_USER_NOT_FOUND());
     }
     // load user profile emails
-    const emailList: EmailListResponse = await emailListByUser({ userId: userProfile.id });
+    const emailList: EmailListResponse = await emailListByUser({ entityId: userProfile.id });
     userProfile.emails = emailList.emails;
     // return user profile
     return DbUtility.removeNullFields(userProfile);
@@ -81,7 +81,7 @@ export const userProfileUpdate = api(
     const resutlQry = await orm('User').where('id', request.id).update(updateUserProfile).returning('id');
     const userEditId = resutlQry[0].id;
     // update emails
-    await emailUserUpdate({ userId: userEditId, emails: userEmails });
+    await emailUserUpdate({ entityId: userEditId, emails: userEmails });
     // return updated user profile
     return userProfileGet({ id: userEditId });
   }

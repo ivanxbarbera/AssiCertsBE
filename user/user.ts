@@ -98,7 +98,7 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   const userRst = await orm('User').insert(newUser).returning('id');
   const id = userRst[0].id;
   // insert user email
-  await emailUserUpdate({ userId: id, emails: [newEmail] });
+  await emailUserUpdate({ entityId: id, emails: [newEmail] });
   // insert user password history
   const newUserPasswordHistory: UserPasswordHistory = {
     userId: id,
@@ -600,10 +600,10 @@ export const userDetail = api({ expose: true, auth: true, method: 'GET', path: '
     throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
   }
   // load user emails
-  const emailList: EmailListResponse = await emailListByUser({ userId: user.id });
+  const emailList: EmailListResponse = await emailListByUser({ entityId: user.id });
   user.emails = emailList.emails;
   // load user addresses
-  const addressList: AddressListResponse = await addressListByUser({ userId: user.id });
+  const addressList: AddressListResponse = await addressListByUser({ entityId: user.id });
   user.addresses = addressList.addresses;
   // return user
   return DbUtility.removeNullFields(user);
@@ -646,10 +646,10 @@ export const userInsert = api(
     const userRst = await orm('User').insert(newUser).returning('id');
     const id = userRst[0].id;
     // insert emails
-    await emailUserUpdate({ userId: id, emails: userEmails });
+    await emailUserUpdate({ entityId: id, emails: userEmails });
     // insert addresses
     const userAddresses = request.addresses;
-    await addressUserUpdate({ userId: id, addresses: userAddresses });
+    await addressUserUpdate({ entityId: id, addresses: userAddresses });
     // insert user password history
     const password = await generateRandomPassword();
     const passwordHash = bcrypt.hashSync(password);
@@ -700,10 +700,10 @@ export const userUpdate = api(
     let updateUser: User = GeneralUtility.filterObjectByInterface(request, user, ['id']);
     const resutlQry = await orm('User').where('id', request.id).update(updateUser).returning('id');
     // update emails
-    await emailUserUpdate({ userId: request.id, emails: userEmails });
+    await emailUserUpdate({ entityId: request.id, emails: userEmails });
     // update addresses
     const userAddresses = request.addresses;
-    await addressUserUpdate({ userId: request.id, addresses: userAddresses });
+    await addressUserUpdate({ entityId: request.id, addresses: userAddresses });
     // check user reactivation
     if (user.disabled && !request.disabled) {
       // user reactivated
