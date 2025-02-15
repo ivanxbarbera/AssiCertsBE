@@ -341,7 +341,7 @@ export interface EmailResponse {
   // default email
   default: boolean;
   // authentication email
-  authentication?: boolean;
+  authentication: boolean;
 } // EmailRespose
 
 /**
