@@ -35,6 +35,7 @@ import {
   UserStatusResponse,
   UserRole,
   UserEmail,
+  UserDealer,
 } from './user.model';
 import { orm } from '../common/db/db';
 import { ValidatorsUtility } from '../common/utility/validators.utility';
@@ -659,9 +660,19 @@ export const userInsert = api(
     // remove unnecessary fields
     delete (newUser as any)['addresses'];
     delete (newUser as any)['emails'];
+    delete (newUser as any)['dealerId'];
     // insert user
     const userRst = await orm('User').insert(newUser).returning('id');
     const id = userRst[0].id;
+    // insert dealer
+    if (request.dealerId) {
+      // associate dealer to user
+      const newUserDealer: UserDealer = {
+        userId: id,
+        dealerId: request.dealerId,
+      };
+      await orm('UserDealer').insert(newUserDealer);
+    }
     // insert emails
     await emailUserUpdate({ entityId: id, emails: userEmails });
     // insert addresses
@@ -716,6 +727,40 @@ export const userUpdate = api(
     // update user
     let updateUser: User = GeneralUtility.filterObjectByInterface(request, user, ['id']);
     const resutlQry = await orm('User').where('id', request.id).update(updateUser).returning('id');
+    // load user-dealer association
+    const userDealers = await orm<User>('UserDealer').where('userId', request.id).select('id');
+    if (userDealers.length > 1) {
+      // error sending email
+      throw APIError.unavailable(locz().USER_DEALER_TOO_MANY());
+    }
+    // update dealer
+    if (request.dealerId) {
+      // dealer must be associated
+      if (userDealers.length == 1) {
+        // user dealer association already exists
+        // update user/dealer association
+        const updateUserDealer: UserDealer = {
+          userId: request.id,
+          dealerId: request.dealerId,
+        };
+        await orm('UserDealer').where('id', userDealers[0].id).update(updateUserDealer);
+      } else {
+        // user dealer association not exist
+        // associate dealer to user
+        const newUserDealer: UserDealer = {
+          userId: request.id,
+          dealerId: request.dealerId,
+        };
+        await orm('UserDealer').insert(newUserDealer);
+      }
+    } else {
+      // dealer not associated to user
+      if (userDealers.length == 1) {
+        // there's a dealer association
+        // delete user dealer association
+        await orm('UserDealer').where('id', userDealers[0].id).delete();
+      }
+    }
     // update emails
     await emailUserUpdate({ entityId: request.id, emails: userEmails });
     // update addresses

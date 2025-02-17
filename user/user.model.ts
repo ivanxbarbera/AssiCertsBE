@@ -94,8 +94,8 @@ export interface UserEditRequest {
   disabled: boolean;
   // user default language
   language?: string;
-  // dealer associated to user
-  dealer?: DealerRequest;
+  // identifier of dealer associated to user
+  dealerId?: number;
 } // UserEditRequest
 
 /**
@@ -358,11 +358,11 @@ export interface UserAddress {
 /**
  * User-Dealer Association
  */
-export interface DealerAddress {
+export interface UserDealer {
   // user dealer unique identifier
   id?: number;
   // user identifier
   userId: number;
   // dealer identifier
-  deakerId: number;
+  dealerId: number;
 } // DealerAddress
