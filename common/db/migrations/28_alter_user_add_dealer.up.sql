@@ -1,0 +1,19 @@
+CREATE TABLE public."UserDealer" (
+    "id" BIGSERIAL PRIMARY KEY,
+    "userId" BIGSERIAL NOT NULL,
+    "dealerId" BIGSERIAL NOT NULL
+);
+
+ALTER TABLE public."UserDealer"
+ADD CONSTRAINT "FkUdUserId"
+FOREIGN KEY ("userId") REFERENCES public."User"("id")
+ON UPDATE CASCADE
+ON DELETE RESTRICT
+;
+
+ALTER TABLE public."UserDealer"
+ADD CONSTRAINT "FkUdDealerId"
+FOREIGN KEY ("dealerId") REFERENCES public."Dealer"("id")
+ON UPDATE CASCADE
+ON DELETE RESTRICT
+;

@@ -107,3 +107,11 @@ export interface DealerAddress {
   // address identifier
   addressId: number;
 } // DealerAddress
+
+/**
+ * Request for dealers associated to an enity.
+ */
+export interface DealerListRequest {
+  // user unique identifier
+  userId?: number;
+} // DealerListRequest

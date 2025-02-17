@@ -49,6 +49,8 @@ import { DbUtility } from '../common/utility/db.utility';
 import { GeneralUtility } from '../common/utility/general.utility';
 import { Email, EmailType, EmailListResponse, EmailEditRequest, AddressListResponse } from './address/address.model';
 import { emailUserCheck, emailListByUser, emailUserUpdate, addressListByUser, addressUserUpdate } from './address/address';
+import { DealerListResponse } from '../dealer/dealer.model';
+import { dealerDetail, dealerList } from '../dealer/dealer';
 
 const jwtSercretKey = secret('JWTSecretKey');
 const frontendBaseURL = secret('FrontendBaseURL');
@@ -598,6 +600,11 @@ export const userDetail = api({ expose: true, auth: true, method: 'GET', path: '
   if (!authorizationCheck.canBePerformed) {
     // user not allowed to get details
     throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+  }
+  // load dealer
+  const dealerListResponse: DealerListResponse = await dealerList({ userId: user.id });
+  if (dealerListResponse.dealers.length > 0) {
+    user.dealer = await dealerDetail({ id: dealerListResponse.dealers[0].id });
   }
   // load user emails
   const emailList: EmailListResponse = await emailListByUser({ entityId: user.id });
