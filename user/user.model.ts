@@ -1,3 +1,4 @@
+import { DealerRequest, DealerResponse } from '../dealer/dealer.model';
 import { EmailEditRequest, EmailResponse, EmailType, AddressResponse, AddressEditRequest } from './address/address.model';
 
 /**
@@ -67,6 +68,8 @@ export interface UserResponse {
   disabled: boolean;
   // user default language
   language?: string;
+  // dealer associated to user
+  dealer?: DealerResponse;
 } // UserResponse
 
 /**
@@ -91,6 +94,8 @@ export interface UserEditRequest {
   disabled: boolean;
   // user default language
   language?: string;
+  // identifier of dealer associated to user
+  dealerId?: number;
 } // UserEditRequest
 
 /**
@@ -112,6 +117,8 @@ export interface UserList {
   phone: string;
   // user status, disabled or active
   disabled: boolean;
+  // comany name of the dealer associated to user
+  dealerCompanyName?: string;
 } // UserList
 
 /**
@@ -347,3 +354,15 @@ export interface UserAddress {
   // address identifier
   addressId: number;
 } // UserAddress
+
+/**
+ * User-Dealer Association
+ */
+export interface UserDealer {
+  // user dealer unique identifier
+  id?: number;
+  // user identifier
+  userId: number;
+  // dealer identifier
+  dealerId: number;
+} // DealerAddress

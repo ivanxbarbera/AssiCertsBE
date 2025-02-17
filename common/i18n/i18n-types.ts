@@ -213,6 +213,10 @@ type RootTranslation = {
 	 */
 	USER_ADDRESS_TOPONYM_NOT_FOUND: string
 	/**
+	 * L​'​u​t​e​n​t​e​ ​p​u​ò​ ​a​v​e​r​e​ ​a​l​ ​m​a​s​s​i​m​o​ ​u​n​ ​s​o​l​o​ ​d​e​a​l​e​r
+	 */
+	USER_DEALER_TOO_MANY: string
+	/**
 	 * U​t​e​n​t​e​ ​c​o​n​ ​l​a​ ​m​a​i​l​ ​i​n​d​i​c​a​t​a​ ​e​s​i​s​t​e​n​t​e
 	 */
 	USER_PROFILE_EMAIL_ALREADY_EXIST: string
@@ -582,6 +586,10 @@ export type TranslationFunctions = {
 	 * Toponimo dell'indirizzo non trovato
 	 */
 	USER_ADDRESS_TOPONYM_NOT_FOUND: () => LocalizedString
+	/**
+	 * L'utente può avere al massimo un solo dealer
+	 */
+	USER_DEALER_TOO_MANY: () => LocalizedString
 	/**
 	 * Utente con la mail indicata esistente
 	 */

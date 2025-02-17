@@ -49,6 +49,7 @@ const it = {
   USER_ADDRESS_EMAILTYPE_NOT_FOUND: 'Tipo Email non trovato',
   USER_ADDRESS_NOT_FOUND: "L'indirizzo con ID {id:number} non esiste",
   USER_ADDRESS_TOPONYM_NOT_FOUND: "Toponimo dell'indirizzo non trovato",
+  USER_DEALER_TOO_MANY: "L'utente può avere al massimo un solo dealer",
   USER_PROFILE_EMAIL_ALREADY_EXIST: 'Utente con la mail indicata esistente',
   USER_PROFILE_USER_NOT_ALLOWED: 'Utente non autorizzato ad accedere ai dati richiesti',
   USER_PROFILE_USER_NOT_FOUND: 'Profilo utente richiesto non trovato',

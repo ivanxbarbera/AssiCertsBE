@@ -50,6 +50,7 @@ const en = {
   USER_ADDRESS_TOPONYM_NOT_FOUND: 'Address toponym not founded',
   USER_PROFILE_EMAIL_ALREADY_EXIST: 'User with specified email already exists',
   USER_ADDRESS_NOT_FOUND: 'User address with ID {id} not exists',
+  USER_DEALER_TOO_MANY: 'User can have max one dealer',
   USER_PROFILE_USER_NOT_ALLOWED: 'User not allowed to access requested data',
   USER_PROFILE_USER_NOT_FOUND: 'Requested user profile not found',
   USER_DOMAIN_NOT_ALLOWED: 'Email domain is not in allowed list',

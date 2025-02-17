@@ -1,7 +1,7 @@
 // libraries
 import { api, APIError } from 'encore.dev/api';
 // application modules
-import { Dealer, DealerEditRequest, DealerList, DealerListResponse, DealerRequest, DealerResponse } from './dealer.model';
+import { Dealer, DealerEditRequest, DealerList, DealerListRequest, DealerListResponse, DealerRequest, DealerResponse } from './dealer.model';
 import { orm } from '../common/db/db';
 import { AuthorizationOperationResponse } from '../authorization/authorization.model';
 import { authorizationOperationUserCheck } from '../authorization/authorization';
@@ -12,34 +12,44 @@ import { AuthenticationData } from '../authentication/authentication.model';
 import { AddressListResponse, EmailListResponse } from '../user/address/address.model';
 import { addressDealerUpdate, addressListByDealer, emailDealerUpdate, emailListByDealer } from '../user/address/address';
 import { GeneralUtility } from '../common/utility/general.utility';
+import { UserResponse } from '../user/user.model';
 
 /**
  * Search for dealers.
  * Apply filters and return a list of dealers.
  */
-export const dealerList = api({ expose: true, auth: true, method: 'GET', path: '/dealer' }, async (): Promise<DealerListResponse> => {
-  // check authorization
-  const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
-    operationCode: 'dealerList',
-    requestingUserRole: getAuthData()?.userRole,
-  });
-  if (!authorizationCheck.canBePerformed) {
-    // user not allowed to get details
-    throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+export const dealerList = api(
+  { expose: true, auth: true, method: 'GET', path: '/dealer' },
+  async (request: DealerListRequest): Promise<DealerListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'dealerList',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+    }
+    // load dealers
+    const dealers = await orm<DealerList>('Dealer')
+      .join('DealerEmail', 'DealerEmail.dealerId', 'Dealer.id')
+      .join('Email', 'Email.id', 'DealerEmail.emailId')
+      .leftOuterJoin('UserDealer', 'UserDealer.dealerId', 'Dealer.id')
+      .select('Dealer.id as id', 'Dealer.companyName as companyName', 'Email.email as email', 'Dealer.vatNumber as vatNumber')
+      .where((whereBuilder) => {
+        whereBuilder.where('DealerEmail.default', true);
+        if (request.userId) {
+          // filter by user
+          whereBuilder.where('UserDealer.userId', request.userId);
+        }
+      })
+      .orderBy('Dealer.companyName');
+    // return dealers
+    return {
+      dealers: DbUtility.removeNullFieldsList(dealers),
+    };
   }
-  // TODO add search filters
-  // load dealers
-  const dealers = await orm<DealerList>('Dealer')
-    .join('DealerEmail', 'DealerEmail.dealerId', 'Dealer.id')
-    .join('Email', 'Email.id', 'DealerEmail.emailId')
-    .select('Dealer.id as id', 'Dealer.companyName as companyName', 'Email.email as email', 'Dealer.vatNumber as vatNumber')
-    .where('DealerEmail.default', true)
-    .orderBy('Dealer.companyName');
-  // return users
-  return {
-    dealers: DbUtility.removeNullFieldsList(dealers),
-  };
-}); // dealerList
+); // dealerList
 
 /**
  * Load dealer details.
