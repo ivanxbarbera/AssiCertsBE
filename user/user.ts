@@ -553,7 +553,17 @@ export const userList = api({ expose: true, auth: true, method: 'GET', path: '/u
   const users = await orm<UserList>('User')
     .join('UserEmail', 'UserEmail.userId', 'User.id')
     .join('Email', 'Email.id', 'UserEmail.emailId')
-    .select('User.id as id', 'User.role as role', 'Email.email as email', 'User.name as name', 'User.surname as surname', 'User.disabled as disabled')
+    .leftOuterJoin('UserDealer', 'UserDealer.userId', 'User.id')
+    .leftOuterJoin('Dealer', 'Dealer.id', 'UserDealer.dealerId')
+    .select(
+      'User.id as id',
+      'User.role as role',
+      'Email.email as email',
+      'User.name as name',
+      'User.surname as surname',
+      'User.disabled as disabled',
+      'Dealer.companyName as dealerCompanyName'
+    )
     .where('UserEmail.authentication', true)
     .orderBy('User.surname')
     .orderBy('User.name');
