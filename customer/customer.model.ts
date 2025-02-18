@@ -15,7 +15,7 @@ export interface Customer {
   // customer fiscal code
   fiscalCode: string;
   // customer date of birth
-  dateOfBirth: boolean;
+  dateOfBirth: Date;
 } // Customer
 
 /**
@@ -42,7 +42,7 @@ export interface CustomerResponse {
   // customer fiscal code
   fiscalCode: string;
   // customer date of birth
-  dateOfBirth: boolean;
+  dateOfBirth: Date;
   // customer emails
   emails: EmailResponse[];
   // customer addresses
@@ -64,7 +64,7 @@ export interface CustomerEditRequest {
   // customer fiscal code
   fiscalCode: string;
   // customer date of birth
-  dateOfBirth: boolean;
+  dateOfBirth: Date;
   // customer emails
   emails: EmailEditRequest[];
   // customer addresses
