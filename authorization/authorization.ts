@@ -120,6 +120,7 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
     (request.operationCode == 'authorizationList' ||
       request.operationCode == 'emailTypeList' ||
       request.operationCode == 'emailTypeDetail' ||
+      request.operationCode == 'phoneTypeDetail' ||
       request.operationCode == 'addressToponymDetail' ||
       request.operationCode == 'addressTypeList' ||
       request.operationCode == 'addressTypeDetail' ||
@@ -136,6 +137,7 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       request.operationCode == 'customerDetail' ||
       request.operationCode == 'customerUpdate' ||
       request.operationCode == 'customerInsert' ||
+      request.operationCode == 'phoneListByCustomer' ||
       request.operationCode == 'emailListByCustomer' ||
       request.operationCode == 'addressListByCustomer') &&
     request.requestingUserRole

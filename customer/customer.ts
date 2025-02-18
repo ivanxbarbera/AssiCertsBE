@@ -8,10 +8,19 @@ import { AuthenticationData } from '../authentication/authentication.model';
 import locz from '../common/i18n';
 import { DbUtility } from '../common/utility/db.utility';
 import { GeneralUtility } from '../common/utility/general.utility';
-import { EmailListResponse, AddressListResponse } from '../user/address/address.model';
+import { EmailListResponse, AddressListResponse, PhoneListResponse } from '../user/address/address.model';
 import { AuthorizationOperationResponse } from '../authorization/authorization.model';
 import { authorizationOperationUserCheck } from '../authorization/authorization';
-import { addressListByCustomer, addressUserUpdate, emailListByCustomer, emailUserUpdate } from '../user/address/address';
+import {
+  addressCustomerUpdate,
+  addressListByCustomer,
+  addressUserUpdate,
+  emailCustomerUpdate,
+  emailListByCustomer,
+  emailUserUpdate,
+  phoneCustomerUpdate,
+  phoneListByCustomer,
+} from '../user/address/address';
 
 /**
  * Search for customers.
@@ -36,7 +45,13 @@ export const customerList = api({ expose: true, auth: true, method: 'GET', path:
     .join('CustomerUser', 'CustomerUser.customerId', 'Customer.id')
     .join('CustomerEmail', 'CustomerEmail.customerId', 'Customer.id')
     .join('Email', 'Email.id', 'CustomerEmail.emailId')
-    .select('Customer.id as id', 'Email.email as email', 'Customer.firstName as firstName', 'Customer.lastName as lastName')
+    .select(
+      'Customer.id as id',
+      'Customer.firstName as firstName',
+      'Customer.lastName as lastName',
+      'Customer.fiscalCode as fiscalCode',
+      'Email.email as email'
+    )
     .where('CustomerUser.userId', userId)
     .where('CustomerEmail.default', true)
     .orderBy('Customer.lastName')
@@ -69,8 +84,15 @@ export const customerDetail = api(
     const customer = await orm<CustomerResponse>('Customer')
       .join('CustomerUser', 'CustomerUser.customerId', 'Customer.id')
       .where('CustomerUser.userId', userId)
-      .where('id', request.id)
-      .first();
+      .where('Customer.id', request.id)
+      .first(
+        'Customer.id as id',
+        'Customer.firstName as firstName',
+        'Customer.middleName as middleName',
+        'Customer.lastName as lastName',
+        'Customer.fiscalCode as fiscalCode',
+        'Customer.dateOfBirth as dateOfBirth'
+      );
     if (!customer) {
       // customer not found
       throw APIError.notFound(locz().CUSTOMER_CUSTOMER_NOT_FOUND());
@@ -81,6 +103,9 @@ export const customerDetail = api(
     // load customer addresses
     const addressList: AddressListResponse = await addressListByCustomer({ entityId: customer.id });
     customer.addresses = addressList.addresses;
+    // load customer phones
+    const phonesList: PhoneListResponse = await phoneListByCustomer({ entityId: customer.id });
+    customer.phones = phonesList.phones;
     // return customer
     return DbUtility.removeNullFields(customer);
   }
@@ -117,6 +142,7 @@ export const customerInsert = api(
     // remove unnecessary fields
     delete (newCustomer as any)['addresses'];
     delete (newCustomer as any)['emails'];
+    delete (newCustomer as any)['phones'];
     // insert customer
     const customerRst = await orm('Customer').insert(newCustomer).returning('id');
     const id = customerRst[0].id;
@@ -128,10 +154,13 @@ export const customerInsert = api(
     await orm('CustomerUser').insert(newCustomerUser);
     // insert emails
     const customerEmails = request.emails;
-    await emailUserUpdate({ entityId: id, emails: customerEmails });
+    await emailCustomerUpdate({ entityId: id, emails: customerEmails });
     // insert addresses
     const customerAddresses = request.addresses;
-    await addressUserUpdate({ entityId: id, addresses: customerAddresses });
+    await addressCustomerUpdate({ entityId: id, addresses: customerAddresses });
+    // insert phones
+    const customerPhones = request.phones;
+    await phoneCustomerUpdate({ entityId: id, phones: customerPhones });
     // return created customer
     return customerDetail({ id });
   }
@@ -178,6 +207,9 @@ export const customerUpdate = api(
     // update addresses
     const customerAddresses = request.addresses;
     await addressUserUpdate({ entityId: request.id, addresses: customerAddresses });
+    // update phones
+    const customerPhones = request.phones;
+    await phoneCustomerUpdate({ entityId: request.id, phones: customerPhones });
     // return updated customer
     return customerDetail({ id: resutlQry[0].id });
   }

@@ -33,6 +33,14 @@ import {
   AddressListRequest,
   AddressUpdateRequest,
   EmailUpdateRequest,
+  PhoneTypeRequest,
+  PhoneTypeResponse,
+  PhoneEditRequest,
+  PhoneUpdateRequest,
+  Phone,
+  PhoneListRequest,
+  PhoneListResponse,
+  PhoneResponse,
 } from './address.model';
 import { AuthorizationOperationResponse } from '../../authorization/authorization.model';
 import { authorizationOperationUserCheck } from '../../authorization/authorization';
@@ -46,7 +54,7 @@ import { systemParametersUserCheck } from '../../system/system';
 import { municipalityDetail } from '../../archive/municipality/municipality';
 import { CertificateAddress, CertificateResponse } from '../../certificate/certificate.model';
 import { DealerAddress, DealerEmail } from '../../dealer/dealer.model';
-import { CustomerAddress, CustomerEmail } from '../../customer/customer.model';
+import { CustomerAddress, CustomerEmail, CustomerPhone } from '../../customer/customer.model';
 
 /**
  * Address toponym list.
@@ -117,6 +125,32 @@ export const phoneTypeList = api(
     return { phoneTypes: DbUtility.removeNullFieldsList(phoneTypes) };
   }
 ); // phoneTypeList
+
+/**
+ * Load phone type details.
+ */
+export const phoneTypeDetail = api(
+  { expose: true, auth: true, method: 'GET', path: '/user/address/phoneType/:id' },
+  async (request: PhoneTypeRequest): Promise<PhoneTypeResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'phoneTypeDetail',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+    }
+    // load phone type
+    const phoneType = await orm<PhoneTypeResponse>('PhoneType').first().where('id', request.id);
+    if (!phoneType) {
+      // phone type not found
+      throw APIError.notFound(locz().USER_ADDRESS_PHONETYPE_NOT_FOUND());
+    }
+    // return phone type
+    return DbUtility.removeNullFields(phoneType);
+  }
+); //phoneTypeDetail
 
 /**
  * Email type list.
@@ -947,7 +981,7 @@ export const emailListByCustomer = api(
   async (request: EmailListRequest): Promise<EmailListResponse> => {
     // check authorization
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
-      operationCode: 'emailListByCustonmer',
+      operationCode: 'emailListByCustomer',
       requestingUserRole: getAuthData()?.userRole,
     });
     if (!authorizationCheck.canBePerformed) {
@@ -1174,3 +1208,126 @@ export const addressCustomerUpdate = api(
     );
   }
 ); // addressCustomerUpdate
+
+/**
+ * List phone associated to a given customer.
+ */
+export const phoneListByCustomer = api(
+  { expose: true, auth: true, method: 'GET', path: '/user/address/phone/customer/:entityId' },
+  async (request: PhoneListRequest): Promise<PhoneListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'phoneListByCustomer',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get data
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
+    // load customer phones
+    const phonesRst = await orm('Phone')
+      .join('CustomerPhone', 'CustomerPhone.phoneId', 'Phone.id')
+      .where('CustomerPhone.customerId', request.entityId)
+      .select(
+        'Phone.id as id',
+        'Phone.typeId as typeId',
+        'Phone.internationalPrefix as internationalPrefix',
+        'Phone.prefix as prefix',
+        'Phone.number as number',
+        'CustomerPhone.default as default'
+      );
+    const phones: PhoneResponse[] = await Promise.all(
+      phonesRst.map(async (phone: any) => {
+        const phoneResponse: PhoneResponse = {
+          id: phone.id,
+          internationalPrefix: phone.internationalPrefix,
+          prefix: phone.prefix,
+          number: phone.number,
+          type: await phoneTypeDetail({ id: phone.typeId }),
+          default: phone.default,
+        };
+        return phoneResponse;
+      })
+    );
+    // return customer phone
+    return { phones: DbUtility.removeNullFieldsList(phones) };
+  }
+); // phoneListByCustomer
+
+/**
+ * Update phone of the given customer
+ */
+export const phoneCustomerUpdate = api(
+  { expose: false, auth: true, method: 'PATCH', path: '/user/address/phone/customer' },
+  async (request: PhoneUpdateRequest): Promise<void> => {
+    // delete removed phone
+    const phonesIds: number[] = request.phones
+      .map((phones: PhoneEditRequest) => {
+        return phones.id ?? 0;
+      })
+      .filter((id: number) => {
+        return id !== 0;
+      });
+    // load removed phones
+    const deletedPhoneIdRst = await orm<{ id: number }>('Phone')
+      .join('CustomerPhone', 'Phone.id', 'CustomerPhone.phoneId')
+      .where('CustomerPhone.customerId', request.entityId)
+      .whereNotIn('Phone.id', phonesIds)
+      .select('Phone.id as id');
+    const deletedPhoneIds: number[] = deletedPhoneIdRst.map((item) => {
+      return item.id;
+    });
+    if (deletedPhoneIds.length > 0) {
+      // delete customer phones
+      await orm('CustomerPhone').where('customerId', request.entityId).whereIn('phoneId', deletedPhoneIds).delete();
+      // delete phones
+      await orm('Phone').whereIn('id', deletedPhoneIds).delete();
+    }
+    // update phones
+    const customerPhones = request.phones;
+    await Promise.all(
+      customerPhones.map(async (customerPhone: PhoneEditRequest) => {
+        if (customerPhone.id) {
+          // phone already exist
+          // load phone
+          const phoneRst = await orm('Phone')
+            .join('CustomerPhone', 'Phone.id', 'CustomerPhone.phoneId')
+            .first('Phone.id as phoneId', 'CustomerPhone.id as customerPhoneId')
+            .where('Phone.id', customerPhone.id)
+            .andWhere('CustomerPhone.customerId', request.entityId);
+          if (!phoneRst) {
+            // phone does not exists
+            throw APIError.notFound(locz().CUSTOMER_PHONE_NOT_FOUND({ id: customerPhone.id }));
+          }
+          // update phone
+          await orm('Phone')
+            .update({
+              internationalPrefix: customerPhone.internationalPrefix,
+              prefix: customerPhone.prefix,
+              number: customerPhone.number,
+              typeId: customerPhone.typeId,
+            })
+            .where('id', phoneRst.phoneId);
+        } else {
+          // phone does not exists
+          // insert phone
+          const newPhone: Phone = {
+            internationalPrefix: customerPhone.internationalPrefix,
+            prefix: customerPhone.prefix,
+            number: customerPhone.number,
+            typeId: customerPhone.typeId,
+          };
+          const phoneRst = await orm('Phone').insert(newPhone).returning('id');
+          const phoneId = phoneRst[0].id;
+          // associate phone to customer
+          const newCustomerPhone: CustomerPhone = {
+            customerId: request.entityId,
+            phoneId: phoneId,
+            default: customerPhone.default,
+          };
+          await orm('CustomerPhone').insert(newCustomerPhone);
+        }
+      })
+    );
+  }
+); // phoneCustomerUpdate

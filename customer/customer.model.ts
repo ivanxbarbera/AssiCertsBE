@@ -1,4 +1,4 @@
-import { EmailEditRequest, EmailResponse, AddressResponse, AddressEditRequest } from '../user/address/address.model';
+import { EmailEditRequest, EmailResponse, AddressResponse, AddressEditRequest, PhoneEditRequest, PhoneResponse } from '../user/address/address.model';
 
 /**
  * Custoner data.
@@ -47,6 +47,8 @@ export interface CustomerResponse {
   emails: EmailResponse[];
   // customer addresses
   addresses: AddressResponse[];
+  // customer phones
+  phones: PhoneResponse[];
 } // CustomerResponse
 
 /**
@@ -69,6 +71,8 @@ export interface CustomerEditRequest {
   emails: EmailEditRequest[];
   // customer addresses
   addresses: AddressEditRequest[];
+  // customer phones
+  phones: PhoneEditRequest[];
 } // CustomerEditRequest
 
 /**
@@ -133,3 +137,17 @@ export interface CustomerAddress {
   // address identifier
   addressId: number;
 } // CustomerAddress
+
+/**
+ * Customer-Phone Association
+ */
+export interface CustomerPhone {
+  // customer phone unique identifier
+  id?: number;
+  // customer identifier
+  customerId: number;
+  // phone identifier
+  phoneId: number;
+  // default email
+  default: boolean;
+} // CustomerPhone
