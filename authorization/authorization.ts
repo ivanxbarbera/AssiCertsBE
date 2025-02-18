@@ -212,6 +212,7 @@ export const authorizationList = api(
         visibility: AuthorizationVisibility.Visible,
       },
       { name: 'Municipality', code: 'archive.municipality', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
+      { name: 'Customer', code: 'archive.customer', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
       { name: 'Dealer', code: 'archive.dealer', userRole: UserRole.Administrator, visibility: AuthorizationVisibility.Visible },
       { name: 'User', code: 'archive.user', userRole: UserRole.Administrator, visibility: AuthorizationVisibility.Visible },
       { name: 'Administration Area', code: 'administration', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
