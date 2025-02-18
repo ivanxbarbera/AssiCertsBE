@@ -131,7 +131,13 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       request.operationCode == 'certificateList' ||
       request.operationCode == 'certificateDetail' ||
       request.operationCode == 'certificateUpdate' ||
-      request.operationCode == 'certificateInsert') &&
+      request.operationCode == 'certificateInsert' ||
+      request.operationCode == 'customerList' ||
+      request.operationCode == 'customerDetail' ||
+      request.operationCode == 'customerUpdate' ||
+      request.operationCode == 'customerInsert' ||
+      request.operationCode == 'emailListByCustomer' ||
+      request.operationCode == 'addressListByCustomer') &&
     request.requestingUserRole
   ) {
     return {

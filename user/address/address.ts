@@ -46,6 +46,7 @@ import { systemParametersUserCheck } from '../../system/system';
 import { municipalityDetail } from '../../archive/municipality/municipality';
 import { CertificateAddress, CertificateResponse } from '../../certificate/certificate.model';
 import { DealerAddress, DealerEmail } from '../../dealer/dealer.model';
+import { CustomerAddress, CustomerEmail } from '../../customer/customer.model';
 
 /**
  * Address toponym list.
@@ -937,3 +938,239 @@ export const addressDealerUpdate = api(
     );
   }
 ); // addressDealerUpdate
+
+/**
+ * List email associated to a given customer.
+ */
+export const emailListByCustomer = api(
+  { expose: true, auth: true, method: 'GET', path: '/user/address/email/customer/:entityId' },
+  async (request: EmailListRequest): Promise<EmailListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'emailListByCustonmer',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get data
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
+    // load customer emails
+    const emailsRst = await orm('Email')
+      .join('CustomerEmail', 'CustomerEmail.emailId', 'Email.id')
+      .where('CustomerEmail.customerId', request.entityId)
+      .select('Email.id as id', 'Email.typeId as typeId', 'Email.email as email', 'CustomerEmail.default as default');
+    const emails: EmailResponse[] = await Promise.all(
+      emailsRst.map(async (email: any) => {
+        const emailResponse: EmailResponse = {
+          id: email.id,
+          email: email.email,
+          type: await emailTypeDetail({ id: email.typeId }),
+          default: email.default,
+          authentication: false,
+        };
+        return emailResponse;
+      })
+    );
+    // return customer email
+    return { emails: DbUtility.removeNullFieldsList(emails) };
+  }
+); // emailListByCustomer
+
+/**
+ * List address associated to a given customer.
+ */
+export const addressListByCustomer = api(
+  { expose: true, auth: true, method: 'GET', path: '/user/address/address/customer/:entityId' },
+  async (request: AddressListRequest): Promise<AddressListResponse> => {
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'addressListByCustomer',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get data
+      throw APIError.permissionDenied(locz().SYSTEM_USER_NOT_ALLOWED());
+    }
+    // load customer addresses
+    const addressRst = await orm('Address')
+      .join('CustomerAddress', 'CustomerAddress.addressId', 'Address.id')
+      .where('CustomerAddress.customerId', request.entityId)
+      .select(
+        'Address.id as id',
+        'Address.typeId as typeId',
+        'Address.toponymId as toponymId',
+        'Address.address as address',
+        'Address.houseNumber as houseNumber',
+        'Address.postalCode as postalCode',
+        'Address.municipalityId as municipalityId'
+      );
+    const addresses: AddressResponse[] = await Promise.all(
+      addressRst.map(async (address: any) => {
+        const addressList: AddressResponse = {
+          id: address.id,
+          type: await addressTypeDetail({ id: address.typeId }),
+          toponym: await addressToponymDetail({ id: address.toponymId }),
+          address: address.address,
+          houseNumber: address.houseNumber,
+          postalCode: address.postalCode,
+          municipality: await municipalityDetail({ id: address.municipalityId }),
+        };
+        return addressList;
+      })
+    );
+    // return customer address
+    return { addresses: DbUtility.removeNullFieldsList(addresses) };
+  }
+); // addressListByCustomer
+
+/**
+ * Update email of the given customer
+ */
+export const emailCustomerUpdate = api(
+  { expose: false, auth: true, method: 'PATCH', path: '/user/address/email/customer' },
+  async (request: EmailUpdateRequest): Promise<void> => {
+    // delete removed email
+    const emailsIds: number[] = request.emails
+      .map((emails: EmailEditRequest) => {
+        return emails.id ?? 0;
+      })
+      .filter((id: number) => {
+        return id !== 0;
+      });
+    // load removed emails
+    const deletedEmailIdRst = await orm<{ id: number }>('Email')
+      .join('CustomerEmail', 'Email.id', 'CustomerEmail.emailId')
+      .where('CustomerEmail.customerId', request.entityId)
+      .whereNotIn('Email.id', emailsIds)
+      .select('Email.id as id');
+    const deletedEmailIds: number[] = deletedEmailIdRst.map((item) => {
+      return item.id;
+    });
+    if (deletedEmailIds.length > 0) {
+      // delete customer emails
+      await orm('CustomerEmail').where('customerId', request.entityId).whereIn('emailId', deletedEmailIds).delete();
+      // delete emails
+      await orm('Email').whereIn('id', deletedEmailIds).delete();
+    }
+    // update emails
+    const customerEmails = request.emails;
+    await Promise.all(
+      customerEmails.map(async (customerEmail: EmailEditRequest) => {
+        if (customerEmail.id) {
+          // email already exist
+          // load email
+          const emailRst = await orm('Email')
+            .join('CustomerEmail', 'Email.id', 'CustomerEmail.emailId')
+            .first('Email.id as emailId', 'CustomerEmail.id as customerEmailId')
+            .where('Email.id', customerEmail.id)
+            .andWhere('CustomerEmail.customerId', request.entityId);
+          if (!emailRst) {
+            // email does not exists
+            throw APIError.notFound(locz().CUSTOMER_EMAIL_NOT_FOUND({ id: customerEmail.id }));
+          }
+          // update email
+          await orm('Email').update({ email: customerEmail.email, typeId: customerEmail.typeId }).where('id', emailRst.emailId);
+          // update customer email association
+          await orm('CustomerEmail').update({ default: customerEmail.default }).where('id', emailRst.custmerEmailId);
+        } else {
+          // email does not exists
+          // insert email
+          const newEmail: Email = {
+            email: customerEmail.email,
+            typeId: customerEmail.typeId,
+          };
+          const emailRst = await orm('Email').insert(newEmail).returning('id');
+          const emailId = emailRst[0].id;
+          // associate email to customer
+          const newCustomerEmail: CustomerEmail = {
+            customerId: request.entityId,
+            emailId: emailId,
+            default: customerEmail.default,
+          };
+          await orm('CustomerEmail').insert(newCustomerEmail);
+        }
+      })
+    );
+  }
+); // emailCustomerUpdate
+
+/**
+ * Update addresses of the given customer.
+ */
+export const addressCustomerUpdate = api(
+  { expose: false, auth: true, method: 'PATCH', path: '/user/address/address/customer' },
+  async (request: AddressUpdateRequest): Promise<void> => {
+    // delete removed addresses
+    const addressIds: number[] = request.addresses
+      .map((address: AddressEditRequest) => {
+        return address.id ?? 0;
+      })
+      .filter((id: number) => {
+        return id !== 0;
+      });
+    // load removed addresses
+    const deletedAddressIdRst = await orm<{ id: number }>('Address')
+      .join('CustomerAddress', 'Address.id', 'CustomerAddress.addressId')
+      .where('CustomerAddress.customerId', request.entityId)
+      .whereNotIn('Address.id', addressIds)
+      .select('Address.id as id');
+    const deletedAddressIds: number[] = deletedAddressIdRst.map((item) => {
+      return item.id;
+    });
+    if (deletedAddressIds.length > 0) {
+      // delete customer address
+      await orm('CustomerAddress').where('customerId', request.entityId).whereIn('addressId', deletedAddressIds).delete();
+      // delete addresses
+      await orm('Address').whereIn('id', deletedAddressIds).delete();
+    }
+    // update addresses
+    const customerAddresses = request.addresses;
+    await Promise.all(
+      customerAddresses.map(async (customerAddress: AddressEditRequest) => {
+        if (customerAddress.id) {
+          // address already exist
+          // load address
+          const addressRst = await orm('Address')
+            .join('CustomerAddress', 'Address.id', 'CustomerAddress.addressId')
+            .first('Address.id as addressId', 'CustomerAddress.id as customerAddressId')
+            .where('Address.id', customerAddress.id)
+            .andWhere('CustomerAddress.customerId', request.entityId);
+          if (!addressRst) {
+            // address does not exists
+            throw APIError.notFound(locz().CUSTOMER_ADDRESS_NOT_FOUND({ id: customerAddress.id }));
+          }
+          // update address
+          await orm('Address')
+            .update({
+              address: customerAddress.address,
+              houseNumber: customerAddress.houseNumber,
+              postalCode: customerAddress.postalCode,
+              typeId: customerAddress.typeId,
+              toponymId: customerAddress.toponymId,
+              municipalityId: customerAddress.municipalityId,
+            })
+            .where('id', addressRst.addressId);
+        } else {
+          // address does not exists
+          // insert address
+          const newAddress: Address = {
+            address: customerAddress.address,
+            houseNumber: customerAddress.houseNumber,
+            postalCode: customerAddress.postalCode,
+            typeId: customerAddress.typeId,
+            toponymId: customerAddress.toponymId,
+            municipalityId: customerAddress.municipalityId,
+          };
+          const addressRst = await orm('Address').insert(newAddress).returning('id');
+          const addressId = addressRst[0].id;
+          // associate address to customer
+          const newCustomerAddress: CustomerAddress = {
+            customerId: request.entityId,
+            addressId: addressId,
+          };
+          await orm('CustomerAddress').insert(newCustomerAddress);
+        }
+      })
+    );
+  }
+); // addressCustomerUpdate

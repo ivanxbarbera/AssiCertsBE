@@ -1,0 +1,184 @@
+// libraries
+import { api, APIError } from 'encore.dev/api';
+import { getAuthData } from '~encore/auth';
+// application modules
+import { Customer, CustomerList, CustomerListResponse, CustomerRequest, CustomerResponse, CustomerEditRequest, CustomerUser } from './customer.model';
+import { orm } from '../common/db/db';
+import { AuthenticationData } from '../authentication/authentication.model';
+import locz from '../common/i18n';
+import { DbUtility } from '../common/utility/db.utility';
+import { GeneralUtility } from '../common/utility/general.utility';
+import { EmailListResponse, AddressListResponse } from '../user/address/address.model';
+import { AuthorizationOperationResponse } from '../authorization/authorization.model';
+import { authorizationOperationUserCheck } from '../authorization/authorization';
+import { addressListByCustomer, addressUserUpdate, emailListByCustomer, emailUserUpdate } from '../user/address/address';
+
+/**
+ * Search for customers.
+ * Apply filters and return a list of customers.
+ */
+export const customerList = api({ expose: true, auth: true, method: 'GET', path: '/customer' }, async (): Promise<CustomerListResponse> => {
+  // get authentication data
+  const authenticationData: AuthenticationData = getAuthData()!;
+  const userId = parseInt(authenticationData.userID);
+  // check authorization
+  const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+    operationCode: 'customerList',
+    requestingUserRole: authenticationData.userRole,
+  });
+  if (!authorizationCheck.canBePerformed) {
+    // user not allowed to get details
+    throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+  }
+  // TODO add search filters
+  // load customers
+  const customers = await orm<CustomerList>('Customer')
+    .join('CustomerUser', 'CustomerUser.customerId', 'Customer.id')
+    .join('CustomerEmail', 'CustomerEmail.customerId', 'Customer.id')
+    .join('Email', 'Email.id', 'CustomerEmail.emailId')
+    .select('Customer.id as id', 'Email.email as email', 'Customer.firstName as firstName', 'Customer.lastName as lastName')
+    .where('CustomerUser.userId', userId)
+    .where('CustomerEmail.default', true)
+    .orderBy('Customer.lastName')
+    .orderBy('Customer.firstName');
+  // return customers
+  return {
+    customers: DbUtility.removeNullFieldsList(customers),
+  };
+}); // customerList
+
+/**
+ * Load customer details.
+ */
+export const customerDetail = api(
+  { expose: true, auth: true, method: 'GET', path: '/customer/:id' },
+  async (request: CustomerRequest): Promise<CustomerResponse> => {
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'customerDetail',
+      requestingUserRole: authenticationData.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+    }
+    // load customer
+    const customer = await orm<CustomerResponse>('Customer')
+      .join('CustomerUser', 'CustomerUser.customerId', 'Customer.id')
+      .where('CustomerUser.userId', userId)
+      .where('id', request.id)
+      .first();
+    if (!customer) {
+      // customer not found
+      throw APIError.notFound(locz().CUSTOMER_CUSTOMER_NOT_FOUND());
+    }
+    // load customer emails
+    const emailList: EmailListResponse = await emailListByCustomer({ entityId: customer.id });
+    customer.emails = emailList.emails;
+    // load customer addresses
+    const addressList: AddressListResponse = await addressListByCustomer({ entityId: customer.id });
+    customer.addresses = addressList.addresses;
+    // return customer
+    return DbUtility.removeNullFields(customer);
+  }
+); // customerDetail
+
+/**
+ * Insert new customer.
+ */
+export const customerInsert = api(
+  { expose: true, auth: true, method: 'POST', path: '/customer' },
+  async (request: CustomerEditRequest): Promise<CustomerResponse> => {
+    if (request.id) {
+      // entity id not allowed in insert mode
+      // TODO MIC extends to other insert
+      throw APIError.permissionDenied(locz().COMMON_ID_NOT_ALLOWED_INSERT());
+    }
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'customerInsert',
+      requestingUserRole: authenticationData.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+    }
+    // add internal fields
+    // TODO MIC evaluate using filterObjectByInterface
+    const newCustomer: Customer = {
+      ...request,
+    };
+    // remove unnecessary fields
+    delete (newCustomer as any)['addresses'];
+    delete (newCustomer as any)['emails'];
+    // insert customer
+    const customerRst = await orm('Customer').insert(newCustomer).returning('id');
+    const id = customerRst[0].id;
+    // associate customer to user
+    const newCustomerUser: CustomerUser = {
+      customerId: id,
+      userId,
+    };
+    await orm('CustomerUser').insert(newCustomerUser);
+    // insert emails
+    const customerEmails = request.emails;
+    await emailUserUpdate({ entityId: id, emails: customerEmails });
+    // insert addresses
+    const customerAddresses = request.addresses;
+    await addressUserUpdate({ entityId: id, addresses: customerAddresses });
+    // return created customer
+    return customerDetail({ id });
+  }
+); // customerInsert
+
+/**
+ * Update existing customer.
+ */
+export const customerUpdate = api(
+  { expose: true, auth: true, method: 'PATCH', path: '/customer/:id' },
+  async (request: CustomerEditRequest): Promise<CustomerResponse> => {
+    if (!request.id) {
+      // entity id required in edit mode
+      // TODO MIC extends to other edit
+      throw APIError.permissionDenied(locz().COMMON_ID_REQUIRED_UPDATE());
+    }
+    // check authorization
+    const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
+      operationCode: 'customerUpdate',
+      requestingUserRole: getAuthData()?.userRole,
+    });
+    if (!authorizationCheck.canBePerformed) {
+      // customer not allowed to get details
+      throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+    }
+    // load customer
+    const customer = await orm<Customer>('Customer').first().where('id', request.id);
+    if (!customer) {
+      // customer not found
+      throw APIError.notFound(locz().CUSTOMER_CUSTOMER_NOT_FOUND());
+    }
+    // update customer
+    let updateCustomer: Customer = GeneralUtility.filterObjectByInterface(request, customer, ['id']);
+    const resutlQry = await orm('Customer').where('id', request.id).update(updateCustomer).returning('id');
+    // load customer-dealer association
+    const customerDealers = await orm<Customer>('CustomerDealer').where('customerId', request.id).select('id');
+    if (customerDealers.length > 1) {
+      // error sending email
+      throw APIError.unavailable(locz().USER_DEALER_TOO_MANY());
+    }
+    // update emails
+    const customerEmails = request.emails;
+    await emailUserUpdate({ entityId: request.id, emails: customerEmails });
+    // update addresses
+    const customerAddresses = request.addresses;
+    await addressUserUpdate({ entityId: request.id, addresses: customerAddresses });
+    // return updated customer
+    return customerDetail({ id: resutlQry[0].id });
+  }
+); // customerUpdate

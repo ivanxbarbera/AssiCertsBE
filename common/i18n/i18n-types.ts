@@ -94,6 +94,20 @@ type RootTranslation = {
 	 */
 	COMMON_ID_REQUIRED_UPDATE: string
 	/**
+	 * C​l​i​e​n​t​e​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	CUSTOMER_CUSTOMER_NOT_FOUND: string
+	/**
+	 * L​a​ ​m​a​i​l​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
+	 * @param {number} id
+	 */
+	CUSTOMER_EMAIL_NOT_FOUND: RequiredParams<'id'>
+	/**
+	 * L​'​i​n​d​i​r​i​z​z​o​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
+	 * @param {number} id
+	 */
+	CUSTOMER_ADDRESS_NOT_FOUND: RequiredParams<'id'>
+	/**
 	 * C​o​n​c​e​s​s​i​o​n​a​r​i​o​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	DEALER_DEALER_NOT_FOUND: string
@@ -470,6 +484,18 @@ export type TranslationFunctions = {
 	 * ID obbligatorio in modifica
 	 */
 	COMMON_ID_REQUIRED_UPDATE: () => LocalizedString
+	/**
+	 * Cliente non trovato
+	 */
+	CUSTOMER_CUSTOMER_NOT_FOUND: () => LocalizedString
+	/**
+	 * La mail con ID {id} non esiste
+	 */
+	CUSTOMER_EMAIL_NOT_FOUND: (arg: { id: number }) => LocalizedString
+	/**
+	 * L'indirizzo con ID {id} non esiste
+	 */
+	CUSTOMER_ADDRESS_NOT_FOUND: (arg: { id: number }) => LocalizedString
 	/**
 	 * Concessionario non trovato
 	 */
