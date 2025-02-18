@@ -73,10 +73,6 @@ type RootTranslation = {
 	 */
 	AUTHENTICATION_USER_NOT_FOUND: string
 	/**
-	 * I​l​ ​c​e​r​t​i​f​i​c​a​t​o​ ​d​e​v​e​ ​a​v​e​r​e​ ​u​n​ ​i​n​d​i​r​i​z​z​o
-	 */
-	CERTIFICATE_ADDRESS_WRONG__NUMBER: string
-	/**
 	 * L​'​i​n​d​i​r​i​z​z​o​ ​d​e​l​ ​c​e​r​t​i​f​i​c​a​t​o​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
 	 * @param {number} id
 	 */
@@ -85,6 +81,10 @@ type RootTranslation = {
 	 * C​e​r​t​i​f​i​c​a​t​o​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	CERTIFICATE_CERTIFICATE_NOT_FOUND: string
+	/**
+	 * I​l​ ​c​e​r​t​i​f​i​c​a​t​o​ ​d​e​v​e​ ​a​v​e​r​e​ ​u​n​o​ ​e​ ​u​n​ ​s​o​l​o​ ​c​l​i​e​n​t​e
+	 */
+	CERTIFICATE_CUSTOMER_WRONG_NUMBER: string
 	/**
 	 * I​D​ ​n​o​n​ ​c​o​n​s​e​n​t​i​t​o​ ​i​n​ ​i​n​s​e​r​i​m​e​n​t​o
 	 */
@@ -474,10 +474,6 @@ export type TranslationFunctions = {
 	 */
 	AUTHENTICATION_USER_NOT_FOUND: () => LocalizedString
 	/**
-	 * Il certificato deve avere un indirizzo
-	 */
-	CERTIFICATE_ADDRESS_WRONG__NUMBER: () => LocalizedString
-	/**
 	 * L'indirizzo del certificato con ID {id} non esiste
 	 */
 	CERTIFICATE_ADDRESS_NOT_FOUND: (arg: { id: number }) => LocalizedString
@@ -485,6 +481,10 @@ export type TranslationFunctions = {
 	 * Certificato non trovato
 	 */
 	CERTIFICATE_CERTIFICATE_NOT_FOUND: () => LocalizedString
+	/**
+	 * Il certificato deve avere uno e un solo cliente
+	 */
+	CERTIFICATE_CUSTOMER_WRONG_NUMBER: () => LocalizedString
 	/**
 	 * ID non consentito in inserimento
 	 */
