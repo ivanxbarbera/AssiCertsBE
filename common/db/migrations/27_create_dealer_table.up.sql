@@ -33,8 +33,8 @@ CREATE TABLE public."DealerEmail" (
 );
 
 ALTER TABLE public."DealerEmail"
-ADD CONSTRAINT "FkUedealerId"
-FOREIGN KEY ("dealerId") REFERENCES public."User"("id")
+ADD CONSTRAINT "FkUeDealerId"
+FOREIGN KEY ("dealerId") REFERENCES public."Dealer"("id")
 ON UPDATE CASCADE
 ON DELETE RESTRICT
 ;

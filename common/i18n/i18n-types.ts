@@ -94,6 +94,25 @@ type RootTranslation = {
 	 */
 	COMMON_ID_REQUIRED_UPDATE: string
 	/**
+	 * C​l​i​e​n​t​e​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	CUSTOMER_CUSTOMER_NOT_FOUND: string
+	/**
+	 * L​'​i​n​d​i​r​i​z​z​o​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
+	 * @param {number} id
+	 */
+	CUSTOMER_ADDRESS_NOT_FOUND: RequiredParams<'id'>
+	/**
+	 * L​a​ ​m​a​i​l​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
+	 * @param {number} id
+	 */
+	CUSTOMER_EMAIL_NOT_FOUND: RequiredParams<'id'>
+	/**
+	 * I​l​ ​t​e​l​e​f​o​n​o​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
+	 * @param {number} id
+	 */
+	CUSTOMER_PHONE_NOT_FOUND: RequiredParams<'id'>
+	/**
 	 * C​o​n​c​e​s​s​i​o​n​a​r​i​o​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	DEALER_DEALER_NOT_FOUND: string
@@ -203,6 +222,10 @@ type RootTranslation = {
 	 * T​i​p​o​ ​E​m​a​i​l​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	USER_ADDRESS_EMAILTYPE_NOT_FOUND: string
+	/**
+	 * T​i​p​o​ ​T​e​l​e​f​o​n​o​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	USER_ADDRESS_PHONETYPE_NOT_FOUND: string
 	/**
 	 * L​'​i​n​d​i​r​i​z​z​o​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
 	 * @param {number} id
@@ -471,6 +494,22 @@ export type TranslationFunctions = {
 	 */
 	COMMON_ID_REQUIRED_UPDATE: () => LocalizedString
 	/**
+	 * Cliente non trovato
+	 */
+	CUSTOMER_CUSTOMER_NOT_FOUND: () => LocalizedString
+	/**
+	 * L'indirizzo con ID {id} non esiste
+	 */
+	CUSTOMER_ADDRESS_NOT_FOUND: (arg: { id: number }) => LocalizedString
+	/**
+	 * La mail con ID {id} non esiste
+	 */
+	CUSTOMER_EMAIL_NOT_FOUND: (arg: { id: number }) => LocalizedString
+	/**
+	 * Il telefono con ID {id} non esiste
+	 */
+	CUSTOMER_PHONE_NOT_FOUND: (arg: { id: number }) => LocalizedString
+	/**
 	 * Concessionario non trovato
 	 */
 	DEALER_DEALER_NOT_FOUND: () => LocalizedString
@@ -578,6 +617,10 @@ export type TranslationFunctions = {
 	 * Tipo Email non trovato
 	 */
 	USER_ADDRESS_EMAILTYPE_NOT_FOUND: () => LocalizedString
+	/**
+	 * Tipo Telefono non trovato
+	 */
+	USER_ADDRESS_PHONETYPE_NOT_FOUND: () => LocalizedString
 	/**
 	 * L'indirizzo con ID {id} non esiste
 	 */

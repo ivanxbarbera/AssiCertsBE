@@ -224,11 +224,31 @@ export interface PhoneTypeListResponse {
 } // PhoneTypeListResponse
 
 /**
+ * Request for ohone type details.
+ */
+export interface PhoneTypeRequest {
+  // phone type unique identifier
+  id: number;
+} // PhoneTypeRequest
+
+/**
+ * Phone type returned to caller.
+ */
+export interface PhoneTypeResponse {
+  // phone type unique identifier
+  id: number;
+  // phone type code
+  code: string;
+  // phone type name
+  name: string;
+} // PhoneTypeResponse
+
+/**
  * Phone associated to user or address.
  */
 export interface Phone {
   // phone unique identifier
-  id: number;
+  id?: number;
   // phone type identifier
   typeId: number;
   //  phone international prefix
@@ -238,6 +258,32 @@ export interface Phone {
   // phone number
   number: string;
 } // Phone
+
+/**
+ * Phone associated to user or address returned to client.
+ */
+export interface PhoneResponse {
+  // phone unique identifier
+  id: number;
+  // phone type
+  type: PhoneType;
+  //  phone international prefix
+  internationalPrefix: string;
+  // phone prefix
+  prefix: string;
+  // phone number
+  number: string;
+  // default phone
+  default: boolean;
+} // PhoneResponse
+
+/**
+ * Response for phones associated to a user.
+ */
+export interface PhoneListResponse {
+  // user unique identifier
+  phones: PhoneResponse[];
+} // PhoneListResponse
 
 /**
  * Phone list associated to user or address.
@@ -255,6 +301,42 @@ export interface PhoneList {
   // default phone
   default: boolean;
 } // PhoneList
+
+/**
+ * Request for phones associated to an enity.
+ */
+export interface PhoneListRequest {
+  // entity unique identifier
+  entityId: number;
+} // PhoneListRequest
+
+/**
+ * Phone associated to user or address for updating.
+ */
+export interface PhoneEditRequest {
+  // phone unique identifier
+  id?: number;
+  // phone type identifier
+  typeId: number;
+  //  phone international prefix
+  internationalPrefix: string;
+  // phone prefix
+  prefix: string;
+  // phone number
+  number: string;
+  // default phone
+  default: boolean;
+} // PhoneEditRequest
+
+/**
+ * Request for update phone associated to an entity.
+ */
+export interface PhoneUpdateRequest {
+  // related unique identifier
+  entityId: number;
+  // phones
+  phones: PhoneEditRequest[];
+} // PhoneUpdateRequest
 
 /**
  * Email type.

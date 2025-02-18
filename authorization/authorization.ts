@@ -120,6 +120,7 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
     (request.operationCode == 'authorizationList' ||
       request.operationCode == 'emailTypeList' ||
       request.operationCode == 'emailTypeDetail' ||
+      request.operationCode == 'phoneTypeDetail' ||
       request.operationCode == 'addressToponymDetail' ||
       request.operationCode == 'addressTypeList' ||
       request.operationCode == 'addressTypeDetail' ||
@@ -131,7 +132,14 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       request.operationCode == 'certificateList' ||
       request.operationCode == 'certificateDetail' ||
       request.operationCode == 'certificateUpdate' ||
-      request.operationCode == 'certificateInsert') &&
+      request.operationCode == 'certificateInsert' ||
+      request.operationCode == 'customerList' ||
+      request.operationCode == 'customerDetail' ||
+      request.operationCode == 'customerUpdate' ||
+      request.operationCode == 'customerInsert' ||
+      request.operationCode == 'phoneListByCustomer' ||
+      request.operationCode == 'emailListByCustomer' ||
+      request.operationCode == 'addressListByCustomer') &&
     request.requestingUserRole
   ) {
     return {
@@ -206,6 +214,7 @@ export const authorizationList = api(
         visibility: AuthorizationVisibility.Visible,
       },
       { name: 'Municipality', code: 'archive.municipality', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
+      { name: 'Customer', code: 'archive.customer', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
       { name: 'Dealer', code: 'archive.dealer', userRole: UserRole.Administrator, visibility: AuthorizationVisibility.Visible },
       { name: 'User', code: 'archive.user', userRole: UserRole.Administrator, visibility: AuthorizationVisibility.Visible },
       { name: 'Administration Area', code: 'administration', userRole: UserRole.SuperAdministrator, visibility: AuthorizationVisibility.Visible },
