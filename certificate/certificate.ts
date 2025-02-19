@@ -88,17 +88,17 @@ export const certificateDetail = api(
       .join('CertificateCustomer', 'CertificateCustomer.certificateId', 'Certificate.id')
       .join('Customer', 'Customer.id', 'CertificateCustomer.customerId')
       .first(
-        'Customer.id as id',
-        'Customer.cancellationType as cancellationType',
-        'Customer.clientNumber as clientNumber',
-        'Customer.callerCode as callerCode',
-        'Customer.effectiveDate as effectiveDate',
-        'Customer.policyNumber as policyNumber',
-        'Customer.mainInsuredProductCodeA as mainInsuredProductCodeA',
-        'Customer.mainInsuredProductOptionA as mainInsuredProductOptionA',
-        'CertificateCustomer.idCustomer as customerId'
+        'Certificate.id as id',
+        'Certificate.cancellationType as cancellationType',
+        'Certificate.clientNumber as clientNumber',
+        'Certificate.callerCode as callerCode',
+        'Certificate.effectiveDate as effectiveDate',
+        'Certificate.policyNumber as policyNumber',
+        'Certificate.mainInsuredProductCodeA as mainInsuredProductCodeA',
+        'Certificate.mainInsuredProductOptionA as mainInsuredProductOptionA',
+        'CertificateCustomer.customerId as customerId'
       )
-      .where('id', request.id);
+      .where('Certificate.id', request.id);
     if (!certificate) {
       // certificate not found
       throw APIError.notFound(locz().CERTIFICATE_CERTIFICATE_NOT_FOUND());
