@@ -549,13 +549,19 @@ export const userStatusUnlock = async (id: number) => {
  * Apply filters and return a list of users.
  */
 export const userList = api({ expose: true, auth: true, method: 'GET', path: '/user' }, async (): Promise<UserListResponse> => {
-  // TODO add search filters
+  // get authentication data
+  const authenticationData: AuthenticationData = getAuthData()!;
   // load users
-  const users = await orm<UserList>('User')
+  const usersQry = orm<UserList>('User')
     .join('UserEmail', 'UserEmail.userId', 'User.id')
     .join('Email', 'Email.id', 'UserEmail.emailId')
     .leftOuterJoin('UserDealer', 'UserDealer.userId', 'User.id')
     .leftOuterJoin('Dealer', 'Dealer.id', 'UserDealer.dealerId')
+    .where('UserEmail.authentication', true);
+  if (authenticationData.userRole !== UserRole.Administrator && authenticationData.userRole !== UserRole.SuperAdministrator) {
+    usersQry.join('UserDealer', 'UserDealer.userId', 'User.id').where('UserDealer.dealerId', authenticationData.dealerId);
+  }
+  const users = await usersQry
     .select(
       'User.id as id',
       'User.role as role',
@@ -565,7 +571,6 @@ export const userList = api({ expose: true, auth: true, method: 'GET', path: '/u
       'User.disabled as disabled',
       'Dealer.companyName as dealerCompanyName'
     )
-    .where('UserEmail.authentication', true)
     .orderBy('User.surname')
     .orderBy('User.name');
   // check authorization
@@ -591,15 +596,19 @@ export const userList = api({ expose: true, auth: true, method: 'GET', path: '/u
  * Load user details.
  */
 export const userDetail = api({ expose: true, auth: true, method: 'GET', path: '/user/:id' }, async (request: UserRequest): Promise<UserResponse> => {
+  // get authentication data
+  const authenticationData: AuthenticationData = getAuthData()!;
+  const userId = parseInt(authenticationData.userID);
   // load user
-  const user = await orm<UserResponse>('User').first().where('id', request.id);
+  const userQry = orm<UserResponse>('User').where('id', request.id);
+  if (authenticationData.userRole !== UserRole.Administrator && authenticationData.userRole !== UserRole.SuperAdministrator) {
+    userQry.join('UserDealer', 'UserDealer.userId', 'User.id').where('UserDealer.dealerId', authenticationData.dealerId);
+  }
+  const user = await userQry.first();
   if (!user) {
     // user not found
     throw APIError.notFound(locz().USER_USER_NOT_FOUND());
   }
-  // get authentication data
-  const authenticationData: AuthenticationData = getAuthData()!;
-  const userId = parseInt(authenticationData.userID);
   // check authorization
   const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
     operationCode: 'userDetail',
@@ -705,10 +714,12 @@ export const userUpdate = api(
       // TODO MIC extends to other edit
       throw APIError.permissionDenied(locz().COMMON_ID_REQUIRED_UPDATE());
     }
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
     // check authorization
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
       operationCode: 'userUpdate',
-      requestingUserRole: getAuthData()?.userRole,
+      requestingUserRole: authenticationData.userRole,
       destinationUserRoles: [request.role],
     });
     if (!authorizationCheck.canBePerformed) {
@@ -716,7 +727,11 @@ export const userUpdate = api(
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load user
-    const user = await orm<User>('User').first().where('id', request.id);
+    const userQry = orm<User>('User').where('id', request.id);
+    if (authenticationData.userRole !== UserRole.Administrator && authenticationData.userRole !== UserRole.SuperAdministrator) {
+      userQry.join('UserDealer', 'UserDealer.userId', 'User.id').where('UserDealer.dealerId', authenticationData.dealerId);
+    }
+    const user = await userQry.first();
     if (!user) {
       // user not found
       throw APIError.notFound(locz().USER_USER_NOT_FOUND());
@@ -729,8 +744,8 @@ export const userUpdate = api(
     const resutlQry = await orm('User').where('id', request.id).update(updateUser).returning('id');
     // load user-dealer association
     const userDealers = await orm<User>('UserDealer').where('userId', request.id).select('id');
-    if (userDealers.length > 1) {
-      // error sending email
+    if (userDealers.length != 1) {
+      // wrong user dealer association
       throw APIError.unavailable(locz().USER_DEALER_TOO_MANY());
     }
     // update dealer

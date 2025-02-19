@@ -26,6 +26,7 @@ const it = {
   CUSTOMER_ADDRESS_NOT_FOUND: "L'indirizzo con ID {id:number} non esiste",
   CUSTOMER_EMAIL_NOT_FOUND: 'La mail con ID {id:number} non esiste',
   CUSTOMER_PHONE_NOT_FOUND: 'Il telefono con ID {id:number} non esiste',
+  CUSTOMER_USER_TOO_MANY: 'Il cliente deve avere un solo utente',
   DEALER_DEALER_NOT_FOUND: 'Concessionario non trovato',
   DEALER_EMAIL_NOT_FOUND: 'La mail con ID {id:number} non esiste',
   DEALER_ADDRESS_NOT_FOUND: "L'indirizzo con ID {id:number} non esiste",

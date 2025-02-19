@@ -1,6 +1,6 @@
 // libraries
-import { api, APIError } from 'encore.dev/api';
 // application modules
+import { api, APIError } from 'encore.dev/api';
 import { Dealer, DealerEditRequest, DealerList, DealerListRequest, DealerListResponse, DealerRequest, DealerResponse } from './dealer.model';
 import { orm } from '../common/db/db';
 import { AuthorizationOperationResponse } from '../authorization/authorization.model';
@@ -31,18 +31,16 @@ export const dealerList = api(
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load dealers
-    const dealers = await orm<DealerList>('Dealer')
+    const dealersQry = orm<DealerList>('Dealer')
       .join('DealerEmail', 'DealerEmail.dealerId', 'Dealer.id')
       .join('Email', 'Email.id', 'DealerEmail.emailId')
-      .leftOuterJoin('UserDealer', 'UserDealer.dealerId', 'Dealer.id')
+      .where('DealerEmail.default', true);
+    if (request.userId) {
+      // filter by user
+      dealersQry.join('UserDealer', 'UserDealer.dealerId', 'Dealer.id').where('UserDealer.userId', request.userId);
+    }
+    const dealers = await dealersQry
       .select('Dealer.id as id', 'Dealer.companyName as companyName', 'Email.email as email', 'Dealer.vatNumber as vatNumber')
-      .where((whereBuilder) => {
-        whereBuilder.where('DealerEmail.default', true);
-        if (request.userId) {
-          // filter by user
-          whereBuilder.where('UserDealer.userId', request.userId);
-        }
-      })
       .orderBy('Dealer.companyName');
     // return dealers
     return {

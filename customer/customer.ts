@@ -14,10 +14,8 @@ import { authorizationOperationUserCheck } from '../authorization/authorization'
 import {
   addressCustomerUpdate,
   addressListByCustomer,
-  addressUserUpdate,
   emailCustomerUpdate,
   emailListByCustomer,
-  emailUserUpdate,
   phoneCustomerUpdate,
   phoneListByCustomer,
 } from '../user/address/address';
@@ -30,7 +28,6 @@ import { UserRole } from '../user/user.model';
 export const customerList = api({ expose: true, auth: true, method: 'GET', path: '/customer' }, async (): Promise<CustomerListResponse> => {
   // get authentication data
   const authenticationData: AuthenticationData = getAuthData()!;
-  const userId = parseInt(authenticationData.userID);
   // check authorization
   const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
     operationCode: 'customerList',
@@ -217,7 +214,7 @@ export const customerUpdate = api(
     const customerUser = await orm<Customer>('CustomerUser').where('customerId', request.id).select('id');
     if (customerUser.length != 1) {
       // wrong custmer user association
-      throw APIError.unavailable(locz().USER_DEALER_TOO_MANY());
+      throw APIError.unavailable(locz().CUSTOMER_USER_TOO_MANY());
     }
     // update customer user association
     await orm('CustomerUser').update({ userId: userId }).where('id', customerUser[0].id);

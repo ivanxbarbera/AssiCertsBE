@@ -121,6 +121,10 @@ type RootTranslation = {
 	 */
 	CUSTOMER_PHONE_NOT_FOUND: RequiredParams<'id'>
 	/**
+	 * I​l​ ​c​l​i​e​n​t​e​ ​d​e​v​e​ ​a​v​e​r​e​ ​u​n​ ​s​o​l​o​ ​u​t​e​n​t​e
+	 */
+	CUSTOMER_USER_TOO_MANY: string
+	/**
 	 * C​o​n​c​e​s​s​i​o​n​a​r​i​o​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	DEALER_DEALER_NOT_FOUND: string
@@ -525,6 +529,10 @@ export type TranslationFunctions = {
 	 * Il telefono con ID {id} non esiste
 	 */
 	CUSTOMER_PHONE_NOT_FOUND: (arg: { id: number }) => LocalizedString
+	/**
+	 * Il cliente deve avere un solo utente
+	 */
+	CUSTOMER_USER_TOO_MANY: () => LocalizedString
 	/**
 	 * Concessionario non trovato
 	 */

@@ -26,6 +26,7 @@ const en = {
   CUSTOMER_ADDRESS_NOT_FOUND: 'Customer address with ID {id} not exists',
   CUSTOMER_EMAIL_NOT_FOUND: 'Customer email with ID {id} not exists',
   CUSTOMER_PHONE_NOT_FOUND: 'Customer phone with ID {id} not exists',
+  CUSTOMER_USER_TOO_MANY: 'Customer must have one dealer',
   DEALER_DEALER_NOT_FOUND: 'Dealer not founded',
   DEALER_EMAIL_NOT_FOUND: 'Dealer email with ID {id} not exists',
   DEALER_ADDRESS_NOT_FOUND: 'Dealer address with ID {id} not exists',
