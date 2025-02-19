@@ -5,7 +5,7 @@ import { jwtVerify } from 'jose';
 import cookie from 'cookie';
 import { AuthenticationData, AuthenticationParams } from './authentication.model';
 import locz from '../common/i18n';
-import { User, UserPasswordExpirationResponse } from '../user/user.model';
+import { User, UserDealer, UserPasswordExpirationResponse, UserRole } from '../user/user.model';
 import { getUserPasswordExpiration } from '../user/user';
 import { orm } from '../common/db/db';
 
@@ -49,10 +49,17 @@ export const authenticationHandler = authHandler<AuthenticationParams, Authentic
       // user not founded
       throw APIError.permissionDenied(locz().AUTHENTICATION_USER_NOT_FOUND());
     }
+    // load user dealer
+    const userDealer = await orm<UserDealer>('UserDealer').first().where('userId', payload.userID);
+    if (!userDealer && user.role !== UserRole.Administrator && user.role !== UserRole.SuperAdministrator) {
+      // user malconfigured
+      throw APIError.permissionDenied(locz().AUTHENTICATION_USER_MALCONFIGURED());
+    }
     // prepare authentication response
     const response: AuthenticationData = {
       userID: '' + payload.userID,
       userRole: user.role,
+      dealerId: userDealer?.dealerId,
     };
     // check password expiration
     const passwordEpiration: UserPasswordExpirationResponse = await getUserPasswordExpiration(parseInt(payload.userID));

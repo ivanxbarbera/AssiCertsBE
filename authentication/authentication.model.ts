@@ -23,4 +23,6 @@ export interface AuthenticationData {
   userID: string;
   // role of the logged user
   userRole: UserRole;
+  // dentifier of the dealer associate user
+  dealerId?: number;
 } // AutheticationData
