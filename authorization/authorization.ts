@@ -206,7 +206,7 @@ export const authorizationList = api(
       { name: 'Cerificate Area', code: 'certificate', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
       { name: 'New certificate', code: 'certificate.new', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
       { name: 'Certificate list', code: 'certificate.list', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
-      { name: 'Archive Area', code: 'archive', userRole: UserRole.Administrator, visibility: AuthorizationVisibility.Visible },
+      { name: 'Archive Area', code: 'archive', userRole: UserRole.Member, visibility: AuthorizationVisibility.Visible },
       {
         name: 'Address toponym',
         code: 'archive.address-toponym',
