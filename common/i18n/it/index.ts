@@ -17,6 +17,7 @@ const it = {
   AUTHENTICATION_USER_NOT_FOUND: 'Authenticated user not found',
   CERTIFICATE_ADDRESS_NOT_FOUND: "L'indirizzo del certificato con ID {id:number} non esiste",
   CERTIFICATE_CERTIFICATE_NOT_FOUND: 'Certificato non trovato',
+  CERTIFICATE_CUSTOMER_NOT_FOUND: 'Cliente del certificato non trovato',
   CERTIFICATE_CUSTOMER_WRONG_NUMBER: 'Il certificato deve avere uno e un solo cliente',
   COMMON_ID_NOT_ALLOWED_INSERT: 'ID non consentito in inserimento',
   COMMON_ID_REQUIRED_UPDATE: 'ID obbligatorio in modifica',

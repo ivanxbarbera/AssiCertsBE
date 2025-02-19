@@ -94,6 +94,7 @@ export const certificateDetail = api(
         'Certificate.policyNumber as policyNumber',
         'Certificate.mainInsuredProductCodeA as mainInsuredProductCodeA',
         'Certificate.mainInsuredProductOptionA as mainInsuredProductOptionA',
+        'Certificate.customerOriginal as customerOriginal',
         'CertificateCustomer.customerId as customerId'
       )
       .where('Certificate.id', request.id);
@@ -102,8 +103,13 @@ export const certificateDetail = api(
       throw APIError.notFound(locz().CERTIFICATE_CERTIFICATE_NOT_FOUND());
     }
     // load customer
-    const customer: CustomerResponse = await customerDetail({ id: certificate.customerId });
-    certificate.customer = customer;
+    if (certificate.customerOriginal) {
+      // original customer json was saved
+      certificate.customer = certificate.customerOriginal;
+    } else {
+      const customer: CustomerResponse = await customerDetail({ id: certificate.customerId });
+      certificate.customer = customer;
+    }
     // return certificate
     return DbUtility.removeNullFields(certificate);
   }
@@ -131,6 +137,12 @@ export const certificateInsert = api(
     if (!authorizationCheck.canBePerformed) {
       // user not allowed to get details
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+    }
+    // load selected customer
+    const customer = await customerDetail({ id: request.customerId });
+    if (!customer) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().CERTIFICATE_CUSTOMER_NOT_FOUND());
     }
     // add internal fields
     // TODO MIC evaluate using filterObjectByInterface
@@ -186,6 +198,12 @@ export const certificateUpdate = api(
     if (!authorizationCheck.canBePerformed) {
       // user not allowed to get details
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
+    }
+    // load selected customer
+    const customer = await customerDetail({ id: request.customerId });
+    if (!customer) {
+      // user not allowed to get details
+      throw APIError.permissionDenied(locz().CERTIFICATE_CUSTOMER_NOT_FOUND());
     }
     // load certificate
     const certificate = await orm<Certificate>('Certificate').first().where('id', request.id);

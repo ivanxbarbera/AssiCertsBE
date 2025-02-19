@@ -79,6 +79,8 @@ export interface Certificate {
   mainInsuredProductCodeA: string;
   // main insured product A option
   mainInsuredProductOptionA: string;
+  // customer original json
+  customerOriginal?: any;
 } // Certificate
 
 /**

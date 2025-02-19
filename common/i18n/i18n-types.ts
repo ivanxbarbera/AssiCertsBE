@@ -82,6 +82,10 @@ type RootTranslation = {
 	 */
 	CERTIFICATE_CERTIFICATE_NOT_FOUND: string
 	/**
+	 * C​l​i​e​n​t​e​ ​d​e​l​ ​c​e​r​t​i​f​i​c​a​t​o​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	CERTIFICATE_CUSTOMER_NOT_FOUND: string
+	/**
 	 * I​l​ ​c​e​r​t​i​f​i​c​a​t​o​ ​d​e​v​e​ ​a​v​e​r​e​ ​u​n​o​ ​e​ ​u​n​ ​s​o​l​o​ ​c​l​i​e​n​t​e
 	 */
 	CERTIFICATE_CUSTOMER_WRONG_NUMBER: string
@@ -481,6 +485,10 @@ export type TranslationFunctions = {
 	 * Certificato non trovato
 	 */
 	CERTIFICATE_CERTIFICATE_NOT_FOUND: () => LocalizedString
+	/**
+	 * Cliente del certificato non trovato
+	 */
+	CERTIFICATE_CUSTOMER_NOT_FOUND: () => LocalizedString
 	/**
 	 * Il certificato deve avere uno e un solo cliente
 	 */

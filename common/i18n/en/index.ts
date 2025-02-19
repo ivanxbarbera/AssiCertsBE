@@ -17,6 +17,7 @@ const en = {
   AUTHENTICATION_USER_NOT_FOUND: 'Authenticated user not found',
   CERTIFICATE_ADDRESS_NOT_FOUND: 'Certificate address with ID {id} not exists',
   CERTIFICATE_CERTIFICATE_NOT_FOUND: 'Certificate not founded',
+  CERTIFICATE_CUSTOMER_NOT_FOUND: 'Certificate customer not founded',
   CERTIFICATE_CUSTOMER_WRONG_NUMBER: 'Certificate must have one and only one customer',
   COMMON_ID_NOT_ALLOWED_INSERT: 'ID not allowed in insert',
   COMMON_ID_REQUIRED_UPDATE: 'ID required in update',
