@@ -69,7 +69,11 @@ type RootTranslation = {
 	 */
 	AUTHENTICATION_PASSWORD_EXPIRED: string
 	/**
-	 * A​u​t​h​e​n​t​i​c​a​t​e​d​ ​u​s​e​r​ ​n​o​t​ ​f​o​u​n​d
+	 * U​t​e​n​t​e​ ​n​o​n​ ​c​o​r​r​e​t​t​a​m​e​n​t​e​ ​c​o​n​f​i​g​u​r​a​t​o
+	 */
+	AUTHENTICATION_USER_MALCONFIGURED: string
+	/**
+	 * U​t​e​n​t​e​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	AUTHENTICATION_USER_NOT_FOUND: string
 	/**
@@ -474,7 +478,11 @@ export type TranslationFunctions = {
 	 */
 	AUTHENTICATION_PASSWORD_EXPIRED: () => LocalizedString
 	/**
-	 * Authenticated user not found
+	 * Utente non correttamente configurato
+	 */
+	AUTHENTICATION_USER_MALCONFIGURED: () => LocalizedString
+	/**
+	 * Utente non trovato
 	 */
 	AUTHENTICATION_USER_NOT_FOUND: () => LocalizedString
 	/**

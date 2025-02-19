@@ -14,6 +14,7 @@ const en = {
   AUTHENTICATION_MALFORMED_REQUEST: 'Malformed request',
   AUTHENTICATION_NOT_AUTHENTICATED: 'Not authenticated',
   AUTHENTICATION_PASSWORD_EXPIRED: 'User password expired',
+  AUTHENTICATION_USER_MALCONFIGURED: 'Authenticated user not found',
   AUTHENTICATION_USER_NOT_FOUND: 'Authenticated user not found',
   CERTIFICATE_ADDRESS_NOT_FOUND: 'Certificate address with ID {id} not exists',
   CERTIFICATE_CERTIFICATE_NOT_FOUND: 'Certificate not founded',

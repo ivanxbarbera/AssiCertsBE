@@ -24,6 +24,7 @@ import { DbUtility } from '../common/utility/db.utility';
 import { GeneralUtility } from '../common/utility/general.utility';
 import { CustomerResponse } from '../customer/customer.model';
 import { customerDetail } from '../customer/customer';
+import { UserRole } from '../user/user.model';
 
 /**
  * Search for certificates.
@@ -32,7 +33,6 @@ import { customerDetail } from '../customer/customer';
 export const certificateList = api({ expose: true, auth: true, method: 'GET', path: '/certificate' }, async (): Promise<CertificateListResponse> => {
   // get authentication data
   const authenticationData: AuthenticationData = getAuthData()!;
-  const userId = parseInt(authenticationData.userID);
   // check authorization
   const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
     operationCode: 'certificateList',
@@ -42,12 +42,14 @@ export const certificateList = api({ expose: true, auth: true, method: 'GET', pa
     // user not allowed to get details
     throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
   }
-  // TODO add search filters
   // load certificates
-  // TODO MIC check visibility
-  const certificates = await orm<CertificateList>('Certificate')
+  const certificatesQry = orm<CertificateList>('Certificate')
     .join('CertificateCustomer', 'CertificateCustomer.certificateId', 'Certificate.id')
-    .join('Customer', 'Customer.id', 'CertificateCustomer.customerId')
+    .join('Customer', 'Customer.id', 'CertificateCustomer.customerId');
+  if (authenticationData.userRole !== UserRole.Administrator && authenticationData.userRole !== UserRole.SuperAdministrator) {
+    certificatesQry.join('UserDealer', 'UserDealer.userId', 'Certificate.userId').where('UserDealer.dealerId', authenticationData.dealerId);
+  }
+  const certificates = await certificatesQry
     .select(
       'Certificate.id as id',
       'Certificate.clientNumber as clientNumber',
@@ -70,7 +72,6 @@ export const certificateDetail = api(
   async (request: CertificateRequest): Promise<CertificateResponse> => {
     // get authentication data
     const authenticationData: AuthenticationData = getAuthData()!;
-    const userId = parseInt(authenticationData.userID);
     // check authorization
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
       operationCode: 'certificateDetail',
@@ -81,23 +82,25 @@ export const certificateDetail = api(
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load certificate
-    // TODO MIC check user visibility
-    const certificate = await orm<CertificateResponse>('Certificate')
+    const certificateQry = orm<CertificateResponse>('Certificate')
       .join('CertificateCustomer', 'CertificateCustomer.certificateId', 'Certificate.id')
       .join('Customer', 'Customer.id', 'CertificateCustomer.customerId')
-      .first(
-        'Certificate.id as id',
-        'Certificate.cancellationType as cancellationType',
-        'Certificate.clientNumber as clientNumber',
-        'Certificate.callerCode as callerCode',
-        'Certificate.effectiveDate as effectiveDate',
-        'Certificate.policyNumber as policyNumber',
-        'Certificate.mainInsuredProductCodeA as mainInsuredProductCodeA',
-        'Certificate.mainInsuredProductOptionA as mainInsuredProductOptionA',
-        'Certificate.customerOriginal as customerOriginal',
-        'CertificateCustomer.customerId as customerId'
-      )
       .where('Certificate.id', request.id);
+    if (authenticationData.userRole !== UserRole.Administrator && authenticationData.userRole !== UserRole.SuperAdministrator) {
+      certificateQry.join('UserDealer', 'UserDealer.userId', 'Certificate.userId').where('UserDealer.dealerId', authenticationData.dealerId);
+    }
+    const certificate = await certificateQry.first(
+      'Certificate.id as id',
+      'Certificate.cancellationType as cancellationType',
+      'Certificate.clientNumber as clientNumber',
+      'Certificate.callerCode as callerCode',
+      'Certificate.effectiveDate as effectiveDate',
+      'Certificate.policyNumber as policyNumber',
+      'Certificate.mainInsuredProductCodeA as mainInsuredProductCodeA',
+      'Certificate.mainInsuredProductOptionA as mainInsuredProductOptionA',
+      'Certificate.customerOriginal as customerOriginal',
+      'CertificateCustomer.customerId as customerId'
+    );
     if (!certificate) {
       // certificate not found
       throw APIError.notFound(locz().CERTIFICATE_CERTIFICATE_NOT_FOUND());
@@ -168,7 +171,7 @@ export const certificateInsert = api(
     // insert certificate customer
     const newCertificateCustomer: CertificateCustomer = {
       certificateId: id,
-      customerId: request.customerId,
+      customerId: customer.id,
     };
     await orm('CertificateCustomer').insert(newCertificateCustomer);
     // return created certificate
@@ -206,7 +209,11 @@ export const certificateUpdate = api(
       throw APIError.permissionDenied(locz().CERTIFICATE_CUSTOMER_NOT_FOUND());
     }
     // load certificate
-    const certificate = await orm<Certificate>('Certificate').first().where('id', request.id);
+    const certificateQry = orm<Certificate>('Certificate').where('id', request.id);
+    if (authenticationData.userRole !== UserRole.Administrator && authenticationData.userRole !== UserRole.SuperAdministrator) {
+      certificateQry.join('UserDealer', 'UserDealer.userId', 'Certificate.userId').where('UserDealer.dealerId', authenticationData.dealerId);
+    }
+    const certificate = await certificateQry.first();
     if (!certificate) {
       // certificate not found
       throw APIError.notFound(locz().CERTIFICATE_CERTIFICATE_NOT_FOUND());
@@ -223,9 +230,8 @@ export const certificateUpdate = api(
       throw APIError.notFound(locz().CERTIFICATE_CUSTOMER_WRONG_NUMBER());
     }
     // update certificate customer
-    // TODO MIC check that user has visibility to the customer
     const certificateCustomer = certificateCustomers[0];
-    await orm('CertificateCustomer').where('id', certificateCustomer.id).update({ customerId: request.customerId });
+    await orm('CertificateCustomer').where('id', certificateCustomer.id).update({ customerId: customer.id });
     // return updated certificate
     return certificateDetail({ id: resutlQry[0].id });
   }
