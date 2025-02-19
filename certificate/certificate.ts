@@ -209,7 +209,7 @@ export const certificateUpdate = api(
       throw APIError.permissionDenied(locz().CERTIFICATE_CUSTOMER_NOT_FOUND());
     }
     // load certificate
-    const certificateQry = orm<Certificate>('Certificate').where('id', request.id);
+    const certificateQry = orm<Certificate>('Certificate').where('Certificate.id', request.id);
     if (authenticationData.userRole !== UserRole.Administrator && authenticationData.userRole !== UserRole.SuperAdministrator) {
       certificateQry.join('UserDealer', 'UserDealer.userId', 'Certificate.userId').where('UserDealer.dealerId', authenticationData.dealerId);
     }
