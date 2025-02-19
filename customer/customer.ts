@@ -21,6 +21,7 @@ import {
   phoneCustomerUpdate,
   phoneListByCustomer,
 } from '../user/address/address';
+import { UserRole } from '../user/user.model';
 
 /**
  * Search for customers.
@@ -39,12 +40,18 @@ export const customerList = api({ expose: true, auth: true, method: 'GET', path:
     // user not allowed to get details
     throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
   }
-  // TODO add search filters
   // load customers
-  const customers = await orm<CustomerList>('Customer')
-    .join('CustomerUser', 'CustomerUser.customerId', 'Customer.id')
+  const customersQry = orm<CustomerList>('Customer')
     .join('CustomerEmail', 'CustomerEmail.customerId', 'Customer.id')
     .join('Email', 'Email.id', 'CustomerEmail.emailId')
+    .where('CustomerEmail.default', true);
+  if (authenticationData.userRole !== UserRole.Administrator && authenticationData.userRole !== UserRole.SuperAdministrator) {
+    customersQry
+      .join('CustomerUser', 'CustomerUser.customerId', 'Customer.id')
+      .join('UserDealer', 'UserDealer.userId', 'CustomerUser.userId')
+      .where('UserDealer.dealerId', authenticationData.dealerId);
+  }
+  const customers = await customersQry
     .select(
       'Customer.id as id',
       'Customer.firstName as firstName',
@@ -52,8 +59,6 @@ export const customerList = api({ expose: true, auth: true, method: 'GET', path:
       'Customer.fiscalCode as fiscalCode',
       'Email.email as email'
     )
-    .where('CustomerUser.userId', userId)
-    .where('CustomerEmail.default', true)
     .orderBy('Customer.lastName')
     .orderBy('Customer.firstName');
   // return customers
@@ -81,18 +86,21 @@ export const customerDetail = api(
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load customer
-    const customer = await orm<CustomerResponse>('Customer')
-      .join('CustomerUser', 'CustomerUser.customerId', 'Customer.id')
-      .where('CustomerUser.userId', userId)
-      .where('Customer.id', request.id)
-      .first(
-        'Customer.id as id',
-        'Customer.firstName as firstName',
-        'Customer.middleName as middleName',
-        'Customer.lastName as lastName',
-        'Customer.fiscalCode as fiscalCode',
-        'Customer.dateOfBirth as dateOfBirth'
-      );
+    const customerQry = orm<CustomerResponse>('Customer').where('Customer.id', request.id);
+    if (authenticationData.userRole !== UserRole.Administrator && authenticationData.userRole !== UserRole.SuperAdministrator) {
+      customerQry
+        .join('CustomerUser', 'CustomerUser.customerId', 'Customer.id')
+        .join('UserDealer', 'UserDealer.userId', 'CustomerUser.userId')
+        .where('UserDealer.dealerId', authenticationData.dealerId);
+    }
+    const customer = await customerQry.first(
+      'Customer.id as id',
+      'Customer.firstName as firstName',
+      'Customer.middleName as middleName',
+      'Customer.lastName as lastName',
+      'Customer.fiscalCode as fiscalCode',
+      'Customer.dateOfBirth as dateOfBirth'
+    );
     if (!customer) {
       // customer not found
       throw APIError.notFound(locz().CUSTOMER_CUSTOMER_NOT_FOUND());
@@ -177,17 +185,27 @@ export const customerUpdate = api(
       // TODO MIC extends to other edit
       throw APIError.permissionDenied(locz().COMMON_ID_REQUIRED_UPDATE());
     }
+    // get authentication data
+    const authenticationData: AuthenticationData = getAuthData()!;
+    const userId = parseInt(authenticationData.userID);
     // check authorization
     const authorizationCheck: AuthorizationOperationResponse = authorizationOperationUserCheck({
       operationCode: 'customerUpdate',
-      requestingUserRole: getAuthData()?.userRole,
+      requestingUserRole: authenticationData.userRole,
     });
     if (!authorizationCheck.canBePerformed) {
       // customer not allowed to get details
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load customer
-    const customer = await orm<Customer>('Customer').first().where('id', request.id);
+    const customerQry = orm<Customer>('Customer').where('id', request.id);
+    if (authenticationData.userRole !== UserRole.Administrator && authenticationData.userRole !== UserRole.SuperAdministrator) {
+      customerQry
+        .join('CustomerUser', 'CustomerUser.customerId', 'Customer.id')
+        .join('UserDealer', 'UserDealer.userId', 'CustomerUser.userId')
+        .where('UserDealer.dealerId', authenticationData.dealerId);
+    }
+    const customer = await customerQry.first();
     if (!customer) {
       // customer not found
       throw APIError.notFound(locz().CUSTOMER_CUSTOMER_NOT_FOUND());
@@ -196,11 +214,13 @@ export const customerUpdate = api(
     let updateCustomer: Customer = GeneralUtility.filterObjectByInterface(request, customer, ['id']);
     const resutlQry = await orm('Customer').where('id', request.id).update(updateCustomer).returning('id');
     // load customer-user association
-    const customerDealers = await orm<Customer>('CustomerUser').where('customerId', request.id).select('id');
-    if (customerDealers.length > 1) {
-      // error sending email
+    const customerUser = await orm<Customer>('CustomerUser').where('customerId', request.id).select('id');
+    if (customerUser.length != 1) {
+      // wrong custmer user association
       throw APIError.unavailable(locz().USER_DEALER_TOO_MANY());
     }
+    // update customer user association
+    await orm('CustomerUser').update({ userId: userId }).where('id', customerUser[0].id);
     // update emails
     const customerEmails = request.emails;
     await emailCustomerUpdate({ entityId: request.id, emails: customerEmails });

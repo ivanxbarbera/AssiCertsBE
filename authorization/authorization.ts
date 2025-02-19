@@ -84,12 +84,6 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
   if (
     (request.operationCode == 'systemParameterList' ||
       request.operationCode == 'systemParameterUpdate' ||
-      request.operationCode == 'phoneTypeList' ||
-      request.operationCode == 'addressToponymList' ||
-      request.operationCode == 'nationList' ||
-      request.operationCode == 'regionList' ||
-      request.operationCode == 'provinceList' ||
-      request.operationCode == 'municipalityList' ||
       request.operationCode == 'municipalityCompleteList') &&
     request.requestingUserRole &&
     request.requestingUserRole == UserRole.SuperAdministrator // superadmin can access system functionality
@@ -126,6 +120,12 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       request.operationCode == 'addressTypeDetail' ||
       request.operationCode == 'nationDetail' ||
       request.operationCode == 'regionDetail' ||
+      request.operationCode == 'phoneTypeList' ||
+      request.operationCode == 'addressToponymList' ||
+      request.operationCode == 'nationList' ||
+      request.operationCode == 'regionList' ||
+      request.operationCode == 'provinceList' ||
+      request.operationCode == 'municipalityList' ||
       request.operationCode == 'provinceDetail' ||
       request.operationCode == 'municipalityDetail' ||
       request.operationCode == 'addressListByCertificate' ||
