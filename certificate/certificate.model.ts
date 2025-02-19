@@ -79,6 +79,14 @@ export interface Certificate {
   mainInsuredProductCodeA: string;
   // main insured product A option
   mainInsuredProductOptionA: string;
+  // car plate number
+  carPlateNumber: string;
+  // car chassis number
+  carChassisNumber: string;
+  // car model
+  carModel: string;
+  // policy duration in month
+  policyDurationInMonth: number;
   // customer original json
   customerOriginal?: any;
 } // Certificate
@@ -103,6 +111,12 @@ export interface CertificateEditRequest {
   id?: number;
   // transation effective date
   effectiveDate: Date;
+  // car plate number
+  carPlateNumber: string;
+  // car chassis number
+  carChassisNumber: string;
+  // car model
+  carModel: string;
   // customer identificator
   customerId: number;
 } // CertificateEditRequest
@@ -138,6 +152,14 @@ export interface CertificateResponse {
   mainInsuredProductCodeA: string;
   // main insured product A option
   mainInsuredProductOptionA: string;
+  // car plate number
+  carPlateNumber: string;
+  // car chassis number
+  carChassisNumber: string;
+  // car model
+  carModel: string;
+  // policy duration in month
+  policyDurationInMonth: number;
 } // CertificateResponse
 
 /**
@@ -155,6 +177,10 @@ export interface CertificateList {
   customerFirstName: string;
   // customer last name
   custonerLastName: string;
+  // car plate number
+  carPlateNumber: string;
+  // car model
+  carModel: string;
 } // CertificateList
 
 /**

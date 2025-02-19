@@ -54,6 +54,8 @@ export const certificateList = api({ expose: true, auth: true, method: 'GET', pa
       'Certificate.id as id',
       'Certificate.clientNumber as clientNumber',
       'Certificate.effectiveDate as effectiveDate',
+      'Certificate.carPlateNumber as carPlateNumber',
+      'Certificate.carModel as carModel',
       'Customer.firstName as customerFirstName',
       'Customer.lastName as customerLastName'
     )
@@ -98,6 +100,10 @@ export const certificateDetail = api(
       'Certificate.policyNumber as policyNumber',
       'Certificate.mainInsuredProductCodeA as mainInsuredProductCodeA',
       'Certificate.mainInsuredProductOptionA as mainInsuredProductOptionA',
+      'Certificate.carPlateNumber as carPlateNumber',
+      'Certificate.carChassisNumber as carChassisNumber',
+      'Certificate.carModel as carModel',
+      'Certificate.policyDurationInMonth as policyDurationInMonth',
       'Certificate.customerOriginal as customerOriginal',
       'CertificateCustomer.customerId as customerId'
     );
@@ -162,6 +168,7 @@ export const certificateInsert = api(
       paymentFrequency: PaymentFrequency.OneTimeAdvance,
       mainInsuredProductCodeA: 'TODO',
       mainInsuredProductOptionA: 'TODO',
+      policyDurationInMonth: 36,
     };
     // remove unnecessary fields
     delete (newCertificate as any)['customerId'];
