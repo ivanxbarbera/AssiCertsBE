@@ -19,9 +19,7 @@ import {
 } from './certificate.model';
 import locz from '../common/i18n';
 import { orm } from '../common/db/db';
-import { addressCertificateUpdate, addressListByCertificate } from './../user/address/address';
 import { AuthenticationData } from './../authentication/authentication.model';
-import { AddressListResponse } from './../user/address/address.model';
 import { DbUtility } from '../common/utility/db.utility';
 import { GeneralUtility } from '../common/utility/general.utility';
 import { CustomerResponse } from '../customer/customer.model';
