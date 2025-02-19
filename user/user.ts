@@ -110,32 +110,33 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
   };
   const userPasswordHistoryRst = await orm('UserPasswordHistory').insert(newUserPasswordHistory, ['id']);
   // send email to user
-  try {
-    await GeneralUtility.emailSend({
-      recipients: defaultEmail,
-      subject: locz().USER_PASSWORD_REGISTER_EMAIL_SUBJECT(),
-      bodyHtml: locz().USER_PASSWORD_REGISTER_EMAIL_BODY_HTML({ name: newUser.name }),
-      bodyText: locz().USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT({ name: newUser.name }),
+  await GeneralUtility.emailSend({
+    recipients: defaultEmail,
+    subject: locz().USER_PASSWORD_REGISTER_EMAIL_SUBJECT(),
+    bodyHtml: locz().USER_PASSWORD_REGISTER_EMAIL_BODY_HTML({ name: newUser.name }),
+    bodyText: locz().USER_PASSWORD_REGISTER_EMAIL_BODY_TEXT({ name: newUser.name }),
+  })
+    .then(async () => {
+      // send notify to admin users for confirmation
+      // get authorized users
+      const destinationUserCheck: AuthorizationDestinationUserCheckResponse = await authorizationDestinationUserCheck({
+        operationCode: 'userRegisterActivate',
+      });
+      // send notification to users
+      destinationUserCheck.userIds.forEach((userId) => {
+        sendNotificationMessage({
+          userId,
+          type: NotificationMessageType.UserMaintenance,
+          message: locz().USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE({ name: newUser.name, surname: newUser.surname }),
+          detail: locz().USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE_DETAIL(),
+          entityId: id,
+        });
+      });
+    })
+    .catch((error) => {
+      // error sending email
+      throw APIError.unavailable(locz().EMAIL_SEND_ERROR());
     });
-  } catch (error) {
-    // error sending email
-    throw APIError.unavailable(locz().EMAIL_SEND_ERROR());
-  }
-  // send notify to admin users for confirmation
-  // get authorized users
-  const destinationUserCheck: AuthorizationDestinationUserCheckResponse = await authorizationDestinationUserCheck({
-    operationCode: 'userRegisterActivate',
-  });
-  // send notification to users
-  destinationUserCheck.userIds.forEach((userId) => {
-    sendNotificationMessage({
-      userId,
-      type: NotificationMessageType.UserMaintenance,
-      message: locz().USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE({ name: newUser.name, surname: newUser.surname }),
-      detail: locz().USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE_DETAIL(),
-      entityId: id,
-    });
-  });
 }); // userRegister
 
 /**
@@ -168,18 +169,18 @@ export const userPasswordReset = api({ expose: true, method: 'GET', path: '/user
     // save password reset request
     await orm('UserPasswordReset').insert(userPasswordReset);
     // send email to user
-    try {
-      const resetUrl = frontendBaseURL() + '/authentication/reset-password;token=' + token;
-      await GeneralUtility.emailSend({
-        recipients: user.email,
-        subject: locz().USER_PASSWORD_RESET_EMAIL_SUBJECT(),
-        bodyHtml: locz().USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
-        bodyText: locz().USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
+    const resetUrl = frontendBaseURL() + '/authentication/reset-password;token=' + token;
+    await GeneralUtility.emailSend({
+      recipients: user.email,
+      subject: locz().USER_PASSWORD_RESET_EMAIL_SUBJECT(),
+      bodyHtml: locz().USER_PASSWORD_RESET_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+      bodyText: locz().USER_PASSWORD_RESET_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
+    })
+      .then(() => {})
+      .catch((error) => {
+        // error sending email
+        throw APIError.unavailable(locz().EMAIL_SEND_ERROR());
       });
-    } catch (error) {
-      // error sending email
-      throw APIError.unavailable(locz().EMAIL_SEND_ERROR());
-    }
   }
 }); // userPasswordReset
 
@@ -248,23 +249,24 @@ export const userPasswordResetConfirm = api(
     // update password reset request
     await orm('UserPasswordReset').where('id', userPasswordReset.id).update('used', true);
     // send email to user
-    try {
-      const resetUrl = frontendBaseURL() + '/authentication';
-      await GeneralUtility.emailSend({
-        recipients: user.email,
-        subject: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT(),
-        bodyHtml: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
-        bodyText: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
+    const resetUrl = frontendBaseURL() + '/authentication';
+    return await GeneralUtility.emailSend({
+      recipients: user.email,
+      subject: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT(),
+      bodyHtml: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_HTML({ name: user.name, link: resetUrl }),
+      bodyText: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_BODY_TEXT({ name: user.name, link: resetUrl }),
+    })
+      .then(() => {
+        // return response to caller
+        const response: UserPasswordResetConfirmResponse = {
+          email: user.email,
+        };
+        return response;
+      })
+      .catch((error) => {
+        // error sending email
+        throw APIError.unavailable(locz().EMAIL_SEND_ERROR());
       });
-    } catch (error) {
-      // error sending email
-      throw APIError.unavailable(locz().EMAIL_SEND_ERROR());
-    }
-    // return response to caller
-    const response: UserPasswordResetConfirmResponse = {
-      email: user.email,
-    };
-    return response;
   }
 ); // userPasswordResetConfirm
 
@@ -785,20 +787,24 @@ export const userUpdate = api(
     if (user.disabled && !request.disabled) {
       // user reactivated
       // send email to user
-      try {
-        await GeneralUtility.emailSend({
-          recipients: defaultEmail,
-          subject: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT(),
-          bodyHtml: locz().USER_ACTIVATED_EMAIL_BODY_HTML({ name: request.name, link: frontendBaseURL(), siteName: frontendBaseName() }),
-          bodyText: locz().USER_ACTIVATED_EMAIL_BODY_TEXT({ name: request.name, link: frontendBaseURL() }),
+      return await GeneralUtility.emailSend({
+        recipients: defaultEmail,
+        subject: locz().USER_PASSWORD_RESET_CONFIRM_EMAIL_SUBJECT(),
+        bodyHtml: locz().USER_ACTIVATED_EMAIL_BODY_HTML({ name: request.name, link: frontendBaseURL(), siteName: frontendBaseName() }),
+        bodyText: locz().USER_ACTIVATED_EMAIL_BODY_TEXT({ name: request.name, link: frontendBaseURL() }),
+      })
+        .then(() => {
+          // return updated user
+          return userDetail({ id: resutlQry[0].id });
+        })
+        .catch((error) => {
+          // error sending email
+          throw APIError.unavailable(locz().EMAIL_SEND_ERROR());
         });
-      } catch (error) {
-        // error sending email
-        throw APIError.unavailable(locz().EMAIL_SEND_ERROR());
-      }
+    } else {
+      // return updated user
+      return userDetail({ id: resutlQry[0].id });
     }
-    // return updated user
-    return userDetail({ id: resutlQry[0].id });
   }
 ); // userUpdate
 

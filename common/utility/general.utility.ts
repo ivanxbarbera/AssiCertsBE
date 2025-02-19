@@ -30,7 +30,7 @@ export class GeneralUtility {
    * Send a new email.
    * @param emailSendData email data
    */
-  static emailSend = async (emailSendData: EmailSendData) => {
+  static emailSend = async (emailSendData: EmailSendData): Promise<any> => {
     // send email to user
     const smptParameters: SMTPParameters = await systemParametersSmtp();
     const smtpTransport: any = {
@@ -57,7 +57,7 @@ export class GeneralUtility {
       mailMessage.text = emailSendData.bodyText;
     }
     const transporter: Transporter = createTransport(smtpTransport);
-    await transporter.sendMail(mailMessage);
+    return transporter.sendMail(mailMessage);
   }; // emailSend
 
   /**
