@@ -136,6 +136,8 @@ export interface CustomerAddress {
   customerId: number;
   // address identifier
   addressId: number;
+  // default address
+  default: boolean;
 } // CustomerAddress
 
 /**

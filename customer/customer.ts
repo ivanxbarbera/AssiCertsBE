@@ -195,18 +195,18 @@ export const customerUpdate = api(
     // update customer
     let updateCustomer: Customer = GeneralUtility.filterObjectByInterface(request, customer, ['id']);
     const resutlQry = await orm('Customer').where('id', request.id).update(updateCustomer).returning('id');
-    // load customer-dealer association
-    const customerDealers = await orm<Customer>('CustomerDealer').where('customerId', request.id).select('id');
+    // load customer-user association
+    const customerDealers = await orm<Customer>('CustomerUser').where('customerId', request.id).select('id');
     if (customerDealers.length > 1) {
       // error sending email
       throw APIError.unavailable(locz().USER_DEALER_TOO_MANY());
     }
     // update emails
     const customerEmails = request.emails;
-    await emailUserUpdate({ entityId: request.id, emails: customerEmails });
+    await emailCustomerUpdate({ entityId: request.id, emails: customerEmails });
     // update addresses
     const customerAddresses = request.addresses;
-    await addressUserUpdate({ entityId: request.id, addresses: customerAddresses });
+    await addressCustomerUpdate({ entityId: request.id, addresses: customerAddresses });
     // update phones
     const customerPhones = request.phones;
     await phoneCustomerUpdate({ entityId: request.id, phones: customerPhones });

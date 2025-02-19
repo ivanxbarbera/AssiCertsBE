@@ -1,4 +1,5 @@
 // application modules
+import { CustomerList, CustomerResponse } from '../customer/customer.model';
 import { AddressEditRequest, AddressResponse } from '../user/address/address.model';
 
 /**
@@ -68,20 +69,6 @@ export interface Certificate {
   effectiveDate: Date;
   // policy number
   policyNumber: string;
-  // customer first name
-  customerFirstName: string;
-  // customer middle name
-  customerMiddleName: string;
-  // customer last name
-  customerLastName: string;
-  // customer mobile telephone number
-  customerMobileTelephone: string;
-  // customer email address
-  customerEmailAddress: string;
-  // customer fiscal code
-  customerFiscalCode: string;
-  // customer dat of birth
-  customerDateOfBirth: Date;
   // fulfillment type
   fulfillmentType: FulfillmentType;
   // payment type
@@ -92,18 +79,20 @@ export interface Certificate {
   mainInsuredProductCodeA: string;
   // main insured product A option
   mainInsuredProductOptionA: string;
+  // customer original json
+  customerOriginal?: any;
 } // Certificate
 
 /**
  * Certificate-Address Association
  */
-export interface CertificateAddress {
-  // certificate address unique identifier
+export interface CertificateCustomer {
+  // certificate customer unique identifier
   id?: number;
   // certificate identifier
   certificateId: number;
-  // address identifier
-  addressId: number;
+  // customer identifier
+  customerId: number;
 } // CertificateAddress
 
 /**
@@ -114,22 +103,8 @@ export interface CertificateEditRequest {
   id?: number;
   // transation effective date
   effectiveDate: Date;
-  // customer first name
-  customerFirstName: string;
-  // customer middle name
-  customerMiddleName: string;
-  // customer last name
-  customerLastName: string;
-  // customer address
-  customerAddress: AddressEditRequest;
-  // customer mobile telephone number
-  customerMobileTelephone: string;
-  // customer email address
-  customerEmailAddress: string;
-  // customer fiscal code
-  customerFiscalCode: string;
-  // customer dat of birth
-  customerDateOfBirth: Date;
+  // customer identificator
+  customerId: number;
 } // CertificateEditRequest
 
 /**
@@ -157,22 +132,8 @@ export interface CertificateResponse {
   effectiveDate: Date;
   // policy number
   policyNumber: string;
-  // customer first name
-  customerFirstName: string;
-  // customer middle name
-  customerMiddleName: string;
-  // customer last name
-  customerLastName: string;
-  // customer address
-  customerAddress: AddressResponse;
-  // customer mobile telephone number
-  customerMobileTelephone: string;
-  // customer email address
-  customerEmailAddress: string;
-  // customer fiscal code
-  customerFiscalCode: string;
-  // customer dat of birth
-  customerDateOfBirth: Date;
+  // customer
+  customer: CustomerResponse;
   // main insured product A code
   mainInsuredProductCodeA: string;
   // main insured product A option

@@ -169,6 +169,8 @@ export interface AddressResponse {
   postalCode: string;
   // address municipality
   municipality: MunicipalityResponse;
+  // default address
+  default: boolean;
 } // AddressResponse
 
 /**
@@ -189,6 +191,8 @@ export interface AddressEditRequest {
   postalCode: string;
   // address municipality identifier
   municipalityId: number;
+  // default address
+  default: boolean;
 } // AddressEditRequest
 
 /**
