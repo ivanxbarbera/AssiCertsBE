@@ -8,7 +8,14 @@ import { AuthenticationData } from '../authentication/authentication.model';
 import locz from '../common/i18n';
 import { DbUtility } from '../common/utility/db.utility';
 import { GeneralUtility } from '../common/utility/general.utility';
-import { EmailListResponse, AddressListResponse, PhoneListResponse } from '../user/address/address.model';
+import {
+  EmailListResponse,
+  AddressListResponse,
+  PhoneListResponse,
+  EmailEditRequest,
+  AddressEditRequest,
+  PhoneEditRequest,
+} from '../user/address/address.model';
 import { AuthorizationOperationResponse } from '../authorization/authorization.model';
 import { authorizationOperationUserCheck } from '../authorization/authorization';
 import {
@@ -139,6 +146,34 @@ export const customerInsert = api(
       // user not allowed to get details
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
+    // check customer data
+    if (
+      !request.emails ||
+      request.emails.filter((email: EmailEditRequest) => {
+        return email.default;
+      }).length != 1
+    ) {
+      // wrong dealer emails
+      throw APIError.permissionDenied(locz().CUSTOMER_EMAIL_DEFAULT_WRONG());
+    }
+    if (
+      !request.addresses ||
+      request.addresses.filter((address: AddressEditRequest) => {
+        return address.default;
+      }).length != 1
+    ) {
+      // wrong dealer emails
+      throw APIError.permissionDenied(locz().CUSTOMER_ADDRESS_DEFAULT_WRONG());
+    }
+    if (
+      !request.phones ||
+      request.phones.filter((phone: PhoneEditRequest) => {
+        return phone.default;
+      }).length != 1
+    ) {
+      // wrong dealer emails
+      throw APIError.permissionDenied(locz().CUSTOMER_PHONE_DEFAULT_WRONG());
+    }
     // add internal fields
     // TODO MIC evaluate using filterObjectByInterface
     const newCustomer: Customer = {
@@ -206,6 +241,34 @@ export const customerUpdate = api(
     if (!customer) {
       // customer not found
       throw APIError.notFound(locz().CUSTOMER_CUSTOMER_NOT_FOUND());
+    }
+    // check customer data
+    if (
+      !request.emails ||
+      request.emails.filter((email: EmailEditRequest) => {
+        return email.default;
+      }).length != 1
+    ) {
+      // wrong dealer emails
+      throw APIError.permissionDenied(locz().CUSTOMER_EMAIL_DEFAULT_WRONG());
+    }
+    if (
+      !request.addresses ||
+      request.addresses.filter((address: AddressEditRequest) => {
+        return address.default;
+      }).length != 1
+    ) {
+      // wrong dealer emails
+      throw APIError.permissionDenied(locz().CUSTOMER_ADDRESS_DEFAULT_WRONG());
+    }
+    if (
+      !request.phones ||
+      request.phones.filter((phone: PhoneEditRequest) => {
+        return phone.default;
+      }).length != 1
+    ) {
+      // wrong dealer emails
+      throw APIError.permissionDenied(locz().CUSTOMER_PHONE_DEFAULT_WRONG());
     }
     // update customer
     let updateCustomer: Customer = GeneralUtility.filterObjectByInterface(request, customer, ['id']);

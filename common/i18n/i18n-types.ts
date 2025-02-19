@@ -102,10 +102,6 @@ type RootTranslation = {
 	 */
 	COMMON_ID_REQUIRED_UPDATE: string
 	/**
-	 * C​l​i​e​n​t​e​ ​n​o​n​ ​t​r​o​v​a​t​o
-	 */
-	CUSTOMER_CUSTOMER_NOT_FOUND: string
-	/**
 	 * L​'​i​n​d​i​r​i​z​z​o​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
 	 * @param {number} id
 	 */
@@ -115,6 +111,22 @@ type RootTranslation = {
 	 * @param {number} id
 	 */
 	CUSTOMER_EMAIL_NOT_FOUND: RequiredParams<'id'>
+	/**
+	 * I​l​ ​c​l​i​e​n​t​e​ ​d​e​v​e​ ​a​v​e​r​e​ ​u​n​ ​i​n​d​i​r​i​z​z​o​ ​d​i​ ​d​e​f​a​u​l​t
+	 */
+	CUSTOMER_ADDRESS_DEFAULT_WRONG: string
+	/**
+	 * I​l​ ​c​l​i​e​n​t​e​ ​d​e​v​e​ ​a​v​e​r​e​ ​u​n​a​ ​e​m​a​i​l​ ​d​i​ ​d​e​f​a​u​l​t
+	 */
+	CUSTOMER_EMAIL_DEFAULT_WRONG: string
+	/**
+	 * I​l​ ​c​l​i​e​n​t​e​ ​d​e​v​e​ ​a​v​e​r​e​ ​u​n​ ​t​e​l​e​f​o​n​o​ ​d​i​ ​d​e​f​a​u​l​t
+	 */
+	CUSTOMER_PHONE_DEFAULT_WRONG: string
+	/**
+	 * C​l​i​e​n​t​e​ ​n​o​n​ ​t​r​o​v​a​t​o
+	 */
+	CUSTOMER_CUSTOMER_NOT_FOUND: string
 	/**
 	 * I​l​ ​t​e​l​e​f​o​n​o​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
 	 * @param {number} id
@@ -128,6 +140,10 @@ type RootTranslation = {
 	 * C​o​n​c​e​s​s​i​o​n​a​r​i​o​ ​n​o​n​ ​t​r​o​v​a​t​o
 	 */
 	DEALER_DEALER_NOT_FOUND: string
+	/**
+	 * I​l​ ​c​o​n​c​e​s​s​i​o​n​a​r​i​o​ ​d​e​v​e​ ​a​v​e​r​e​ ​u​n​a​ ​m​a​i​l​ ​d​i​ ​d​e​f​a​u​l​t
+	 */
+	DEALER_EMAIL_DEFAULT_WRONG: string
 	/**
 	 * L​a​ ​m​a​i​l​ ​c​o​n​ ​I​D​ ​{​i​d​}​ ​n​o​n​ ​e​s​i​s​t​e
 	 * @param {number} id
@@ -514,10 +530,6 @@ export type TranslationFunctions = {
 	 */
 	COMMON_ID_REQUIRED_UPDATE: () => LocalizedString
 	/**
-	 * Cliente non trovato
-	 */
-	CUSTOMER_CUSTOMER_NOT_FOUND: () => LocalizedString
-	/**
 	 * L'indirizzo con ID {id} non esiste
 	 */
 	CUSTOMER_ADDRESS_NOT_FOUND: (arg: { id: number }) => LocalizedString
@@ -525,6 +537,22 @@ export type TranslationFunctions = {
 	 * La mail con ID {id} non esiste
 	 */
 	CUSTOMER_EMAIL_NOT_FOUND: (arg: { id: number }) => LocalizedString
+	/**
+	 * Il cliente deve avere un indirizzo di default
+	 */
+	CUSTOMER_ADDRESS_DEFAULT_WRONG: () => LocalizedString
+	/**
+	 * Il cliente deve avere una email di default
+	 */
+	CUSTOMER_EMAIL_DEFAULT_WRONG: () => LocalizedString
+	/**
+	 * Il cliente deve avere un telefono di default
+	 */
+	CUSTOMER_PHONE_DEFAULT_WRONG: () => LocalizedString
+	/**
+	 * Cliente non trovato
+	 */
+	CUSTOMER_CUSTOMER_NOT_FOUND: () => LocalizedString
 	/**
 	 * Il telefono con ID {id} non esiste
 	 */
@@ -537,6 +565,10 @@ export type TranslationFunctions = {
 	 * Concessionario non trovato
 	 */
 	DEALER_DEALER_NOT_FOUND: () => LocalizedString
+	/**
+	 * Il concessionario deve avere una mail di default
+	 */
+	DEALER_EMAIL_DEFAULT_WRONG: () => LocalizedString
 	/**
 	 * La mail con ID {id} non esiste
 	 */

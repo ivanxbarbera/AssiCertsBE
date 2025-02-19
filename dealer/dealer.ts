@@ -1,18 +1,16 @@
 // libraries
-// application modules
 import { api, APIError } from 'encore.dev/api';
+import { getAuthData } from '~encore/auth';
+// application modules
 import { Dealer, DealerEditRequest, DealerList, DealerListRequest, DealerListResponse, DealerRequest, DealerResponse } from './dealer.model';
 import { orm } from '../common/db/db';
 import { AuthorizationOperationResponse } from '../authorization/authorization.model';
 import { authorizationOperationUserCheck } from '../authorization/authorization';
-import { getAuthData } from '~encore/auth';
 import locz from '../common/i18n';
 import { DbUtility } from '../common/utility/db.utility';
-import { AuthenticationData } from '../authentication/authentication.model';
-import { AddressListResponse, EmailListResponse } from '../user/address/address.model';
+import { AddressListResponse, EmailEditRequest, EmailListResponse } from '../user/address/address.model';
 import { addressDealerUpdate, addressListByDealer, emailDealerUpdate, emailListByDealer } from '../user/address/address';
 import { GeneralUtility } from '../common/utility/general.utility';
-import { UserResponse } from '../user/user.model';
 
 /**
  * Search for dealers.
@@ -101,6 +99,16 @@ export const dealerInsert = api(
       // user not allowed to get details
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
+    // check dealer data
+    if (
+      !request.emails ||
+      request.emails.filter((email: EmailEditRequest) => {
+        return email.default;
+      }).length != 1
+    ) {
+      // wrong dealer emails
+      throw APIError.permissionDenied(locz().DEALER_EMAIL_DEFAULT_WRONG());
+    }
     // prepare new dealer
     // TODO MIC evaluate using filterObjectByInterface
     const newDealer: Dealer = {
@@ -148,6 +156,16 @@ export const dealerUpdate = api(
     if (!dealer) {
       // dealer not found
       throw APIError.notFound(locz().DEALER_DEALER_NOT_FOUND());
+    }
+    // check dealer data
+    if (
+      !request.emails ||
+      request.emails.filter((email: EmailEditRequest) => {
+        return email.default;
+      }).length != 1
+    ) {
+      // wrong dealer emails
+      throw APIError.permissionDenied(locz().DEALER_EMAIL_DEFAULT_WRONG());
     }
     // update dealer
     let updateDealer: Dealer = GeneralUtility.filterObjectByInterface(request, dealer, ['id']);
