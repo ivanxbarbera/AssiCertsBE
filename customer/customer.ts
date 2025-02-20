@@ -230,7 +230,7 @@ export const customerUpdate = api(
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load customer
-    const customerQry = orm<Customer>('Customer').where('id', request.id);
+    const customerQry = orm<Customer>('Customer').where('Customer.id', request.id);
     if (authenticationData.userRole !== UserRole.Administrator && authenticationData.userRole !== UserRole.SuperAdministrator) {
       customerQry
         .join('CustomerUser', 'CustomerUser.customerId', 'Customer.id')

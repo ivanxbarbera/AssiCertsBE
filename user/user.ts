@@ -729,7 +729,7 @@ export const userUpdate = api(
       throw APIError.permissionDenied(locz().USER_USER_NOT_ALLOWED());
     }
     // load user
-    const userQry = orm<User>('User').where('id', request.id);
+    const userQry = orm<User>('User').where('User.id', request.id);
     if (authenticationData.userRole !== UserRole.Administrator && authenticationData.userRole !== UserRole.SuperAdministrator) {
       userQry.join('UserDealer', 'UserDealer.userId', 'User.id').where('UserDealer.dealerId', authenticationData.dealerId);
     }
