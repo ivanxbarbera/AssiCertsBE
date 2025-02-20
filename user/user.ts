@@ -231,7 +231,7 @@ export const userPasswordResetConfirm = api(
       .first('User.id as id', 'User.name as name', 'Email.email as email')
       .join('UserEmail', 'UserEmail.userId', 'User.id')
       .join('Email', 'Email.id', 'UserEmail.emailId')
-      .where('id', userPasswordReset.userId)
+      .where('User.id', userPasswordReset.userId)
       .where('UserEmail.authentication', true);
     if (!user) {
       // user not fouded
