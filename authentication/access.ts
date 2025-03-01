@@ -13,7 +13,7 @@ import { secret } from 'encore.dev/config';
 import { getUserPasswordExpiration, userStatusUnlock } from '../user/user';
 import locz from '../common/i18n';
 import { UserPasswordExpirationResponse } from '../user/user.model';
-import { sendNotificationMessage } from '../notification/notification';
+// import { sendNotificationMessage } from '../notification/notification';
 import { NotificationMessageType } from '../notification/notification.model';
 import { authorizationOperationUserCheck } from '../authorization/authorization';
 import { AuthorizationOperationResponse } from '../authorization/authorization.model';
@@ -172,11 +172,11 @@ const checkUserPasswordExpiration = async (userId: number) => {
     if (notificationCount == 0) {
       // notification not sended today
       // send notification to user
-      sendNotificationMessage({
-        userId,
-        message: locz().AUTHENTICATION_ACCESS_PASSWORD_NOTIFICATION({ expInDays: passwordEpiration.remainigDays }),
-        type: NotificationMessageType.PasswordExpiration,
-      });
+      // sendNotificationMessage({
+      //   userId,
+      //   message: locz().AUTHENTICATION_ACCESS_PASSWORD_NOTIFICATION({ expInDays: passwordEpiration.remainigDays }),
+      //   type: NotificationMessageType.PasswordExpiration,
+      // });
     }
   }
 }; // checkUserPasswordExpiration

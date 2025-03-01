@@ -1,5 +1,4 @@
 {
-	"id":   "assicertsbe-npm2",
 	"lang": "typescript",
 	"global_cors": {
 		"allow_headers": ["Current-Language"],

@@ -35,13 +35,13 @@ export const authorizationOperationUserCheck = (request: AuthorizationOperationU
       request.operationCode == 'userPasswordChange' ||
       request.operationCode == 'userPasswordHistoryCheck' ||
       request.operationCode == 'userPasswordExpirationCheck' ||
-      request.operationCode == 'resendNotificationMessageList' ||
-      request.operationCode == 'notificationMessageList' ||
-      request.operationCode == 'notificationMessageAllRead' ||
-      request.operationCode == 'notificationMessageRead' ||
-      request.operationCode == 'notificationMessageUnread' ||
-      request.operationCode == 'notificationMessageDetails' ||
-      request.operationCode == 'notificationMessageDetailsFull' ||
+      // request.operationCode == 'resendNotificationMessageList' ||
+      // request.operationCode == 'notificationMessageList' ||
+      // request.operationCode == 'notificationMessageAllRead' ||
+      // request.operationCode == 'notificationMessageRead' ||
+      // request.operationCode == 'notificationMessageUnread' ||
+      // request.operationCode == 'notificationMessageDetails' ||
+      // request.operationCode == 'notificationMessageDetailsFull' ||
       request.operationCode == 'userDetail' ||
       request.operationCode == 'emailListByUser' ||
       request.operationCode == 'addressListByUser' ||

@@ -1,0 +1,63 @@
+name: Build, Push and Deploy a Encore Docker Image to AWS ECS
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-push-deploy-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Encore CLI script
+        uses: sozo-design/curl@v1.0.2
+        with:
+          args: --output install.sh -L https://encore.dev/install.sh
+
+      - name: Install Encore CLI
+        run: bash install.sh
+
+      - name: Configure AWS Credentials # <-- AGGIUNTO QUESTO BLOCCO
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Log in to AWS ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: /home/runner/.encore/bin/encore build docker --config runtime.config.json conducente-gb
+
+      - name: Tag Docker image
+        run: docker tag conducente-gb 415303955501.dkr.ecr.eu-south-1.amazonaws.com/conducente-gb:latest
+
+      - name: Push Docker image to AWS ECR
+        run: docker push 415303955501.dkr.ecr.eu-south-1.amazonaws.com/conducente-gb:latest
+
+      - name: Update ECS Service
+        run: |
+          aws ecs update-service --cluster cond-cluster --service cond-service --force-new-deployment
+
+      - name: Wait for ECS Deployment
+        run: |
+          aws ecs wait services-stable --cluster cond-cluster --services cond-service
+
+      - name: Get Load Balancer DNS
+        run: |
+          echo "Retrieving Load Balancer DNS..."
+          LOAD_BALANCER_DNS=$(aws elbv2 describe-load-balancers --query "LoadBalancers[?contains(LoadBalancerName, 'cond-alb')].DNSName" --output text)
+          echo "Load Balancer DNS: $LOAD_BALANCER_DNS"
+          echo "LOAD_BALANCER_DNS=$LOAD_BALANCER_DNS" >> $GITHUB_ENV
+
+      - name: Test API Endpoint
+        run: |
+          echo "Testing API endpoint..."
+          curl -I http://$LOAD_BALANCER_DNS/health || echo "API is not responding yet"

@@ -44,8 +44,8 @@ import { AuthenticationUser } from '../authentication/access.model';
 import locz from '../common/i18n';
 import { authorizationDestinationUserCheck, authorizationOperationUserCheck } from '../authorization/authorization';
 import { AuthorizationDestinationUserCheckResponse, AuthorizationOperationResponse } from '../authorization/authorization.model';
-import { sendNotificationMessage } from '../notification/notification';
-import { NotificationMessageType } from '../notification/notification.model';
+// import { sendNotificationMessage } from '../notification/notification';
+// import { NotificationMessageType } from '../notification/notification.model';
 import { DbUtility } from '../common/utility/db.utility';
 import { GeneralUtility } from '../common/utility/general.utility';
 import { Email, EmailType, EmailListResponse, EmailEditRequest, AddressListResponse } from './address/address.model';
@@ -124,13 +124,13 @@ export const userRegister = api({ expose: true, method: 'POST', path: '/user/reg
       });
       // send notification to users
       destinationUserCheck.userIds.forEach((userId) => {
-        sendNotificationMessage({
-          userId,
-          type: NotificationMessageType.UserMaintenance,
-          message: locz().USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE({ name: newUser.name, surname: newUser.surname }),
-          detail: locz().USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE_DETAIL(),
-          entityId: id,
-        });
+        // sendNotificationMessage({
+        //   userId,
+        //   type: NotificationMessageType.UserMaintenance,
+        //   message: locz().USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE({ name: newUser.name, surname: newUser.surname }),
+        //   detail: locz().USER_PASSWORD_REGISTER_NOTIFICATION_MESSAGE_DETAIL(),
+        //   entityId: id,
+        // });
       });
     })
     .catch((error) => {
