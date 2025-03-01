@@ -35,18 +35,5 @@
     "MailSMTPPort": { "$env": "MailSMTPPort" },
     "MailSMTPSecure": { "$env": "MailSMTPSecure" },
     "MunicipalitiyIstatXlsFileUrl": { "$env": "MunicipalitiyIstatXlsFileUrl" }
-  },
-  "object_storage": [
-    {
-      "type": "s3",
-      "region": "eu-south-1",
-      "buckets": {
-        "cond-storage": {
-          "name": "cond-storage",
-          "key_prefix": "app-files/",
-          "public_base_url": ""
-        }
-      }
-    }
-  ]
+  }
 }
