@@ -1,5 +1,6 @@
 import { api } from 'encore.dev/api';
 import { version } from 'node:os';
+import { orm } from '../common/db/db';
 
 interface HealthCheckResponse {
   status: string;
@@ -13,7 +14,7 @@ export const health = api({ method: 'GET', expose: true, path: '/health' }, asyn
     cache: 'operational',
     api_gateway: 'operational',
     storage: 'operational',
-    version: '2',
+    version: '3',
   };
 
   return {
@@ -22,3 +23,16 @@ export const health = api({ method: 'GET', expose: true, path: '/health' }, asyn
     timestamp: new Date().toISOString(),
   };
 });
+
+interface ShowTablesResponse {
+  tables: string[];
+}
+
+export const showTables = api(
+  { method: 'GET', expose: true, path: '/sadhihii3xc-show-tables-jhgdsagdbasjbv' },
+  async (): Promise<ShowTablesResponse> => {
+    const result = await orm.raw("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'");
+
+    return { tables: result.rows.map((row: any) => row.tablename) };
+  }
+);
