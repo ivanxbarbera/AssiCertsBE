@@ -4,7 +4,6 @@
 		"debug": true,
 		"allow_headers": ["Current-Language"],
 		"allow_origins_without_credentials": ["https://conducente.assihub.it"],
-		"allow_origins_with_credentials": ["https://conducente.assihub.it"],
-		"expose_headers": ["*"]
+		"allow_origins_with_credentials": ["https://conducente.assihub.it"]
 	}	
 }
